@@ -1,0 +1,101 @@
+/* Custom Modal Style */
+.m-edit-opp-lead-modal .modal-dialog {
+  max-width: 80%; /* Set the modal width to 90% of the page */
+  width: 60%; /* Adjust modal width */
+  margin: 30px auto; /* Center modal vertically */
+  height:fit-content;
+}
+
+.m-edit-opp-lead-header {
+  background-color: #f7941e; /* Light orange background */
+  padding: 20px; /* Add some padding */
+  font-size: 1.25rem; /* Slightly larger font size */
+  font-weight: bold;
+}
+
+.m-edit-opp-lead-form {
+  width: 100%; /* Ensure form takes up the full width of the modal */
+}
+
+.m-edit-opp-lead-footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between the buttons */
+  padding: 10px 10px;
+}
+
+.m-edit-opp-lead-close {
+  background-color: #ff4d4d; /* Red */
+  border-color: #ff4d4d;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+.m-edit-opp-lead-close:hover {
+  background-color: #e60000; /* Darker red */
+}
+
+.m-edit-opp-lead-save {
+  background-color: #f7941e; /* Save button in yellow */
+  border-color: #f7941e;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  transition: background-color 0.3s ease;
+  color: #333;
+}
+.m-edit-opp-lead-save:hover{
+  background-color: #f1960e; 
+}
+
+.m-edit-opp-lead-modal .modal-body {
+  padding: 20px;
+}
+
+.m-edit-opp-lead-form h5 {
+  
+  padding: 5px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.m-edit-opp-lead-form .form-group {
+  margin-bottom: 1.25rem; /* Increased spacing between form elements */
+}
+
+@media (max-width: 768px) {
+  .m-edit-opp-lead-modal .modal-dialog {
+    max-width: 100%; /* Full width on smaller screens */
+  }
+  .m-edit-opp-lead-footer {
+    flex-direction: column; /* Stack the buttons vertically */
+  }
+}
+
+.m-edit-opp-lead-btn-primary {
+  background-color: #f1960e; /* Yellow */
+  border-color: #f1960e;
+  color: #333;
+}
+
+.m-edit-opp-lead-btn-primary:hover {
+  background-color: #f1960e; /* Slightly darker yellow */
+}
+
+.m-edit-opp-lead-btn-secondary {
+  background-color: #ff4d4d; /* Red */
+  border-color: #ff4d4d;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+
+.m-edit-opp-lead-btn-secondary:hover {
+  background-color: #e60000; /* Darker red */
+}
+
+.m-edit-opp-lead-FormLable{
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: black;
+  font-weight: bold;
+}

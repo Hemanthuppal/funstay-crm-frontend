@@ -1,0 +1,236 @@
+/* Navbar Styles */
+.manager-nav-navbar {
+  background: linear-gradient(90deg, #ff8757, #ff5757);
+  padding: 12px 20px;
+  color: white;
+}
+
+.manager-nav-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Enable wrapping for smaller screens */
+}
+
+/* Logo Section */
+.manager-nav-logo-section {
+  display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: -9%;
+}
+
+.manager-nav-logo {
+  height: 66px;
+  width: 88px;
+  object-fit: contain;
+}
+
+.manager-nav-logo-text {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Toggle Button */
+.manager-nav-toggle {
+  display: none; /* Hidden by default for desktop */
+  font-size: 24px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Collapsible Menu Section */
+.manager-nav-collapsible-menu {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.manager-nav-collapsible-menu.active {
+  display: flex; /* Show menu when active */
+  flex-direction: column; /* Stack items vertically in smaller views */
+  width: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* Buttons Section */
+.manager-nav-buttons {
+  display: flex ;
+      gap: 33px;
+      justify-content: center;
+      flex: 1 1;
+      font-size: 20px;
+      margin-right: -22%;
+      margin-left: -35%;
+}
+
+.manager-nav-button {
+  background: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #ff5757;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.manager-nav-button:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Icons Section */
+.manager-nav-icons {
+  display: flex;
+      align-items: right;
+      gap: 15px;
+      margin-right: -19%;
+}
+
+.manager-nav-icon-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.manager-nav-feather-icon {
+  font-size: 20px;
+  color: white;
+}
+
+.manager-nav-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: white;
+  color: #ff5757;
+  font-size: 12px;
+  font-weight: bold;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.lead-button{
+  margin-left: 32%;
+  font-size: 17px;
+}
+/* Profile Section */
+.manager-nav-profile {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.manager-nav-profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.manager-nav-caret-icon {
+  color: white;
+  font-size: 16px;
+  transition: transform 0.3s ease;
+}
+
+/* Dropdown Styles */
+.manager-nav-profile-dropdown {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background: white;
+  color: #333;
+  width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  z-index: 1000;
+  text-align: left;
+  padding: 8px 0;
+}
+
+.manager-nav-profile-header {
+  padding: 10px 16px;
+  font-weight: bold;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.manager-nav-profile-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.manager-nav-profile-item:hover {
+  background: #f7f7f7;
+}
+
+/* Media Queries for Responsiveness */
+
+/* Tablet View */
+@media (max-width: 1024px) {
+  .manager-nav-toggle {
+    display: block; /* Show toggle button */
+  }
+
+  .manager-nav-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-right: -34%;
+  }
+
+  .manager-nav-collapsible-menu {
+    display: none; /* Hide menu by default */
+  }
+
+  .manager-nav-collapsible-menu.active {
+    display: flex; /* Show menu when active */
+    flex-direction: column; /* Stack items vertically */
+    gap: 15px; /* Add spacing between items */
+  }
+
+  .manager-nav-icons {
+    margin-left: -1%;
+    margin-top: 10px;
+  }
+  .manager-nav-logo {
+    height: 66px;
+    width: 88px;
+    object-fit: contain;
+    margin-left: 39%;
+ }
+ .lead-button {
+  margin-left: -11%;
+  font-size: 17px;
+ }
+}
+
+/* Mobile View */
+@media (max-width: 767px) {
+  .manager-nav-buttons {
+    flex-direction: column; /* Stack buttons vertically */
+    align-items: center;
+    gap: 10px;
+  }
+
+  .manager-nav-collapsible-menu.active {
+    flex-direction: column; /* Stack items vertically */
+    gap: 15px; /* Add spacing between items */
+  }
+
+  .manager-nav-icons {
+    margin-left: -61px;
+  }
+}

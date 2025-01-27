@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./InDetailViewLeads.css";
 import axios from "axios"; // Import axios
-import baseURL from "../../../../../Apiservices/Api";
+import {baseURL} from "../../../../../Apiservices/Api";
 
 const InDetailViewLeads = () => {
   const navigate = useNavigate();

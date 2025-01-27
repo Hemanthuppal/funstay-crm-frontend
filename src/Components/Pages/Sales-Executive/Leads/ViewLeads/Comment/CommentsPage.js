@@ -6,7 +6,7 @@ import { Button, Form } from 'react-bootstrap';
 import './CommentsPage.css'; // Optional: Create a CSS file for styling
 import Navbar from '../../../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { useNavigate } from 'react-router-dom';
-import baseURL from '../../../../../Apiservices/Api';
+import {baseURL} from '../../../../../Apiservices/Api';
 
 const CommentsPage = () => {
   const { leadid } = useParams(); // Gets the lead ID from the URL
@@ -35,7 +35,7 @@ const navigate = useNavigate();
     if (!newComment.trim()) return;
 
     const comment = {
-      leadid,
+      leadid: leadid,
       timestamp: new Date().toISOString(),
       text: newComment.trim(),
     };

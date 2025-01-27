@@ -5,7 +5,7 @@ import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditLead.css';
-import baseURL from "../../../../../Apiservices/Api";
+import {baseURL} from "../../../../../Apiservices/Api";
 
 const EditOppLead = () => {
   const location = useLocation();

@@ -4,7 +4,7 @@ import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./LeadDetails.css";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import baseURL from "../../../../Apiservices/Api";
+import {baseURL} from "../../../../Apiservices/Api";
 
 const LeadDetails = () => {
     const location = useLocation();
@@ -18,9 +18,11 @@ const LeadDetails = () => {
     useEffect(() => {
         const fetchLeadData = async () => {
             try {
-                const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
+                const leadoppcomment = `${baseURL}/api/lead-opp-comment/${leadid}`;
+                console.log("API URL:", leadoppcomment);
+                const response = await axios.get(leadoppcomment);
                 console.log("API Response:", response.data);
-
+console.log("API Response:", response);
                 setLeadData(response.data); // Update state with fetched data
                 setLoading(false);
             } catch (err) {

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import Login from "./Components/Pages/Login/Login";
+import { AuthProvider } from "./Components/AuthContext/AuthContext";
 import Addleads from "./Components/Pages/Sales-Executive/Leads/AddLeads/Addleads";
 import ViewLeads from "./Components/Pages/Sales-Executive/Leads/ViewLeads/ViewLeads";
 import Employee from "./Components/Pages/Admin/Employee/AddSales-executive/Employee";
@@ -45,6 +46,7 @@ import LeadDetailss from "./Components/Pages/Sales-Executive/Potentialleads/Lead
 
 function App() {
     return (
+        <AuthProvider>
         <Router>
             <Routes>
                 <Route path="/login" element={<Login />} />
@@ -89,6 +91,7 @@ function App() {
                 <Route path="/details/:leadid" element={<LeadDetailss />} />
             </Routes>
         </Router>
+        </AuthProvider>
     );
 }
 

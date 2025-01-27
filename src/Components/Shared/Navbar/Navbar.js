@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import { Link } from "react-router-dom";
 import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaTachometerAlt, FaBell, FaEnvelope, FaCaretDown,FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry, FaHSquare          } from "react-icons/fa";
 import { IoHomeOutline, IoMenu } from "react-icons/io5";
@@ -6,13 +6,14 @@ import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from "../../AuthContext/AuthContext";
 
 const Navbar = ({ onToggleSidebar }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
-
+  const { logout } = useContext(AuthContext);
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
     onToggleSidebar(!collapsed);
@@ -28,9 +29,11 @@ const Navbar = ({ onToggleSidebar }) => {
     setShowDropdown(!showDropdown);
   };
 
+  
   const handleLogout = () => {
+    logout(); // Clears authToken, userRole, and userId
     console.log('Logged out');
-    navigate('/');
+    navigate('/'); // Redirect to the home or login page
   };
 
   return (

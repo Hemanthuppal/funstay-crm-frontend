@@ -1,6 +1,9 @@
 const baseURL = "https://crm.funstay.in/crmbackend"; 
 
-
+const webhookUrl = "https://crm.funstay.in";
 
 // const baseURL = "http://localhost:5000"; 
-export default baseURL;
+// const webhookUrl = "http://localhost:4000";
+
+// Export them as named exports
+export { baseURL, webhookUrl };

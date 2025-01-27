@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import baseURL from "../../../Apiservices/Api";
+import {baseURL} from "../../../Apiservices/Api";
 
 const AddEmployeeModal = ({ isOpen, onClose, onAddEmployeeSuccess = () => {} }) => {
   const [newEmployee, setNewEmployee] = useState({

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 
-import baseURL from "../../../../../Apiservices/Api";
+import {baseURL} from "../../../../../Apiservices/Api";
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
@@ -87,6 +87,7 @@ const CreateCustomerOpportunity = () => {
       reminder_setting: formData.reminder_setting,
       leadid: leadid,
     };
+    console.log(JSON.stringify(opportunityData, null, 2));
 
     try {
       const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);

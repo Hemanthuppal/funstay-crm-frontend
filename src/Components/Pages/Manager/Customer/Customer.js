@@ -1,171 +1,125 @@
-import React, { useState } from "react";
+
+
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import DataTable from './../../../Layout/Table/TableLayout'; // Make sure to import your DataTable component
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
-import './Customer.css'
+import "./Customer.css";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import {baseURL} from "../../../Apiservices/Api";
+import { useNavigate } from 'react-router-dom';
 
-const ManagerCustomer = () => {
-   const [collapsed, setCollapsed] = useState(false);
+const SalesCustomer = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [data, setData] = useState([]); // State for storing leads
+  const navigate = useNavigate();
 
-   const data = [
-    {
-      leadId: "LD001",
-      opportunityId: "OP001",
-      customerId: "CU001",
-      name: "Rajesh Kumar",
-      mobileNo: "9876543210",
-      email: "rajesh.kumar@example.com",
-      addedBy: "Rajesh",
-      actions: (
-        <div>
-          <button  className="btn btn-info view-button me-1">
-              <FaEye />
-          </button>
-          <button className="btn btn-warning edit-button me-1 mb-1"
-          > <FaEdit />
-        </button>
-         <button
-              className="btn btn-danger delete-button me-1 mb-1">
-              <FaTrash />  
-              </button>
-        </div>
-      ),
-    },
-    {
-      leadId: "LD002",
-      opportunityId: "OP002",
-      customerId: "CU002",
-      name: "Jane Smith",
-      mobileNo: "9123456780",
-      email: "jane.smith@example.com",
-      addedBy: "Mani",
-      actions: (
-        <div>
-          <button  className="btn btn-info view-button me-1">
-              <FaEye />
-          </button>
-          <button className="btn btn-warning edit-button me-1 mb-1"
-          > <FaEdit />
-        </button>
-         <button
-              className="btn btn-danger delete-button me-1 mb-1">
-              <FaTrash />  
-              </button>
+  // Fetch leads on component load
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/allleads`);
+        if (response.status === 200) {
+          // Filter leads with 'Opportunity' status
+          const filteredLeads = response.data.filter(
+            (lead) => lead.status == "opportunity"
+          );
+          setData(filteredLeads); // Update state with filtered leads
+        } else {
+          console.error("Error fetching leads:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching leads:", error);
+        alert("Failed to fetch leads.");
+      }
+    };
 
-        </div>
-      ),
-    },
-    {
-      leadId: "LD003",
-      opportunityId: "OP003",
-      customerId: "CU003",
-      name: "Mike Johnson",
-      mobileNo: "9012345678",
-      email: "mike.johnson@example.com",
-      addedBy: "Maniteja",
-      actions: (
-        <div>
-          <button  className="btn btn-info view-button me-1">
-              <FaEye />
-          </button>
-          <button className="btn btn-warning edit-button me-1 mb-1"
-          > <FaEdit />
-        </button>
-         <button
-              className="btn btn-danger delete-button me-1 mb-1">
-              <FaTrash />  
-              </button>
+    fetchLeads();
+  }, []);
 
-        </div>
-      ),
-    },
-    {
-      leadId: "LD004",
-      opportunityId: "OP004",
-      customerId: "CU004",
-      name: "Emily Davis",
-      mobileNo: "9988776655",
-      email: "emily.davis@example.com",
-      addedBy: "Rajesh",
-      actions: (
-        <div>
-          <button  className="btn btn-info view-button me-1">
-              <FaEye />
-          </button>
-          <button className="btn btn-warning edit-button me-1 mb-1"
-          > <FaEdit />
-        </button>
-         <button
-              className="btn btn-danger delete-button me-1 mb-1">
-              <FaTrash />  
-              </button>
+  const navigateToLead = (leadId) => {
+    navigate(`/details/${leadId}`, {
+      state: { leadid: leadId },
+    });
+  };
 
-        </div>
-      ),
-    },
-    {
-      leadId: "LD005",
-      opportunityId: "OP005",
-      customerId: "CU005",
-      name: "Robert Brown",
-      mobileNo: "8899776655",
-      email: "robert.brown@example.com",
-      addedBy: "Hemanth",
-      actions: (
-        <div>
-           <button  className="btn btn-info view-button me-1">
-              <FaEye />
-          </button>
-          <button className="btn btn-warning edit-button me-1 mb-1"
-          > <FaEdit />
-        </button>
-         <button
-              className="btn btn-danger delete-button me-1 mb-1">
-              <FaTrash />  
-              </button>
-
-        </div>
-      ),
-    },
-  ];
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
+      {
+        Header: "S.No",
+        accessor: (row, index) => index + 1,  // This will generate the serial number based on the row index
+      },
+      {
+        Header: "Customer ID",
+        accessor: "leadcode",
+      },
+      {
+        Header: "Name",
+        accessor: "name",
+      },
+      {
+        Header: "Mobile No",
+        accessor: "phone_number",
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+      },
+      {
+        Header: "Description",
+        accessor: "description",
+      },
       // {
-      //   Header: 'Lead ID',
-      //   accessor: 'leadId',
-      // },
-      // {
-      //   Header: 'Opportunity ID',
-      //   accessor: 'opportunityId',
+      //   Header: "Duration",
+      //   accessor: "duration",
       // },
       {
-        Header: 'Customer ID',
-        accessor: 'customerId',
-      },
-      {
-        Header: 'Name',
-        accessor: 'name',
-      },
-      {
-        Header: 'Mobile No',
-        accessor: 'mobileNo',
-      },
-      {
-        Header: 'Email',
-        accessor: 'email',
-      },
-      {
-        Header: 'Added By',
-        accessor: 'addedBy',
-      },
-      {
-        Header: 'Actions',
-        accessor: 'actions',
+        Header: "Actions",
+        accessor: "actions",
+        Cell: ({ row }) => (
+          <div>
+            <button
+              className="btn btn-primary btn-sm me-2"
+              onClick={()  =>navigateToLead(row.original.leadid)}
+            >
+              <FaEye />
+            </button>
+            {/* <button
+              className="btn btn-warning btn-sm me-2"
+              onClick={() => editCustomer(row.original)}
+            >
+              <FaEdit />
+            </button>
+            <button
+              className="btn btn-danger btn-sm"
+              onClick={() => deleteCustomer(row.original.leadId)}
+            >
+              <FaTrash />
+            </button> */}
+          </div>
+        ),
       },
     ],
     []
   );
+
+  // Placeholder actions
+  const viewCustomer = (customer) => {
+    alert(`Viewing customer: ${customer.name}`);
+  };
+
+  const editCustomer = (customer) => {
+    alert(`Editing customer: ${customer.name}`);
+  };
+
+  const deleteCustomer = (leadId) => {
+    if (window.confirm("Are you sure you want to delete this customer?")) {
+      // Perform delete logic here
+      alert(`Customer with ID ${leadId} deleted.`);
+    }
+  };
 
   return (
     <div className="ManagerCustomercontainer">
@@ -173,13 +127,15 @@ const ManagerCustomer = () => {
     <div className={`ManagerCustomer ${collapsed ? "collapsed" : ""}`}>
       <div className="ManagerCustomer-container mb-5">
         <div className="ManagerCustomer-table-container">
-          <h3 className="d-flex justify-content-between align-items-center">Customer Details</h3>
-          <DataTable columns={columns} data={data} />
+            <h3 className="d-flex justify-content-between align-items-center">
+              Customer Details
+            </h3>
+            <DataTable columns={columns} data={data} />
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };
 
-export default ManagerCustomer;
+export default SalesCustomer;

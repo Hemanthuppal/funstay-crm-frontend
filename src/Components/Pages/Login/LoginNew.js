@@ -1,23 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState,useContext  } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginNew.css';
-import baseURL from '../../Apiservices/Api';
-
+import {baseURL} from '../../Apiservices/Api';
+import { AuthContext } from "../../AuthContext/AuthContext";
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
+  const { login } = useContext(AuthContext);
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const userData = {
-      email,
-      password
-    };
+    const userData = { email, password };
 
     try {
-      // Send login request to the backend
       const response = await fetch(`${baseURL}/login`, {
         method: 'POST',
         headers: {
@@ -29,11 +25,8 @@ const Login = () => {
       const data = await response.json();
 
       if (response.status === 200) {
-        // Store token and role for further use (like in localStorage or context)
-        localStorage.setItem('authToken', data.token);  // Store token
-        localStorage.setItem('userRole', data.role);    // Store role
+        login(data.token, data.role, data.id); // Use context to manage auth state
 
-        // Navigate based on role
         if (data.role === 'employee') {
           navigate('/s-dashboard');
         } else if (data.role === 'manager') {
@@ -49,7 +42,7 @@ const Login = () => {
       alert('Login failed');
     }
   };
- 
+
   return (
     <div className="login-page">
       <div className="login-container">

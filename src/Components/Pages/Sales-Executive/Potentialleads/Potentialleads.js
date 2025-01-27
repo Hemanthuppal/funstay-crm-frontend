@@ -1,15 +1,17 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect ,useContext} from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css"; 
 import { FaEdit, FaEye, FaComment, FaTrash } from "react-icons/fa";
 import {  Row, Col, } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayout"; 
-import baseURL from "../../../Apiservices/Api";
+import {baseURL} from "../../../Apiservices/Api";
 import './PotentialLeads.css';
 import axios from 'axios';
+import { AuthContext } from '../../../AuthContext/AuthContext';
 
 const Potentialleads = () => {
+   const { authToken, userRole ,userId} = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
@@ -18,20 +20,26 @@ const Potentialleads = () => {
     try {
       const response = await axios.get(`${baseURL}/api/allleads`);
       if (response.status === 200) {
-       
-        const filteredLeads = response.data.filter(lead => lead.status === 'opportunity');
-        setData(filteredLeads); 
+        const leads = response.data; // Extract data from the response
+        const filteredLeads = leads.filter(
+          (enquiry) =>
+            enquiry.assignedSalesId == userId && enquiry.status == "opportunity"
+        );
+        setData(filteredLeads); // Set the filtered data
       } else {
-        console.error('Error fetching leads:', response.statusText);
+        console.error("Error fetching leads:", response.statusText);
+        alert("Failed to fetch leads.");
       }
     } catch (error) {
-      console.error('Error fetching leads:', error);
-      alert('Failed to fetch leads.');
+      console.error("Error fetching leads:", error);
+      alert("Failed to fetch leads.");
     }
   };
+  
   useEffect(() => {
     fetchLeads();
   }, []);
+  
 
   const [loading, setLoading] = useState(false);
   const [isPrimaryChanged, setIsPrimaryChanged] = useState(false);
@@ -188,67 +196,24 @@ const Potentialleads = () => {
         accessor: (row, index) => index + 1,
       },
       {
-        Header: "Lead Id ",
-        accessor: "leadcode",
+        Header: "Opp Details",
+        accessor: "leadDetails",
         Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
-            {row.original.leadcode}
-          </span>
+          <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
+            <div>{row.original.lead_type}</div>
+            <div>{row.original.leadcode}</div>
+          </div>
         ),
       },
       {
-        Header: "Opportunity Type",
-        accessor: "lead_type",
+        Header: "Contact Info",
+        accessor: "contactInfo",
         Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
-            {row.original.lead_type}
-          </span>
-        ),
-      },
-      {
-        Header: "Name",
-        accessor: "name",
-        Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
-          >
-            {row.original.name}
-          </span>
-        ),
-      },
-      {
-        Header: "Mobile No",
-        accessor: "phone_number",
-        Cell: ({ row }) => (
-          <span className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
-            {row.original.phone_number}
-          </span>
-        ),
-      },
-      {
-        Header: "Email",
-        accessor: "email",
-        Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
-            {row.original.email}
-          </span>
+          <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
+            <div style={{ color: "blue", textDecoration: "underline" }}>{row.original.name}</div>
+            <div>{row.original.phone_number}</div>
+            <div>{row.original.email}</div>
+          </div>
         ),
       },
       {

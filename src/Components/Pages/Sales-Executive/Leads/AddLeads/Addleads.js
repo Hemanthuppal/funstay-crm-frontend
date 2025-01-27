@@ -4,7 +4,7 @@ import axios from "axios";
 import "./AddLeads.css";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
-import baseURL from "../../../../Apiservices/Api";
+import {baseURL} from "../../../../Apiservices/Api";
 
 const DynamicForm = () => {
   const [formData, setFormData] = useState({

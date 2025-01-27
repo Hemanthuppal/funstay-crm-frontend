@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditOppLead.css';
 import { useLocation } from "react-router-dom";
-import baseURL from "../../../../Apiservices/Api";
+import {baseURL} from "../../../../Apiservices/Api";
 
 const EditOppLead = () => {
   const location = useLocation();
@@ -610,7 +610,7 @@ const EditOppLead = () => {
               </Row>
             </div>
             <div className="addleads-form-footer">
-              <button className="btn btn-secondary" onClick={() => navigate('/potential-leads')}>
+              <button className="btn btn-secondary" onClick={() => navigate(-1)}>
                 Back
               </button>
               <button className="btn btn-primary" type="submit">

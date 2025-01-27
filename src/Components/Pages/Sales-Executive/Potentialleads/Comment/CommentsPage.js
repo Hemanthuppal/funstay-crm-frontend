@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
 import './CommentsPage.css'; // Optional: Create a CSS file for styling
 import Navbar from '../../../../Shared/Sales-ExecutiveNavbar/Navbar';
-import baseURL from '../../../../Apiservices/Api';
+import {baseURL} from '../../../../Apiservices/Api';
 
 const CommentsPage = () => {
   const { leadid } = useParams(); // Gets the lead ID from the URL
@@ -39,7 +39,7 @@ const [collapsed, setCollapsed] = useState(false);
     };
 
     try {
-      const response = await fetch("http://localhost:5000/comments/add", {
+      const response = await fetch(`${baseURL}/comments/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(comment),

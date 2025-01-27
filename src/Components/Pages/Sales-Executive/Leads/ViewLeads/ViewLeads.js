@@ -1,20 +1,24 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayout";
-import { FaEdit, FaTrash, FaEye, FaUser, FaUserPlus, FaComment } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment } from "react-icons/fa";
 import { Button, Row, Col } from "react-bootstrap";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./ViewLeads.css";
 import axios from 'axios';
-import baseURL from "../../../../Apiservices/Api";
+import {baseURL} from "../../../../Apiservices/Api";
 import { io } from 'socket.io-client';
+import { AuthContext } from '../../../../AuthContext/AuthContext';
+import { webhookUrl } from "../../../../Apiservices/Api";
 
 const ViewLeads = () => {
+  const { authToken, userRole, userId } = useContext(AuthContext);
   const [message, setMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
+  
 
   const handleEdit = (leadId) => {
     navigate(`/edit-lead/${leadId}`, {
@@ -35,7 +39,7 @@ const ViewLeads = () => {
       const response = await fetch(`${baseURL}/api/deleteByLeadId/${leadid}`, {
         method: 'DELETE',
       });
-      
+
       if (response.ok) {
         setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
         setMessage('The lead has been deleted successfully.');
@@ -71,7 +75,6 @@ const ViewLeads = () => {
           : row
       )
     );
-    const lead = data.find((lead) => lead.leadid === rowId);
     updateLeadStatus(rowId, value, ""); // Update without secondary status
   };
 
@@ -108,8 +111,7 @@ const ViewLeads = () => {
   };
 
   const initializeSocket = () => {
-    const socket = io('https://crm.funstay.in', {
-      // const socket = io(' http://localhost:4000', {
+    const socket = io(`${webhookUrl}`, {
       transports: ['websocket'],
     });
     socket.on('connect', () => {
@@ -127,13 +129,6 @@ const ViewLeads = () => {
     socket.on('disconnect', () => {
       console.log('Disconnected from WebSocket');
       setIsConnected(false);
-      const retryConnection = setInterval(() => {
-        console.log('Retrying WebSocket connection...');
-        socket.connect();
-      }, 3000);
-      socket.on('connect', () => {
-        clearInterval(retryConnection);
-      });
     });
 
     return socket;
@@ -146,31 +141,38 @@ const ViewLeads = () => {
       socket.disconnect();
     };
   }, []);
-
   useEffect(() => {
-    console.log('Component mounted. Starting to fetch existing enquiries...');
     const fetchEnquiries = async () => {
+      // console.log("userid=",userId) 
+      if (!userId)
+      {  
+        // console.log("not exist userid=",userId) 
+         return; }
+
       try {
-        console.log('Fetching existing enquiries from server...');
-        const response = await fetch('https://crm.funstay.in/api/enquiries');
-        // const response = await fetch('http://localhost:4000/enquiries');
+        const response = await fetch(`${webhookUrl}/api/enquiries`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`, // Use authToken for secure API calls
+          },
+        });
         const data = await response.json();
-        console.log('All enquiries fetched:', data);
-  
-        // Filter enquiries where status is 'lead'
-        const filteredData = data.filter((enquiry) => enquiry.status === 'lead');
-        console.log('Filtered enquiries (status == lead):', filteredData);
+        // console.log("data=", data.length);
+
+        const filteredData = data.filter(
+          (enquiry) => enquiry.assignedSalesId == userId && enquiry.status == 'lead'
+        );
+        console.log("filterd data=", filteredData.length);
         setData(filteredData);
       } catch (error) {
         console.error('Error fetching enquiries:', error);
       }
     };
+
     fetchEnquiries();
-  }, []);
-  
+  }, [userId, authToken]); 
 
   
-
+  
 
   const handleViewLeads = (lead) => {
     navigate(`/view-lead/${lead.leadid}`, {
@@ -185,24 +187,26 @@ const ViewLeads = () => {
         accessor: (row, index) => index + 1,
       },
       {
-        Header: "Lead Type",
-        accessor: "lead_type",
+        Header: "Lead Details",
+        accessor: "leadDetails",
+        Cell: ({ row }) => (
+          <div>
+            
+            <div>{row.original.leadcode}</div>
+            <div>{row.original.lead_type}</div>
+          </div>
+        ),
       },
       {
-        Header: "Lead Id ",
-        accessor: "leadcode",
-      },
-      {
-        Header: "Lead Name",
-        accessor: "name",
-      },
-      {
-        Header: "Mobile No",
-        accessor: "phone_number",
-      },
-      {
-        Header: "Email",
-        accessor: "email",
+        Header: "Contact Info",
+        accessor: "contactInfo",
+        Cell: ({ row }) => (
+          <div>
+            <div>{row.original.name}</div>
+            <div>{row.original.phone_number}</div>
+            <div>{row.original.email}</div>
+          </div>
+        ),
       },
       {
         Header: "Lead Status",
@@ -308,6 +312,7 @@ const ViewLeads = () => {
             <Row className="mb-3">
               <Col className="d-flex justify-content-between align-items-center">
                 <h3>Lead Details</h3>
+                
                 {message && <div className="alert alert-info">{message}</div>}
                 <Button onClick={handleAddLead}>Add Leads</Button>
               </Col>

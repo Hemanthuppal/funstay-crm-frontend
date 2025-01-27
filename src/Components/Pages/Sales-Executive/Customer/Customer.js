@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import axios from "axios";
 import DataTable from "./../../../Layout/Table/TableLayout"; // Ensure this path is correct
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./Customer.css";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import baseURL from "../../../Apiservices/Api";
+import {baseURL} from "../../../Apiservices/Api";
+import { AuthContext } from '../../../AuthContext/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const SalesCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]); // State for storing leads
-  
-
+   const { authToken, userRole, userId } = useContext(AuthContext);
+const navigate = useNavigate();
   // Fetch leads on component load
   useEffect(() => {
     const fetchLeads = async () => {
@@ -19,7 +21,7 @@ const SalesCustomer = () => {
         if (response.status === 200) {
           // Filter leads with 'Opportunity' status
           const filteredLeads = response.data.filter(
-            (lead) => lead.status === "opportunity"
+            (lead) => lead.assignedSalesId == userId && lead.status == 'opportunity'
           );
           setData(filteredLeads); // Update state with filtered leads
         } else {
@@ -32,8 +34,12 @@ const SalesCustomer = () => {
     };
 
     fetchLeads();
-  }, []);
-
+  }, [userId]);
+  const navigateToLead = (leadId) => {
+    navigate(`/details/${leadId}`, {
+      state: { leadid: leadId },
+    });
+  };
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
@@ -58,13 +64,10 @@ const SalesCustomer = () => {
         accessor: "email",
       },
       {
-        Header: "Type Of Travel",
-        accessor: "travel_type",
+        Header: "Description",
+        accessor: "description",
       },
-      {
-        Header: "Preferred Contact Method",
-        accessor: "preferred_contact_method",
-      },
+     
       {
         Header: "Actions",
         accessor: "actions",
@@ -72,11 +75,11 @@ const SalesCustomer = () => {
           <div>
             <button
               className="btn btn-primary btn-sm me-2"
-              onClick={() => viewCustomer(row.original)}
+              onClick={() =>navigateToLead(row.original.leadid)}
             >
               <FaEye />
             </button>
-            <button
+            {/* <button
               className="btn btn-warning btn-sm me-2"
               onClick={() => editCustomer(row.original)}
             >
@@ -87,7 +90,7 @@ const SalesCustomer = () => {
               onClick={() => deleteCustomer(row.original.leadId)}
             >
               <FaTrash />
-            </button>
+            </button> */}
           </div>
         ),
       },

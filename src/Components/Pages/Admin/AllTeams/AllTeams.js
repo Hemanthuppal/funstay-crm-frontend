@@ -6,7 +6,7 @@ import '../Customer/Customer.css';
 import './AllTeams.css';
 import AddEmployeeModal from "./AddEmployeeModal";
 import axios from 'axios';
-import baseURL from "../../../Apiservices/Api";
+import {baseURL} from "../../../Apiservices/Api";
 
 const AdminCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);

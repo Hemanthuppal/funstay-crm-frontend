@@ -48,19 +48,19 @@ const ViewLeads = () => {
   }, [authToken]);
 
   const handleEdit = (leadId) => {
-    navigate(`/edit-lead/${leadId}`, {
+    navigate(`/m-edit-lead/${leadId}`, {
       state: { leadid: leadId },
     });
   };
 
   const handleAddUser  = (lead) => {
-    navigate(`/create-customer-opportunity/${lead.leadid}`);
+    navigate(`/m-create-customer-opportunity/${lead.leadid}`);
   };
 
  
 
   const handleViewLeads = (lead) => {
-    navigate(`/view-lead/${lead.leadid}`, {
+    navigate(`/m-view-lead/${lead.leadid}`, {
       state: { leadid: lead.leadid },
     });
   };
@@ -306,7 +306,7 @@ const ViewLeads = () => {
           <button
             className="btn btn-info"
             onClick={() => {
-              navigate(`/comments/${row.original.leadid}`);
+              navigate(`/m-comments/${row.original.leadid}`);
             }}
           >
             <FaComment />

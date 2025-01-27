@@ -43,6 +43,12 @@ import EditLead from './Components/Pages/Sales-Executive/Leads/ViewLeads/EditLea
 import Webhook from './Webhook';
 import InDetailViewLeads from "./Components/Pages/Sales-Executive/Leads/ViewLeads/ViewLead/InDetailViewLeads";
 import LeadDetailss from "./Components/Pages/Sales-Executive/Potentialleads/LeadDetails";
+import M_EditLead from "./Components/Pages/Manager/Leads/ViewLeads/EditLead/EditLead";
+import M_InDetailViewLeads from "./Components/Pages/Manager/Leads/ViewLeads/ViewLead/InDetailViewLeads";
+import M_CommentsPage from "./Components/Pages/Manager/Leads/ViewLeads/Comment/CommentsPage";
+import M_EditOppLead from "./Components/Pages/Manager/Potentialleads/EditOpp/EditOppLead";
+import M_LeadDetailss from "./Components/Pages/Manager/Potentialleads/LeadDetails";
+import M_CreateCustomerOpportunity from "./Components/Pages/Manager/Leads/ViewLeads/CreateCustomerOpportinity/CreateandOpportunity"
 
 function App() {
     return (
@@ -89,6 +95,15 @@ function App() {
                 <Route path="/view-lead/:leadid" element={<InDetailViewLeads />} />
                 <Route path="/webhook" element={<Webhook />} />
                 <Route path="/details/:leadid" element={<LeadDetailss />} />
+
+
+
+                <Route path="/m-edit-lead/:leadid" element={<M_EditLead />} />
+                <Route path="/m-view-lead/:leadid" element={<M_InDetailViewLeads />} />
+                <Route path="/m-comments/:leadid" element={<M_CommentsPage />} />
+                <Route path="/m-edit-opportunity/:leadid" element={<M_EditOppLead />} />
+                <Route path="/m-details/:leadid" element={<M_LeadDetailss />} />
+                <Route path="/m-create-customer-opportunity/:leadid" element={<M_CreateCustomerOpportunity />} />
             </Routes>
         </Router>
         </AuthProvider>

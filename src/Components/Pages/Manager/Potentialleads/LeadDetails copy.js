@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './LeadDetails.css';
-import Navbar from '../../../Shared/ManagerNavbar/Navbar';
+import Navbar from '../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
 
 const LeadOppView = () => {
@@ -35,7 +35,7 @@ const LeadOppView = () => {
     }
 
     const handleEdit = (leadId) => {
-        navigate(`/m-edit-opportunity/${leadId}`, {
+        navigate(`/edit-opportunity/${leadId}`, {
             state: { leadid: leadId }, // Pass leadid to the edit page
         });
     };

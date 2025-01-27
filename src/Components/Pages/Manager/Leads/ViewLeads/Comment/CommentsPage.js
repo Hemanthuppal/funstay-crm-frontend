@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
 import './CommentsPage.css'; // Optional: Create a CSS file for styling
-import Navbar from '../../../../../Shared/Sales-ExecutiveNavbar/Navbar';
+import Navbar from '../../../../../Shared/ManagerNavbar/Navbar'; // Update the path
 import { useNavigate } from 'react-router-dom';
 import {baseURL} from '../../../../../Apiservices/Api';
 

@@ -33,7 +33,7 @@ const [collapsed, setCollapsed] = useState(false);
     if (!newComment.trim()) return;
 
     const comment = {
-      leadid: leadid,
+      leadid,
       timestamp: new Date().toISOString(),
       text: newComment.trim(),
     };

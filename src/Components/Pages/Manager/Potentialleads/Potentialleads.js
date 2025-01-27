@@ -178,12 +178,12 @@ const Potentialleads = () => {
   };
 
   const navigateToLead = (leadId) => {
-    navigate(`/details/${leadId}`, {
+    navigate(`/m-details/${leadId}`, {
       state: { leadid: leadId },
     });
   };
   const handleEdit = (leadId) => {
-    navigate(`/edit-opportunity/${leadId}`, {
+    navigate(`/m-edit-opportunity/${leadId}`, {
      
         state: { leadid: leadId },
    
@@ -289,7 +289,7 @@ const Potentialleads = () => {
           <button
             className="btn btn-info"
             onClick={() => {
-              navigate(`/comments/${row.original.leadid}`);
+              navigate(`/m-comments/${row.original.leadid}`);
             }}
           >
             <FaComment />

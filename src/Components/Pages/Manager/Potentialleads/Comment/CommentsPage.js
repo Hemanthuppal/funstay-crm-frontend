@@ -4,16 +4,14 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
 import './CommentsPage.css'; // Optional: Create a CSS file for styling
-import Navbar from '../../../../../Shared/Sales-ExecutiveNavbar/Navbar';
-import { useNavigate } from 'react-router-dom';
-import {baseURL} from '../../../../../Apiservices/Api';
+import Navbar from '../../../../Shared/ManagerNavbar/Navbar';
+import {baseURL} from '../../../../Apiservices/Api';
 
 const CommentsPage = () => {
   const { leadid } = useParams(); // Gets the lead ID from the URL
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 const [collapsed, setCollapsed] = useState(false);
-const navigate = useNavigate();
   useEffect(() => {
     // Fetch comments based on lead ID when the component mounts
     const fetchComments = async () => {
@@ -35,14 +33,13 @@ const navigate = useNavigate();
     if (!newComment.trim()) return;
 
     const comment = {
-      leadid: leadid,
+      leadid,
       timestamp: new Date().toISOString(),
       text: newComment.trim(),
     };
 
     try {
-      const commenturl = `${baseURL}/comments/add`;
-      const response = await fetch(commenturl, {
+      const response = await fetch(`${baseURL}/comments/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(comment),
@@ -64,8 +61,8 @@ const navigate = useNavigate();
     <div className="salesViewLeadsContainer">
     <Navbar onToggleSidebar={setCollapsed} />
     <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
-    <div className="comment-form-container">
-    <h3 className='comment-form-header'>Comments</h3>
+    <div className="opp-comment-form-container">
+    <h3 className='opp-comment-form-header'>Comments</h3>
 
     {/* Input Field for New Comment */}
     <div className="mb-3 opp-modal-footer">
@@ -104,8 +101,8 @@ const navigate = useNavigate();
 
     {/* Close Button */}
     <div className="mt-3">
-        <Button className="comment-close-btn comment-btn" onClick={() => navigate(-1)}>
-            Back
+        <Button className="opp-comment-btn opp-comment-close-btn" onClick={() => navigate(-1)}>
+        Back
         </Button>
     </div>
 </div>

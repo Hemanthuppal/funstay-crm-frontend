@@ -1,135 +1,72 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from './../../../../Layout/Table/TableLayout';
-import { FaEdit, FaTrash, FaEye, FaComment } from 'react-icons/fa';
-import { Button, Row, Col,Modal } from 'react-bootstrap';
+import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus } from 'react-icons/fa';
+import { Button, Row, Col, Modal } from 'react-bootstrap';
 import Navbar from '../../../../Shared/Navbar/Navbar';
-import EditLead from './EditLead'; // Import the EditLead modal
-import LeadView from './LeadView';
+import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
+import axios from 'axios';
+
 import './ViewLeads.css'
 
 const AdminViewLeads = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [showFollowupModal, setShowFollowupModal] = useState(false);
-  const [leadForFollowup, setLeadForFollowup] = useState(null);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedLead, setSelectedLead] = useState(null);
+  const [message, setMessage] = useState(null);
 
-  const [showCommentsModal, setShowCommentsModal] = useState(false);
 
-  const handleEdit = (lead) => {
-    setSelectedLead(lead);
-    setShowEditModal(true);
+  const [data, setData] = useState([]);
+
+  const handleEdit = (leadId) => {
+    navigate(`/a-edit-lead/${leadId}`, {
+      state: { leadid: leadId },
+    });
   };
 
-  const handleView = (lead) => {
-    setSelectedLead(lead);
-    setShowViewModal(true);
+  const handleAddUser = (lead) => {
+    navigate(`/a-create-customer-opportunity/${lead.leadid}`);
   };
 
-  const handleSaveEdit = (updatedLead) => {
-    setData((prevData) =>
-      prevData.map((item) =>
-        item.leadid === updatedLead.leadid ? updatedLead : item
-      )
-    );
-    setShowEditModal(false);
+
+
+  const handleViewLeads = (lead) => {
+    navigate(`/a-view-lead/${lead.leadid}`, {
+      state: { leadid: lead.leadid },
+    });
   };
 
-  const handleDelete = (id) => {
-    setData(data.filter((item) => item.leadid !== id));
+  const handleDelete = async (leadid) => {
+    try {
+      const response = await fetch(`${baseURL}/api/deleteByLeadId/${leadid}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
+        setMessage('The lead has been deleted successfully.');
+      } else {
+        setMessage('Failed to delete the lead. Please try again later.');
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setMessage('An unexpected error occurred while deleting the lead.');
+    }
   };
 
-  const handleFollowup = (lead) => {
-    setLeadForFollowup(lead);
-    setShowFollowupModal(true);
-  };
-  const handleAddUser = (leadData) => {
-    console.log("Add user functionality triggered for:", leadData);
-    // Add your logic here, e.g., redirecting to a new page or opening a modal
-  };
 
-  const [data, setData] = useState([
-    {
-      leadid: 1,
-      leadname: 'John Doe',
-      mobile: '1234567890',
-      email: 'john.doe@example.com',
-      leadstatus: 'New Lead',
-      source: 'Facebook',
-      assignedTo: '',
-    },
-    {
-      leadid: 2,
-      leadname: 'Jane Smith',
-      mobile: '9876543210',
-      email: 'jane.smith@example.com',
-      leadstatus: 'Junk Lead',
-      source: 'Facebook',
-      assignedTo: '',
-    },
-    {
-      leadid: 3,
-      leadname: 'Alice Brown',
-      mobile: '5556667777',
-      email: 'alice.brown@example.com',
-      leadstatus: 'Qualified',
-      source: 'LinkedIn',
-      assignedTo: '',
-    },
-    {
-      leadid: 4,
-      leadname: 'Michael Green',
-      mobile: '2223334444',
-      email: 'michael.green@example.com',
-      leadstatus: 'Qualified',
-      source: 'Google Ads',
-      assignedTo: '',
-    },
-    {
-      leadid: 5,
-      leadname: 'Emily White',
-      mobile: '9998887777',
-      email: 'emily.white@example.com',
-      leadstatus: 'No Response',
-      source: 'Referral',
-      assignedTo: '',
-    },
-    {
-      leadid: 6,
-      leadname: 'David Black',
-      mobile: '6665554444',
-      email: 'david.black@example.com',
-      leadstatus: 'Disqualified',
-      source: 'Event',
-      assignedTo: '',
-    },
-  ]);
-  const handleAssignToChange = (value, rowId) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.leadid === rowId ? { ...row, assignedTo: value } : row
-      )
-    );
-  };
-  const [dropdownOptions, setDropdownOptions] = useState({
-    primary: ['New', 'No Response', 'Duplicate', 'False Lead', 'Lost'],
+
+
+  const dropdownOptions = {
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
     secondary: {
-      'New': ['Yet to Contact', 'Not picking up call ', 'Asked to call alter'],
-      'No Response': ['No Response'],
-      'Duplicate': ['Duplicate'],
-      'False Lead': ['False Lead'],
-      'Lost': ['Plan Cancelled', 'Plan Delayed', 'Already Booked', 'Others'],
+      New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
+      "No Response": [],
+      Duplicate: [],
+      "False Lead": [],
+      Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
-    assignTo: ['Alice Johnson', 'Bob Smith', 'Charlie Brown'],
-  });
-const sampleComments = [
-    { text: 'Follow-up call scheduled.', time: '2025-01-11 10:30 AM' },
-    { text: 'Sent quotation for the project.', time: '2025-01-10 4:15 PM' },
-    { text: 'Customer requested additional details.', time: '2025-01-09 2:45 PM' },
-  ];
+  };
+
   const handlePrimaryStatusChange = (value, rowId) => {
     setData((prevData) =>
       prevData.map((row) =>
@@ -137,11 +74,12 @@ const sampleComments = [
           ? {
             ...row,
             primaryStatus: value,
-            secondaryStatus: '', // Reset secondary status on primary change
+            secondaryStatus: "", // Reset secondary status when primary changes
           }
           : row
       )
     );
+    updateLeadStatus(rowId, value, ""); // Update without secondary status
   };
 
   const handleSecondaryStatusChange = (value, rowId) => {
@@ -150,155 +88,252 @@ const sampleComments = [
         row.leadid === rowId ? { ...row, secondaryStatus: value } : row
       )
     );
+    const lead = data.find((lead) => lead.leadid === rowId);
+    updateLeadStatus(rowId, lead?.primaryStatus || "", value);
   };
+  const updateLeadStatus = async (leadId, primaryStatus, secondaryStatus) => {
+    const body = {
+      primaryStatus: primaryStatus,
+      secondaryStatus: secondaryStatus,
+    };
+    console.log('JSON:', JSON.stringify(body, null, 2));
+    try {
+      const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
+
+      if (response.status === 200) {
+        // Assuming the response contains a message
+        setMessage(response.data.message || 'Status updated successfully.'); // Use the message from the response or a default message
+        console.log('Status updated:', response.data);
+      } else {
+        console.error('Failed to update status:', response.data);
+        setMessage('Failed to update status. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      setMessage('An error occurred while updating the status. Please try again.');
+    }
+  };
+
+  useEffect(() => {
+    const fetchEnquiries = async () => {
+      try {
+        const response = await fetch(`${webhookUrl}/api/enquiries`);
+        const data = await response.json();
+
+        const filteredData = data.filter((enquiry) => enquiry.status == 'lead');
+        setData(filteredData);
+      } catch (error) {
+        console.error('Error fetching enquiries:', error);
+      }
+    };
+    fetchEnquiries();
+  }, []);
+
+  const [managers, setManagers] = useState([]); // State to store fetched managers
+  const [loading, setLoading] = useState(true); // Loading state for API call
+  const [error, setError] = useState(null); // Error state for API call
+  const handleAddLead = () => {
+    navigate('/a-add-leads');
+  };
+
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const response = await fetch(`${baseURL}/managers`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch managers");
+        }
+        const result = await response.json(); // Parse JSON directly from response
+        console.log("Fetched data:", result.data); // Log fetched data
+        console.log(JSON.stringify(result.data, null, 2)); // Log fetched data in pretty format
+        setManagers(result.data); // Update the managers state
+        setLoading(false); // Set loading to false after successful fetch
+      } catch (err) {
+        console.error("Error fetching managers:", err.message); // Log the error
+        setError(err.message); // Update error state
+        setLoading(false); // Stop loading on error
+      }
+    };
+
+    fetchManagers();
+  }, []);
+
+  const handleAssignToChange = async (assignee, leadid, managerid) => {
+    try {
+      const response = await fetch(`${baseURL}/update-assignee`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          leadid,
+          assignee,
+          managerid,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message);
+        // Update the data to display the assignee name directly
+        setData((prevData) =>
+          prevData.map((lead) =>
+            lead.leadid === leadid
+              ? { ...lead, assign_to_manager: assignee } // Assign the name, not ID
+              : lead
+          )
+        );
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Error updating assignee:', error);
+    }
+  };
+
+
+
+
+
+
+
 
   const columns = useMemo(
     () => [
       {
-        Header: 'Lead ID',
-        accessor: 'leadid',
+        Header: "S.No",
+        accessor: (row, index) => index + 1,
       },
       {
-        Header: 'Lead Name',
-        accessor: 'leadname',
-      },
-      {
-        Header: 'Mobile No',
-        accessor: 'mobile',
-      },
-      {
-        Header: 'Email',
-        accessor: 'email',
-      },
-      {
-        Header: 'Lead Status',
+        Header: "Lead Details",
+        accessor: "leadDetails",
         Cell: ({ row }) => (
-          <div className="d-flex align-items-center">
-            {/* Primary Dropdown */}
-            <select
-              value={row.original.primaryStatus}
-              onChange={(e) =>
-                handlePrimaryStatusChange(e.target.value, row.original.leadid)
-              }
-              className="form-select me-2"
-            >
-              <option value="">Select Primary Status</option>
-              {dropdownOptions.primary.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+          <div>
 
-            {/* Secondary Dropdown */}
-            <select
-              value={row.original.secondaryStatus}
-              onChange={(e) =>
-                handleSecondaryStatusChange(e.target.value, row.original.leadid)
-              }
-              className="form-select"
-              disabled={!row.original.primaryStatus} // Disable until a primary status is selected
-            >
-              <option value="">Select Secondary Status</option>
-              {(dropdownOptions.secondary[row.original.primaryStatus] || []).map(
-                (option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                )
-              )}
-            </select>
+            <div>{row.original.leadcode}</div>
+            <div>{row.original.lead_type}</div>
           </div>
         ),
       },
-
       {
-        Header: 'Source',
-        accessor: 'source',
-      },
-      {
-        Header: 'Assign To',
+        Header: "Contact Info",
+        accessor: "contactInfo",
         Cell: ({ row }) => (
-          <select
-            value={row.original.assignedTo}
-            onChange={(e) =>
-              handleAssignToChange(e.target.value, row.original.leadid)
-            }
-            className="form-select"
-          >
-            <option value="">Select Assignee</option>
-            {dropdownOptions.assignTo.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
+          <div>
+            <div>{row.original.name}</div>
+            <div>{row.original.phone_number}</div>
+            <div>{row.original.email}</div>
+          </div>
         ),
       },
       {
-        Header: 'Actions',
+        Header: "Lead Status",
+        Cell: ({ row }) => {
+          const primaryStatus = row.original.primaryStatus;
+          const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
+          const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
+
+          return (
+            <div className="d-flex align-items-center">
+              <select
+                value={primaryStatus}
+                onChange={(e) =>
+                  handlePrimaryStatusChange(e.target.value, row.original.leadid)
+                }
+                className="form-select me-2"
+              >
+                <option value="">Select Primary Status</option>
+                {dropdownOptions.primary.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={row.original.secondaryStatus}
+                onChange={(e) =>
+                  handleSecondaryStatusChange(e.target.value, row.original.leadid)
+                }
+                className="form-select"
+                disabled={isSecondaryDisabled} // Disable if no primary status or no secondary options
+              >
+                <option value="">Select Secondary Status</option>
+                {secondaryOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        },
+      },
+      {
+        Header: 'Source',
+        accessor: 'sources',
+      },
+
+      {
+        Header: 'Assign To',
+        Cell: ({ row }) => {
+          const isAssigned = row.original.assign_to_manager;
+      
+          return isAssigned ? (
+            <button className="btn btn-secondary" disabled>
+              {isAssigned} {/* Display the name directly */}
+            </button>
+          ) : (
+            <select
+              onChange={(e) => {
+                const [managerid, assignee] = e.target.value.split('|');
+                handleAssignToChange(assignee, row.original.leadid, managerid);
+              }}
+              className="form-select"
+              disabled={isAssigned}
+            >
+              <option value="">Select Assignee</option>
+              {managers.map((manager, index) => (
+                <option key={index} value={`${manager.id}|${manager.name}`}>
+                  {manager.name}
+                </option>
+              ))}
+            </select>
+          );
+        },
+      },
+
+      
+
+      ,
+
+      {
+        Header: "Actions",
         Cell: ({ row }) => (
-          // <div>
-          //   <button
-          //     className="edit-btn edit-button"
-          //     onClick={() => handleEdit(row.original)}
-          //   >
-          //     <FaEdit />
-          //   </button>
-          //   <button
-          //     className="delete-btn delete-button"
-          //     onClick={() => handleDelete(row.original.leadid)}
-          //   >
-          //     <FaTrash />
-          //   </button>
-          //   <button
-          //     className="view-btn view-button"
-          //     onClick={() => handleView(row.original)}
-          //   >
-          //     <FaEye />
-          //   </button>
-          //   <button
-          //     className="add-user-btn add-user-button"
-          //     onClick={() => handleAddUser(row.original)}
-          //   >
-          //     <FaUserPlus />
-          //   </button>
-          // </div>
-
-
-
           <div>
             <button
               className="btn btn-warning edit-button me-1 mb-1"
-              onClick={() => handleEdit(row.original)}
-              title="Edit"
+              onClick={() => handleEdit(row.original.leadid)}
             >
               <FaEdit />
             </button>
             <button
               className="btn btn-danger delete-button me-1 mb-1"
               onClick={() => handleDelete(row.original.leadid)}
-              title="Delete"
             >
               <FaTrash />
             </button>
             <button
               className="btn btn-info view-button me-1"
-              onClick={() => handleView(row.original)}
-              title="View"
+              onClick={() => handleViewLeads(row.original)}
             >
               <FaEye />
             </button>
-            {/* <button
+            <button
               className="btn btn-success add-user-button me-1"
-
               onClick={() => handleAddUser(row.original)}
-              title="Add User"
             >
               <FaUserPlus />
-            </button> */}
+            </button>
           </div>
-
         ),
       },
       {
@@ -306,83 +341,41 @@ const sampleComments = [
         accessor: 'comments',
         Cell: ({ row }) => (
           <button
-            className="btn btn-info "
+            className="btn btn-info"
             onClick={() => {
-              setSelectedLead(row.original);
-              setShowCommentsModal(true);
+              navigate(`/a-comments/${row.original.leadid}`);
             }}
           >
-            
             <FaComment />
           </button>
         ),
-      }
-      ,
+      },
     ],
-[dropdownOptions]
+    [dropdownOptions, managers]
   );
 
 
 
-return (
-  <div className="admin-ViewLeadcontainer">
-    <Navbar onToggleSidebar={setCollapsed} />
-    <div className={`admin-ViewLead ${collapsed ? "collapsed" : ""}`}>
-      <div className="admin-ViewLead-container mb-5">
-        <div className="admin-ViewLead-table-container">
-          <Row className="mb-3">
-            <Col className="d-flex justify-content-between align-items-center">
-              <h3>Lead Details</h3>
-              {/* // <Button onClick={() => console.log('Add Lead')}>Add Lead</Button> */}
-            </Col>
-          </Row>
-          <DataTable columns={columns} data={data} />
+  return (
+    <div className="admin-ViewLeadcontainer">
+      <Navbar onToggleSidebar={setCollapsed} />
+      <div className={`admin-ViewLead ${collapsed ? "collapsed" : ""}`}>
+        <div className="admin-ViewLead-container mb-5">
+          <div className="admin-ViewLead-table-container">
+            <Row className="mb-3">
+              <Col className="d-flex justify-content-between align-items-center">
+                <h3>Lead Details</h3>
+                {message && <div className="alert alert-info">{message}</div>}
+                <Button onClick={handleAddLead}>Add Leads</Button>
+              </Col>
+            </Row>
+            <DataTable columns={columns} data={data} />
+          </div>
+
         </div>
-        <Modal show={showCommentsModal} onHide={() => setShowCommentsModal(false)} size="lg">
-              <Modal.Header closeButton className='comment-modal-header'>
-                <Modal.Title>
-                  <div className="d-flex justify-content-between align-items-center w-100">
-                    <span>Comments</span>
-                    <span className="text-muted">{selectedLead?.opportunityid}</span>
-                  </div>
-                </Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                {sampleComments.map((comment, index) => (
-                  <div key={index} className="mb-3">
-                    <p className="text-muted mb-1">{comment.time}</p>
-                    <p>{comment.text}</p>
-                  </div>
-                ))}
-              </Modal.Body>
-              <Modal.Footer className="opp-modal-footer">
-                <Button className='opp-comment-btn-secondary' onClick={() => setShowCommentsModal(false)}>
-                  Close
-                </Button>
-                <Button className='opp-comment-btn-primary' onClick={() => alert('Update action')}>
-                  Update
-                </Button>
-              </Modal.Footer>
-            </Modal>
-        {selectedLead && (
-          <>
-            <EditLead
-              show={showEditModal}
-              handleClose={() => setShowEditModal(false)}
-              lead={selectedLead}
-              handleSave={handleSaveEdit}
-            />
-            <LeadView
-              show={showViewModal}
-              handleClose={() => setShowViewModal(false)}
-              lead={selectedLead}
-            />
-          </>
-        )}
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default AdminViewLeads;

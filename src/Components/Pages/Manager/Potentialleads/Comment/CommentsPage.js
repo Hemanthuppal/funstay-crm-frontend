@@ -37,7 +37,7 @@ const [collapsed, setCollapsed] = useState(false);
       timestamp: new Date().toISOString(),
       text: newComment.trim(),
     };
-
+console.log(JSON.stringify(comment, null, 2));
     try {
       const response = await fetch(`${baseURL}/comments/add`, {
         method: "POST",

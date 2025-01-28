@@ -29,29 +29,59 @@ const DynamicForm = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const nameInputRef = useRef(null);
+  const [phoneError, setPhoneError] = useState(""); // State for phone number error
+  const [emailError, setEmailError] = useState("");
+const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  
+    if (name === "phone_number") {
+      // Allow only numeric input and limit to 10 digits
+      const formattedValue = value.replace(/\D/g, ""); // Remove non-numeric characters
+      if (formattedValue.length <= 10) {
+        setFormData({ ...formData, [name]: formattedValue });
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const validateEmail = (email) => {
+    // Basic email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(""); // Clear previous messages
+  
+    // Validate phone_number length
+    if (formData.phone_number.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    // Validate email
+    if (!validateEmail(formData.email)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
 
     try {
       const response = await axios.post(`${baseURL}/api/leads`, formData);
       console.log(response.data);
-
+  console.log(JSON.stringify(formData));
       // Set success message
       setMessage("Lead added successfully!");
-
+  
       // Reset form data
       setFormData({
         name: '',
         email: '',
         phone_number: '',
-        country_code: '+1', // Reset to default country code
+        country_code: '+91', // Reset to default country code
         primarySource: '',
         secondarySource: '',
         another_name: '',
@@ -63,7 +93,7 @@ const DynamicForm = () => {
     } catch (error) {
       console.error("Error adding lead:", error);
       // Set error message
-      setMessage("Failed to add lead. Please try again.");
+      setMessage("Error: Failed to add lead. Please try again.");
     }
   };
 
@@ -95,8 +125,8 @@ const DynamicForm = () => {
 
     return (
       <div className="addleads-form-grid">
-        <div className="addleads-input-group">
-          <label>Name</label>
+       <div className="addleads-input-group">
+          <label>Name<span style={{ color: "red" }}> *</span></label>
           <input
             type="text"
             name="name"
@@ -109,17 +139,29 @@ const DynamicForm = () => {
           />
         </div>
         <div className="addleads-input-group">
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter Email"
-            value={formData.email}
-            onChange={handleChange}
-          />
+          <label>Email<span style={{ color: "red" }}> *</span></label>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              onBlur={() => {
+                if (!validateEmail(formData.email)) {
+                  setEmailError("Please enter a valid email address.");
+                } else {
+                  setEmailError("");
+                }
+              }}
+            />
+            {/* Show email error message below the input */}
+            {emailError && <span style={{ color: "red", fontSize: "12px" }}>{emailError}</span>}
+          </div>
         </div>
         <div className="addleads-input-group">
-          <label>Phone Number</label>
+          <label>Phone Number<span style={{ color: "red" }}> *</span></label>
           <div style={{ display: "flex", alignItems: "center" }}>
             {/* Country Code Input */}
             <select
@@ -134,11 +176,11 @@ const DynamicForm = () => {
                 borderRadius: "4px",
               }}
             >
-              <option value="+1">+1 (USA)</option>
-              <option value="+91">+91 (India)</option>
-              <option value="+44">+44 (UK)</option>
-              <option value="+61">+61 (Australia)</option>
-              <option value="+81">+81 (Japan)</option>
+              <option value="+1">+1 </option>
+              <option value="+91">+91 </option>
+              <option value="+44">+44 </option>
+              <option value="+61">+61 </option>
+              <option value="+81">+81 </option>
               {/* Add more country codes as needed */}
             </select>
 
@@ -148,15 +190,30 @@ const DynamicForm = () => {
               name="phone_number"
               placeholder="Enter Phone Number"
               value={formData.phone_number}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) {
+                  handleChange(e); // Update the value if it's a valid number
+                }
+              }}
+              onBlur={(e) => {
+                if (formData.phone_number.length !== 10) {
+                  setPhoneError("Please enter a valid number.");
+                } else {
+                  setPhoneError("");
+                }
+              }}
               style={{
                 flex: 1,
                 padding: "5px",
                 border: "1px solid #ccc",
                 borderRadius: "4px",
               }}
+              required
             />
           </div>
+          {/* Show error message below the input */}
+          {phoneError && <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>}
         </div>
         <div className="addleads-input-group">
           <label>Primary Source</label>
@@ -257,7 +314,8 @@ const DynamicForm = () => {
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="addleads-form-container">
           <h2 className="addleads-form-header">Add Leads</h2>
-          {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
+          {error && <div className="alert alert-danger">{error}</div>}
+          {message && <div className="alert alert-info">{message}</div>}{/* Display message */}
           <form onSubmit={handleSubmit} className="addleads-form">
             {renderForm()}
             <div className="addleads-form-footer">

@@ -36,7 +36,7 @@ const navigate = useNavigate();
     fetchLeads();
   }, [userId]);
   const navigateToLead = (leadId) => {
-    navigate(`/details/${leadId}`, {
+    navigate(`/sales-details/${leadId}`, {
       state: { leadid: leadId },
     });
   };

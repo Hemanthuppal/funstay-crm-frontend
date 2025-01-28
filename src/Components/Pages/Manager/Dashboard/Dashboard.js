@@ -5,6 +5,7 @@ import "./Dashboard.css";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import Navbar from '../../../Shared/ManagerNavbar/Navbar';
+import FollowUp from "./FollowUp";
 
 
 const Dashboard = () => {
@@ -145,7 +146,7 @@ const Dashboard = () => {
 
           {/* Follow-up Schedule Section */}
           <div className="col-lg-5 col-md-12 mt-4">
-            <div className="Manager-follow-up-schedule">
+            {/* <div className="Manager-follow-up-schedule">
               <div className="Manager-schedule-header d-flex justify-content-between align-items-center">
                 <h5>Follow-up Schedule</h5>
                 <div className="dropdown">
@@ -212,7 +213,8 @@ const Dashboard = () => {
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
+            <FollowUp/>
           </div>
         </div>
       </div>

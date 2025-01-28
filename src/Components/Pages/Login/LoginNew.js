@@ -25,15 +25,24 @@ const Login = () => {
       const data = await response.json();
 
       if (response.status === 200) {
-        login(data.token, data.role, data.id); // Use context to manage auth state
+        login(data.token, data.role, data.id ,data.name); // Use context to manage auth state
+
+        // if (data.role === 'employee') {
+        //   navigate('/s-dashboard');
+        // } else if (data.role === 'manager') {
+        //   navigate('/m-dashboard');
+        // } else {
+        //   navigate('/dashboard');
+        // }
 
         if (data.role === 'employee') {
-          navigate('/s-dashboard');
+          navigate('/View-lead');
         } else if (data.role === 'manager') {
-          navigate('/m-dashboard');
+          navigate('/m-view-leads');
         } else {
-          navigate('/dashboard');
+          navigate('/a-view-lead');
         }
+
       } else {
         alert(data.message);
       }

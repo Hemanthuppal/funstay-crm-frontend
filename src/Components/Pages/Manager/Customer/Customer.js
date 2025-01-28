@@ -1,7 +1,7 @@
 
 
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import axios from "axios";
 import DataTable from './../../../Layout/Table/TableLayout'; // Make sure to import your DataTable component
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
@@ -9,12 +9,13 @@ import "./Customer.css";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import {baseURL} from "../../../Apiservices/Api";
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from "../../../AuthContext/AuthContext";
 
 const SalesCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]); // State for storing leads
   const navigate = useNavigate();
-
+  const { authToken ,userId} = useContext(AuthContext);
   // Fetch leads on component load
   useEffect(() => {
     const fetchLeads = async () => {
@@ -23,7 +24,7 @@ const SalesCustomer = () => {
         if (response.status === 200) {
           // Filter leads with 'Opportunity' status
           const filteredLeads = response.data.filter(
-            (lead) => lead.status == "opportunity"
+            (lead) =>  lead.managerid == userId && lead.status == "opportunity"
           );
           setData(filteredLeads); // Update state with filtered leads
         } else {
@@ -39,7 +40,7 @@ const SalesCustomer = () => {
   }, []);
 
   const navigateToLead = (leadId) => {
-    navigate(`/details/${leadId}`, {
+    navigate(`/m-details/${leadId}`, {
       state: { leadid: leadId },
     });
   };

@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {baseURL} from "../../../Apiservices/Api";
+import { baseURL } from "../../../Apiservices/Api";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../../../Shared/Navbar/Navbar";
+import "./AddEmployeeModal.css";
 
-const AddEmployeeModal = ({ isOpen, onClose, onAddEmployeeSuccess = () => {} }) => {
+const AddEmployeeModal = () => {
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
+  const [message, setMessage] = useState(""); // Success message
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     mobile: "",
@@ -11,64 +17,64 @@ const AddEmployeeModal = ({ isOpen, onClose, onAddEmployeeSuccess = () => {} }) 
     assignManager: "",
   });
 
-  const [managers, setManagers] = useState([]); // Store the list of managers
+  const [managers, setManagers] = useState([]); // List of managers
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch managers when the modal opens
   useEffect(() => {
-    if (isOpen) {
-      fetchManagers();
-    }
-  }, [isOpen]);
+    const fetchManagers = async () => {
+      try {
+        const response = await fetch(`${baseURL}/managers`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // JWT token
+          },
+        });
+        const data = await response.json();
 
-  const fetchManagers = async () => {
-    try {
-      const response = await fetch(`${baseURL}/managers`, {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem('token')}`, // Pass JWT token for authentication
-        },
-      });
-      const data = await response.json();
-
-      if (response.ok) {
-        setManagers(data.data); // Set managers list
-      } else {
-        throw new Error(data.message || "Failed to fetch managers.");
+        if (response.ok) {
+          setManagers(data.data || []); // Populate managers
+        } else {
+          throw new Error(data.message || "Failed to fetch managers.");
+        }
+      } catch (error) {
+        setError(error.message);
       }
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+    };
 
-  const handleAddEmployee = async () => {
+    fetchManagers();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
+
     const { name, mobile, email, password, role, assignManager } = newEmployee;
-  
+
     if (!name || !mobile || !email || !password || !role) {
       alert("Please fill in all the fields.");
       return;
     }
-  
+
     try {
       setLoading(true);
       setError(null);
-  
+
       const response = await fetch(`${baseURL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`, // Pass JWT token for authentication
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // JWT token
         },
         body: JSON.stringify(newEmployee),
       });
-  
+
       const data = await response.json();
-  
+      console.log(JSON.stringify(newEmployee));
+
       if (!response.ok) {
         throw new Error(data.message || "Failed to add employee.");
       }
-  
-      // Reset newEmployee form
+
+      // Reset form and show success message
       setNewEmployee({
         name: "",
         mobile: "",
@@ -77,138 +83,138 @@ const AddEmployeeModal = ({ isOpen, onClose, onAddEmployeeSuccess = () => {} }) 
         role: "",
         assignManager: "",
       });
-  
-      // Close the modal and pass the new employee data
-      onAddEmployeeSuccess(data);
-      alert("Employee added successfully.");
-      onClose(); // Close the modal after successful employee addition
+      setMessage("Employee added successfully!");
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
-  
 
-  return isOpen ? (
-    <div className="modal fade show" style={{ display: "block" }}>
-      <div className="modal-dialog modal-lg">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Add New Employee</h5>
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-          <div className="modal-body">
-            {error && (
-              <div className="alert alert-danger">
-                <strong>Error:</strong> {error}
+  return (
+    <div className="salesViewLeadsContainer">
+      <Navbar onToggleSidebar={setCollapsed} />
+      <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
+        <div className="addleads-form-container">
+          <h2 className="addleads-form-header">Add New Employee</h2>
+
+          {message && <div className="alert alert-success">{message}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
+            <div className="addemployee-form-grid">
+              <div className="addemployee-input-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Enter Name"
+                  value={newEmployee.name}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, name: e.target.value })
+                  }
+                  required
+                />
               </div>
-            )}
-            <form>
-              <div className="row">
-                <div className="col-md-6 mb-3">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Name"
-                    value={newEmployee.name}
-                    onChange={(e) =>
-                      setNewEmployee({ ...newEmployee, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="col-md-6 mb-3">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Mobile"
-                    value={newEmployee.mobile}
-                    onChange={(e) =>
-                      setNewEmployee({ ...newEmployee, mobile: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="col-md-6 mb-3">
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="Email"
-                    value={newEmployee.email}
-                    onChange={(e) =>
-                      setNewEmployee({ ...newEmployee, email: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="col-md-6 mb-3">
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Password"
-                    value={newEmployee.password}
-                    onChange={(e) =>
-                      setNewEmployee({ ...newEmployee, password: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="col-md-6 mb-3">
+              <div className="addemployee-input-group">
+                <label>Mobile</label>
+                <input
+                  type="text"
+                  name="mobile"
+                  placeholder="Enter Mobile"
+                  value={newEmployee.mobile}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, mobile: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="addemployee-input-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter Email"
+                  value={newEmployee.email}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, email: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="addemployee-input-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Enter Password"
+                  value={newEmployee.password}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, password: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="addemployee-input-group">
+                <label>Role</label>
+                <select
+                  name="role"
+                  value={newEmployee.role}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, role: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Select Role</option>
+                  <option value="manager">Manager</option>
+                  <option value="employee">Employee</option>
+                </select>
+              </div>
+              {newEmployee.role === "employee" && (
+                <div className="addemployee-input-group">
+                  <label>Assign Manager</label>
                   <select
-                    className="form-control"
-                    value={newEmployee.role}
+                    name="assignManager"
+                    value={newEmployee.assignManager}
                     onChange={(e) =>
-                      setNewEmployee({ ...newEmployee, role: e.target.value })
+                      setNewEmployee({
+                        ...newEmployee,
+                        assignManager: e.target.value,
+                      })
                     }
                   >
-                    <option value="">Select Role</option>
-                    <option value="manager">Manager</option>
-                    <option value="employee">Employee</option>
+                    <option value="">Select Manager</option>
+                    {managers.map((manager) => (
+                      <option key={manager.id} value={manager.id}>
+                        {manager.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                {newEmployee.role === "employee" && (
-                  <div className="col-md-6 mb-3">
-                    <select
-                      className="form-control"
-                      value={newEmployee.assignManager}
-                      onChange={(e) =>
-                        setNewEmployee({
-                          ...newEmployee,
-                          assignManager: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="">Select Manager</option>
-                      {managers.map((manager) => (
-                        <option key={manager.id} value={manager.id}>
-                          {manager.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-            </form>
-          </div>
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleAddEmployee}
-              disabled={loading}
-            >
-              {loading ? "Adding..." : "Add Employee"}
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Close
-            </button>
-          </div>
+              )}
+            </div>
+
+            <div className="addleads-form-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => navigate(-1)}
+              >
+                Back
+              </button>
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  ) : null;
+  );
 };
 
 export default AddEmployeeModal;

@@ -1,0 +1,34 @@
+.quotation-header {
+  background-color: #f7941e;
+  color: white;
+}
+
+.quotation-header .btn-close {
+  color: white;
+  opacity: 1;
+}
+
+.quotation-content {
+  border-radius: 10px;
+}
+
+.quotation-body label {
+  font-weight: bold;
+}
+
+.quotation-footer .btn {
+  background-color: #f7941e;
+  color: white;
+}
+
+.section-title {
+  color: #f7941e;
+  font-weight: bold;
+  margin: 20px 0 15px 0;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #f7941e;
+}
+
+.table th {
+  background-color: #f8f9fa;
+}

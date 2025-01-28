@@ -13,7 +13,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
+  const { logout ,userName} = useContext(AuthContext);
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
     onToggleSidebar(!collapsed);
@@ -49,7 +49,7 @@ const Navbar = ({ onToggleSidebar }) => {
             </div> &nbsp;&nbsp;
             <img src={'https://primary0101211.s3.ap-south-1.amazonaws.com/v3/assets/images/Logo.png'} alt="Logo" className="admin-company-logo" />
           </div>
-          <h2 className="text-center" style={{ color: 'white' }}>Admin</h2>
+          <h2 className="text-center" style={{ color: 'white' }}>{userName}</h2>
 
           <div className="admin-header-right">
             {/* Add Leads Button */}
@@ -77,11 +77,11 @@ const Navbar = ({ onToggleSidebar }) => {
                 {showDropdown && (
                   <div className="admin-nav-profile-dropdown">
                     <div className="admin-nav-profile-header">
-                      <strong>Alex Johnson</strong>
+                      <strong>{userName}</strong>
                     </div>
                     <div className="admin-nav-profile-item">Your Profile</div>
-                    <div className="admin-nav-profile-item">Settings</div>
-                    <div className="admin-nav-profile-item">Help Center</div>
+                    {/* <div className="admin-nav-profile-item">Settings</div>
+                    <div className="admin-nav-profile-item">Help Center</div> */}
                     <div className="admin-nav-profile-item" onClick={handleLogout}>Sign Out</div>
                   </div>
                 )}
@@ -93,12 +93,12 @@ const Navbar = ({ onToggleSidebar }) => {
         <div className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
           <div className="admin-position-sticky">
             <ul className="nav flex-column">
-              <li className="admin-nav-item">
+              {/* <li className="admin-nav-item">
                 <Link className="nav-link" to="/dashboard" onClick={handleNavItemClick}>
                   <FaHome className="admin-nav-icon" />
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
-              </li>
+              </li> */}
 
               <li className="admin-nav-item">
                 <Link className="nav-link" to="/a-view-lead" onClick={handleNavItemClick}>

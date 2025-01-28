@@ -39,7 +39,7 @@ const navigate = useNavigate();
       timestamp: new Date().toISOString(),
       text: newComment.trim(),
     };
-
+console.log(JSON.stringify(comment, null, 2));
     try {
       const commenturl = `${baseURL}/comments/add`;
       const response = await fetch(commenturl, {

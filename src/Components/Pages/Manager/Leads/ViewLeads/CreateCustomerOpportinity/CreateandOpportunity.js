@@ -53,9 +53,10 @@ const CreateCustomerOpportunity = () => {
   const handleSubmitCustomer = async () => {
     setLoading(true);
     setError(null);
-
+console.log(JSON.stringify(formData, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/leads/update/${leadid}`, formData);
+      console.log(JSON.stringify(response, null, 2));
       if (response.status === 200) {
         setMessage("Customer data submitted successfully!");
         setActiveTab("opportunity");
@@ -74,6 +75,14 @@ const CreateCustomerOpportunity = () => {
     setLoading(true);
     setError(null);
 
+    // Validation check for required fields
+    if (!formData.destination || !startDate || !endDate || !formData.reminder_setting || !formData.notes) {
+      setError("All required fields must be filled in.");
+
+      setLoading(false);
+      return; // Stop submission if validation fails
+    }
+
     const opportunityData = {
       destination: formData.destination,
       start_date: startDate,
@@ -81,26 +90,25 @@ const CreateCustomerOpportunity = () => {
       duration: duration,
       adults_count: formData.adults_count,
       children_count: formData.children_count,
-      child_ages: childrenAges.join(','), 
+      child_ages: childrenAges.join(','),
       approx_budget: formData.approx_budget,
       notes: formData.notes,
       reminder_setting: formData.reminder_setting,
       leadid: leadid,
     };
+
     console.log(JSON.stringify(opportunityData, null, 2));
 
     try {
       const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);
       if (response.status === 201) {
-       
-setMessage('Opportunity created successfully!')
+        setMessage("Opportunity created successfully!");
         navigate("/m-potential-leads");
       }
     } catch (err) {
       console.error("Error creating opportunity:", err);
       setError("Error creating opportunity. Please try again.");
-      
-      setMessage('Failed to create opportunity. Please try again.')
+      setMessage("Failed to create opportunity. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -207,37 +215,42 @@ setMessage('Opportunity created successfully!')
            
             <div className="createcustomer-form-grid">
               <div className="createcustomer-input-group">
-                <label>Destination</label>
+                <label>Destination<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
                   name="destination"
                   value={formData.destination || ""}
                   onChange={handleChange}
                   autoFocus={activeTab === "opportunity"}
+                  required
                 />
               </div>
               <div className="createcustomer-input-group">
-                <label>Start Date</label>
+                <label>Start Date<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="date"
                   value={startDate}
+                  min={new Date().toISOString().split("T")[0]} // Restrict start date to today or later
                   onChange={(e) => {
                     const newStartDate = e.target.value;
                     setStartDate(newStartDate);
                     calculateDuration(newStartDate, endDate);
                   }}
+                  required
                 />
               </div>
               <div className="createcustomer-input-group">
-                <label>End Date</label>
+                <label>End Date<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="date"
                   value={endDate}
+                  min={startDate || new Date().toISOString().split("T")[0]} // Restrict end date to start date or later
                   onChange={(e) => {
                     const newEndDate = e.target.value;
                     setEndDate(newEndDate);
                     calculateDuration(startDate, newEndDate);
                   }}
+                  required
                 />
               </div>
               <div className="createcustomer-input-group">
@@ -293,22 +306,26 @@ setMessage('Opportunity created successfully!')
                 />
               </div>
               <div className="createcustomer-input-group">
-                <label>Reminder Setting</label>
+                <label>Reminder Setting<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="date"
                   name="reminder_setting"
+                  min={new Date().toISOString().split("T")[0]}
+                  max={startDate}
                   value={formData.reminder_setting || ""}
                   onChange={handleChange}
                   placeholder="Optional"
+                  required
                 />
               </div>
               <div className="createcustomer-input-group full-width">
-                <label>Notes</label>
+                <label>Notes<span style={{ color: "red" }}> *</span></label>
                 <textarea
                   name="notes"
                   value={formData.notes || ""}
                   onChange={handleChange}
                   placeholder="Optional"
+                  required
                 />
               </div>
             </div>

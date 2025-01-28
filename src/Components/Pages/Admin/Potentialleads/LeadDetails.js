@@ -1,232 +1,132 @@
-import React, { useState, useMemo } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { useState, useEffect } from "react";
+import { Row, Col, Card } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
+import './LeadDetails.css';
 import Navbar from '../../../Shared/Navbar/Navbar';
+import { baseURL } from "../../../Apiservices/Api";
 
-import "./LeadDetails.css";
+const LeadOppView = () => {
+    const [collapsed, setCollapsed] = useState(false);
+    const [lead, setLead] = useState(null);
+    const location = useLocation();
+    const { leadid } = location.state;
+    const navigate = useNavigate();
 
-const LeadDetails = () => {
-        const handleAddReceipt = () => {
-                console.log("Add Receipt clicked");
+    useEffect(() => {
+        const fetchLeadDetails = async () => {
+            try {
+                const response = await fetch(`${baseURL}/api/leadsoppcomment/${leadid}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log(data); // Log the data to see its structure
+                setLead(data);
+            } catch (error) {
+                console.error('Error fetching lead details:', error);
+            }
         };
 
-        const handleAddQuotation = () => {
-                console.log("Add Quotation clicked");
-        };
+        fetchLeadDetails();
+    }, [leadid]);
 
-        const [collapsed, setCollapsed] = useState(false);
+    if (!lead) {
+        return <div>Loading...</div>; // Show a loading state while fetching data
+    }
 
+    const handleEdit = (leadId) => {
+        navigate(`/a-edit-opportunity/${leadId}`, {
+            state: { leadid: leadId }, // Pass leadid to the edit page
+        });
+    };
 
-        return (
+    // Sort comments by timestamp in descending order
+    const sortedComments = lead.comments ? lead.comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
 
-                <div className="Admin-ViewOpportunitycontainer">
-                        <Navbar onToggleSidebar={setCollapsed} />
-                        <div className={`Admin-ViewOpportunity ${collapsed ? "collapsed" : ""}`}>
-                                <div className="container py-4">
-                                        {/* <div className="d-flex justify-content-end mb-3 gap-2">
-                                                <button className="btn btn-gradient-left" onClick={handleAddReceipt}>
-                                                        Add Receipt
-                                                </button>
-                                                <button className="btn btn-gradient-right" onClick={handleAddQuotation}>
-                                                        Add Quotation
-                                                </button>
+    return (
+        <div className="salesViewLeadsContainer">
+            <Navbar onToggleSidebar={setCollapsed} />
+            <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
+                <div className="lead-opportunity-view">
+                    <Card className="mb-4">
+                        <Card.Header className='s-LeadOppView-modal-header'>
+                            <h2>Lead Details</h2>
+                        </Card.Header>
+                        <Card.Body>
+                            <Row>
+                                {/* Customer Details Section */}
+                                <Col md={6}>
+                                    <h5>Customer Details</h5>
+                                    <p><strong>Lead Type:</strong> {lead.lead.lead_type || 'N/A'}</p>
+                                    <p><strong>Lead Id:</strong> {lead.lead.leadcode || 'N/A'}</p>
+                                    <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
+                                    <p><strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}</p>
+                                    <p><strong>Email ID:</strong> {lead.lead.email || 'N/A'}</p>
+                                    <p><strong>Primary Source:</strong> {lead.lead.primarySource || 'N/A'}</p>
+                                    <p><strong>Secondary Source:</strong> {lead.lead.secondarysource || 'N/A'}</p>
+                                    <p><strong>Primary Status:</strong> {lead.lead.primaryStatus || 'N/A'}</p>
+                                    <p><strong>Secondary Status:</strong> {lead.lead.secondaryStatus || 'N/A'}</p>
+                                    <p><strong>Travel Type:</strong> {lead.lead.travel_type || 'N/A'}</p>
+                                    <p><strong>Channel:</strong> {lead.lead.channel || 'N/A'}</p>
+                                    <hr />
+                                    
+                                    <h5>Opportunity Details</h5>
+                                    {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                        <>
+                                            <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
+                                            <p><strong>Start Date:</strong> {lead.travelOpportunities[0].start_date ? new Date(lead.travelOpportunities[0].start_date).toLocaleDateString() : 'N/A'}</p>
+                                            <p><strong>End Date:</strong> {lead.travelOpportunities[0].end_date ? new Date(lead.travelOpportunities[0].end_date).toLocaleDateString() : 'N/A'}</p>
+                                            <p><strong>Duration:</strong> {lead.travelOpportunities[0].duration || 'N/A'}</p>
+                                            <p><strong>Number of Adults:</strong> {lead.travelOpportunities[0].adults_count || 'N/A'}</p>
+                                            <p><strong>Number of Children:</strong> {lead.travelOpportunities[0].children_count || 'N/A'}</p>
+                                            <p><strong>Child Age:</strong> {lead.travelOpportunities[0].child_ages || 'N/A'}</p>
+                                            <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
+                                            {/* <p><strong>Notes:</strong> {lead.travelOpportunities[0].notes || 'N/A'}</p> */}
+                                            <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
+                                        </>
+                                    )}
+                                </Col>
 
-                                        </div> */}
-
-
-                                        {/* Lead Details Card */}
-                                          {/* Lead Details Card */}
-                                          <div className="card mb-4">
-                                                <div className="card-body">
-                                                        <h2 className="card-title">Lead Details</h2>
-
-                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                        Lead Name:
-                                                                </span>
-                                                                <span className="text-muted">Hemanth Uppala</span>
-                                                        </div>
-
-                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                        Email:
-                                                                </span>
-                                                                <span className="text-muted">uppalahemanth4@gmail.com</span>
-                                                        </div>
-
-                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                        Mobile Number:
-                                                                </span>
-                                                                <span className="text-muted">9666010238</span>
-                                                        </div>
-
-                                                        {/* <div className="d-flex flex-wrap">
-                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                        Opportunity Status:
-                                                                </span>
-                                                                <span className="text-muted">In Progress</span>
-                                                        </div> */}
-                                                </div>
+                                <Col md={6}>
+                                    <h5>Additional Details</h5>
+                                    <p><strong>Notes:</strong></p>
+                                    <div className="s-Opp-Commentsection">
+                                    {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                         <>
+                                         <p> {lead.travelOpportunities[0].notes || 'N/A'}</p>
+                                         </>
+                                        )}
                                         </div>
-
-                                        {/* Lead Information Card */}
-                                        <div className="card">
-                                                <div className="card-body">
-                                                        <h2 className="card-title">Lead Information</h2>
-
-                                                        <div className="row">
-                                                                {/* Column 1 */}
-                                                                <div className="col-md-6">
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Lead ID:
-                                                                                </span>
-                                                                                <span className="text-muted">LD001</span>
-                                                                        </div>
-
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Lead Type:
-                                                                                </span>
-                                                                                <span className="text-muted">Group</span>
-                                                                        </div>
-
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Opportunity Staus:
-                                                                                </span>
-                                                                                <span className="text-muted">In progress</span>
-                                                                        </div>
-
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Source:
-                                                                                </span>
-                                                                                <span className="text-muted">Referal</span>
-                                                                        </div>
-
-                                                                        <div className="d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Destination:
-                                                                                </span>
-                                                                                <span className="text-muted">Goa</span>
-                                                                        </div>
-                                                                </div>
-
-                                                                {/* Column 2 */}
-                                                                <div className="col-md-6">
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Start Date:
-                                                                                </span>
-                                                                                <span className="text-muted">14-02-2025</span>
-                                                                        </div>
-
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        End Date:
-                                                                                </span>
-                                                                                <span className="text-muted">20-02-2025</span>
-                                                                        </div>
-
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Budget:
-                                                                                </span>
-                                                                                <span className="text-muted">20000</span>
-                                                                        </div>
-
-                                                                        <div className="mb-3 d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Lead Date:
-                                                                                </span>
-                                                                                <span className="text-muted">12/12/2024</span>
-                                                                        </div>
-
-                                                                        <div className="d-flex flex-wrap">
-                                                                                <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                                                                                        Description:
-                                                                                </span>
-                                                                                <span className="text-muted">OK</span>
-                                                                        </div>
-                                                                </div>
-                                                        </div>
+                                    <p><strong>Comments:</strong></p>
+                                    <div className="s-Opp-Commentsection">
+                                        {sortedComments.length > 0 ? (
+                                            sortedComments.map(comment => (
+                                                <div key={comment.id}>
+                                                    <p>
+                                                        <strong>{new Date(comment.timestamp).toLocaleString()}:</strong>
+                                                    </p>
+                                                    <p>{comment.text}</p>
+                                                    <hr /> {/* Optional: Add a horizontal line between comments */}
                                                 </div>
-                                        </div>
-                                </div>
-
-
-
-                                <h2 className="text-center mb-4">Quotations</h2>
-                                <div className="card p-4 shadow-sm">
-                                        <div className="row">
-                                                {/* Left Section */}
-                                                <div className="col-md-6">
-                                                        <div className="card p-4 shadow-sm mb-4">
-                                                        <h5>Quotation Number: <span className="fw-bold">QN00101</span></h5>
-                                                        <p><strong>Lead Name:</strong> Hemanth Uppala</p>
-                                                        <p><strong>Grand Total:</strong> 2000</p>
-                                                        <p><strong>Created Date:</strong> 12/28/2024, 11:09:50 AM</p>
-                                                        <p><strong>Destination:</strong> Goa Trip</p>
-                                                        {/* <p><strong>Mode of Training:</strong> Online Training</p> */}
-                                                        <a href="#" className="text-primary">View Quotation PDF</a>
-                                                        <div className="mt-3">
-                                                                <button className="btn btn-email-blue">Send Email</button>
-                                                        </div>
-                                                        <div className="mt-3">
-                                                                <label><strong>Status:</strong></label>
-                                                                <input type="text" className="form-control mt-2" value="Confirmed" readOnly />
-                                                        </div>
-                                                        </div>
-                                                </div>
-
-                                                {/* Right Section */}
-                                                {/* <div className="col-md-6">
-                                                        <div className="d-flex justify-content-between align-items-center mb-3">
-                                                                <h5>Invoice Number: <span className="fw-bold">IN00043</span></h5>
-                                                                <button className="btn btn-email-blue">Send Email</button>
-                                                        </div>
-                                                        <button className="btn btn-custom-red w-30 mb-3">Generate Receipt</button>
-                                                        <div className="mb-2">
-                                                                <strong>Paid:</strong> 26250 <strong className="ms-3">Balance:</strong> 0
-                                                        </div>
-                                                        <div>
-                                                                <p className="mb-1">
-                                                                        <a href="#" className="text-primary">RECP0039</a>
-                                                                        <button className="btn btn-receipt-email">Send Receipt Email</button>
-                                                                </p>
-                                                                <p>
-                                                                        <a href="#" className="text-primary">RECP0040</a>
-                                                                        <button className="btn btn-receipt-email">Send Receipt Email</button>
-                                                                </p>
-                                                        </div>
-                                                </div> */}
-                                                 <div className="col-md-6">
-                                                 <div className="card p-4 shadow-sm mb-4">
-                                                        <h5>Quotation Number: <span className="fw-bold">QN00102</span></h5>
-                                                        <p><strong>Lead Name:</strong> Hemanth Uppala</p>
-                                                        <p><strong>Grand Total:</strong> 2000</p>
-                                                        <p><strong>Discount:</strong> 500</p>
-                                                        <p><strong>Amount:</strong> 19050</p>
-                                                        <p><strong>Created Date:</strong> 12/28/2024, 11:09:50 AM</p>
-                                                        <p><strong>Destination:</strong> Goa Trip</p>
-                                                        {/* <p><strong>Mode of Training:</strong> Online Training</p> */}
-                                                        <a href="#" className="text-primary">View Quotation PDF</a>
-                                                        <div className="mt-3">
-                                                                <button className="btn btn-email-blue">Send Email</button>
-                                                        </div>
-                                                        <div className="mt-3">
-                                                                <label><strong>Status:</strong></label>
-                                                                <input type="text" className="form-control mt-2" value="Confirmed" readOnly />
-                                                        </div>
-                                                        </div>
-                                                </div>
-                                        </div>
-                                </div>
-
-                        </div>
+                                            ))
+                                        ) : (
+                                            <p>No comments available.</p>
+                                        )}
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                        <Card.Footer className='s-LeadOppView-footer'>
+                            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+                                Back
+                            </button>
+                            <button className='btn btn-primary' onClick={() => handleEdit(leadid)}>Edit</button>
+                        </Card.Footer>
+                    </Card>
                 </div>
-        );
+            </div>
+        </div>
+    );
 };
 
-export default LeadDetails;
+export default LeadOppView;

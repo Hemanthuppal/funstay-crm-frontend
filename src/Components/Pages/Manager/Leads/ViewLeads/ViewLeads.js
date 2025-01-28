@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayout";
-import { Row, Col, Form } from "react-bootstrap";
+import {Button, Row, Col, Form } from "react-bootstrap";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
 import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment } from "react-icons/fa";
 import "./ViewLeads.css";
@@ -12,7 +12,7 @@ import { webhookUrl } from "../../../../Apiservices/Api";
 
 const ViewLeads = () => {
   const [message, setMessage] = useState('');
-  const { authToken } = useContext(AuthContext);
+  const { authToken ,userId} = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const ViewLeads = () => {
       try {
         const response = await fetch(`${webhookUrl}/api/enquiries`);
         const data = await response.json();
-        const filteredData = data.filter((enquiry) => enquiry.status === "lead");
+        const filteredData = data.filter((enquiry) =>  enquiry.managerid == userId && enquiry.status == "lead");
         setData(filteredData);
       } catch (error) {
         console.error("Error fetching enquiries:", error);
@@ -45,7 +45,7 @@ const ViewLeads = () => {
 
     fetchEnquiries();
     fetchEmployees();
-  }, [authToken]);
+  }, [authToken,userId]);
 
   const handleEdit = (leadId) => {
     navigate(`/m-edit-lead/${leadId}`, {
@@ -56,7 +56,9 @@ const ViewLeads = () => {
   const handleAddUser  = (lead) => {
     navigate(`/m-create-customer-opportunity/${lead.leadid}`);
   };
-
+  const handleAddLead = () => {
+    navigate('/m-add-leads');
+  };
  
 
   const handleViewLeads = (lead) => {
@@ -123,7 +125,7 @@ const ViewLeads = () => {
         primaryStatus: primaryStatus,
         secondaryStatus: secondaryStatus,
     };
-
+console.log(JSON.stringify(body, null, 2));
     try {
         const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
         
@@ -150,7 +152,7 @@ const ViewLeads = () => {
       setMessage("Please select a valid employee.");
       return;
     }
-
+console.log(leadid, employeeId, employeeName);
     try {
       const response = await axios.post(`${baseURL}/api/assign-lead`, {
         leadid,
@@ -327,6 +329,7 @@ const ViewLeads = () => {
               <Col className="d-flex justify-content-between align-items-center">
                 <h3>Lead Details</h3>
                 {message && <div className="alert alert-info">{message}</div>}
+                <Button onClick={handleAddLead}>Add Leads</Button>
               </Col>
             </Row>
             <DataTable columns={columns} data={data} />

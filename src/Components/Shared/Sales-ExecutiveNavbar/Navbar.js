@@ -5,7 +5,7 @@ import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate ,useLocation} from 'react-router-dom';
 import { AuthContext } from "../../AuthContext/AuthContext";
 
 const Sales = ({ onToggleSidebar }) => {
@@ -13,7 +13,8 @@ const Sales = ({ onToggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
-const { logout } = useContext(AuthContext);
+  const location = useLocation();
+const { logout,userName } = useContext(AuthContext);
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
     onToggleSidebar(!collapsed);
@@ -47,11 +48,11 @@ const { logout } = useContext(AuthContext);
             </div> &nbsp;&nbsp;
             <img src='https://primary0101211.s3.ap-south-1.amazonaws.com/v3/assets/images/Logo.png' alt="Logo" className="sales-company-logo" />
           </div>
-          <h2 className="text-center" style={{ color: 'white' }}>Sales</h2>
+          <h2 className="text-center" style={{ color: 'white' }}> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase() : ""} - Sales Executive</h2>
 
           <div className="sales-header-right">
             {/* Add Leads Button */}
-            <button className="btn lead-button">Add Leads</button>
+            {/* <button className="btn lead-button">Add Leads</button> */}
 
             <div className="sales-header-icons">
               <div className="sales-nav-icon-container">
@@ -75,11 +76,11 @@ const { logout } = useContext(AuthContext);
                 {showDropdown && (
                   <div className="sales-nav-profile-dropdown">
                     <div className="sales-nav-profile-header">
-                      <strong>Alex Johnson</strong>
+                      <strong> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase() : ""}</strong>
                     </div>
                     <div className="sales-nav-profile-item">Your Profile</div>
-                    <div className="sales-nav-profile-item">Settings</div>
-                    <div className="sales-nav-profile-item">Help Center</div>
+                    {/* <div className="sales-nav-profile-item">Settings</div>
+                    <div className="sales-nav-profile-item">Help Center</div> */}
                     <div className="sales-nav-profile-item" onClick={handleLogout}>Sign Out</div>
                   </div>
                 )}
@@ -88,48 +89,79 @@ const { logout } = useContext(AuthContext);
           </div>
         </div>
 
-        <div className={`sales-sidebar ${collapsed ? 'collapsed' : ''}`}>
+        <div className={`sales-sidebar ${collapsed ? "collapsed" : ""}`}>
           <div className="sales-position-sticky">
             <ul className="nav flex-column">
-              <li className="sales-nav-item">
-                <Link className="nav-link" to="/s-dashboard" onClick={handleNavItemClick}>
-                <FaHome  className="sales-nav-icon" />
+              {/* <li
+                className={`sales-nav-item ${location.pathname === "/s-dashboard" ? "active" : ""
+                  }`}
+              >
+                <Link
+                  className="nav-link"
+                  to="/s-dashboard"
+                  onClick={handleNavItemClick}
+                >
+                  <FaHome className="sales-nav-icon" />
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
-              </li>
-
-              {/* <li className="sales-nav-item">
-                <Link className="nav-link" to="/s-leads" onClick={handleNavItemClick}>
-                  <FaUsers className="sales-nav-icon" />
-                  {!collapsed && <span className="link_text">All Leads</span>}
-                </Link>
               </li> */}
-
-              <li className="sales-nav-item">
-                <Link className="nav-link" to="/view-lead" onClick={handleNavItemClick}>
-                <FaUsers   className="sales-nav-icon" />
+              <li
+                className={`sales-nav-item ${location.pathname.startsWith("/View-lead") ||
+                    location.pathname.startsWith("/edit-lead") ||
+                    location.pathname.startsWith("/add-lead") ||
+                    location.pathname.startsWith("/comments") ||
+                    location.pathname.startsWith("/view-lead") ||
+                    location.pathname.startsWith("/create-customer-opportunity")
+                    ? "active"
+                    : ""
+                  }`}
+              >
+                <Link
+                  className="nav-link"
+                  to="/View-lead"
+                  onClick={handleNavItemClick}
+                >
+                  <FaUsers className="sales-nav-icon" />
                   {!collapsed && <span className="link_text">My Leads</span>}
                 </Link>
               </li>
+              <li
+                className={`sales-nav-item ${location.pathname.startsWith("/potential-leads") ||
+                    location.pathname.startsWith("/edit-opportunity") ||
+                    location.pathname.startsWith("/opportunity-comments") ||
+                    location.pathname.startsWith("/details")
+                    ? "active"
+                    : ""
+                  }`}
+              >
+                <Link
+                  className="nav-link"
+                  to="/potential-leads"
+                  onClick={handleNavItemClick}
+                >
+                  <FaChartLine className="sales-nav-icon" />
+                  {!collapsed && (
+                    <span className="link_text">My Opportunities</span>
+                  )}
+                </Link>
+              </li>
 
-              <li className="sales-nav-item">
-                <Link className="nav-link" to="/potential-leads" onClick={handleNavItemClick}>
-                <FaChartLine   className="sales-nav-icon" />
-                  {!collapsed && <span className="link_text">My Opportunities</span>}
+              <li
+                className={`sales-nav-item ${location.pathname.startsWith("/s-customers") ||                   
+                    location.pathname.startsWith("/sales-details")
+                    ? "active"
+                    : ""
+                  }`}
+              >
+                <Link
+                  className="nav-link"
+                  to="/s-customers"
+                  onClick={handleNavItemClick}
+                >
+                  <FaUserFriends className="sales-nav-icon" />
+                  {!collapsed && <span className="link_text">My Customers</span>}
                 </Link>
               </li>
-              <li className="sales-nav-item">
-                <Link className="nav-link" to="/s-customers" onClick={handleNavItemClick}>
-                <FaUserFriends   className="sales-nav-icon" />
-                  {!collapsed && <span className="link_text">My Customers </span>}
-                </Link>
-              </li>
-              {/* <li className="sales-nav-item">
-                <Link className="nav-link" to="/s-myteam" onClick={handleNavItemClick}>
-                <FaPeopleCarry   className="sales-nav-icon" />
-                  {!collapsed && <span className="link_text">My Team </span>}
-                </Link>
-              </li> */}
             </ul>
           </div>
         </div>

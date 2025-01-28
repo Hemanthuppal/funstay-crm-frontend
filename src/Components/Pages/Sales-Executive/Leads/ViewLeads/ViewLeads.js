@@ -93,7 +93,7 @@ const ViewLeads = () => {
       primaryStatus: primaryStatus,
       secondaryStatus: secondaryStatus,
     };
-
+console.log(JSON.stringify(body, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
       

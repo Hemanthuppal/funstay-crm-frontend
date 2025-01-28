@@ -127,6 +127,26 @@
   box-sizing: border-box; /* Ensure padding is included in width */
 }
 
+
+.alert-danger {
+  color: #842029;
+  background-color: #f8d7da;
+  border-color: #f5c2c7;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.alert-info {
+  color: #055160;
+  background-color: #cff4fc;
+  border-color: #b6effb;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+
 /* Responsive Design */
 @media (max-width: 600px) {
   .createcustomer-form-grid {

@@ -23,7 +23,7 @@ const Potentialleads = () => {
         const leads = response.data; // Extract data from the response
         const filteredLeads = leads.filter(
           (enquiry) =>
-             enquiry.status === "opportunity"
+             enquiry.managerid == userId && enquiry.status == "opportunity"
         );
         setData(filteredLeads); // Set the filtered data
       } else {
@@ -38,7 +38,7 @@ const Potentialleads = () => {
   
   useEffect(() => {
     fetchLeads();
-  }, []);
+  }, [userId]);
   
 
   const [loading, setLoading] = useState(false);
@@ -112,7 +112,7 @@ const Potentialleads = () => {
       opportunity_status1: primaryStatus,
       opportunity_status2: secondaryStatus,
     };
-  
+  console.log(JSON.stringify(body, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/update-status/${leadId}`, body);
       

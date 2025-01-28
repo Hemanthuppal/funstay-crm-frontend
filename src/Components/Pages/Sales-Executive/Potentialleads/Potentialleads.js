@@ -112,7 +112,7 @@ const Potentialleads = () => {
       opportunity_status1: primaryStatus,
       opportunity_status2: secondaryStatus,
     };
-  
+  console.log(JSON.stringify(body, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/update-status/${leadId}`, body);
       
@@ -285,7 +285,7 @@ const Potentialleads = () => {
           <button
             className="btn btn-info"
             onClick={() => {
-              navigate(`/comments/${row.original.leadid}`);
+              navigate(`/opportunity-comments/${row.original.leadid}`);
             }}
           >
             <FaComment />

@@ -13,7 +13,7 @@ const Manager = ({ onToggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
+  const { logout,userName } = useContext(AuthContext);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -50,11 +50,11 @@ const Manager = ({ onToggleSidebar }) => {
             </div> &nbsp;&nbsp;
             <img src='https://primary0101211.s3.ap-south-1.amazonaws.com/v3/assets/images/Logo.png' alt="Logo" className="manager-company-logo" />
           </div>
-          <h2 className="text-center" style={{ color: 'white' }}>Manager</h2>
+          <h2 className="text-center" style={{ color: 'white' }}> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1) : ""} - Manager</h2>
 
           <div className="manager-header-right">
             {/* Add Leads Button */}
-            <button className="btn btn-primary lead-button">Add Leads</button>
+            {/* <button className="btn btn-primary lead-button">Add Leads</button> */}
 
             <div className="manager-header-icons">
               <div className="manager-nav-icon-container">
@@ -78,11 +78,12 @@ const Manager = ({ onToggleSidebar }) => {
                 {showDropdown && (
                   <div className="manager-nav-profile-dropdown">
                     <div className="manager-nav-profile-header">
-                      <strong>Alex Johnson</strong>
+                    <strong> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1) : ""}</strong>
+
                     </div>
                     <div className="manager-nav-profile-item">Your Profile</div>
-                    <div className="manager-nav-profile-item">Settings</div>
-                    <div className="manager-nav-profile-item">Help Center</div>
+                    {/* <div className="manager-nav-profile-item">Settings</div>
+                    <div className="manager-nav-profile-item">Help Center</div> */}
                     <div className="manager-nav-profile-item" onClick={handleLogout}>Sign Out</div>
                   </div>
                 )}
@@ -94,12 +95,12 @@ const Manager = ({ onToggleSidebar }) => {
         <div className={`manager-sidebar ${collapsed ? 'collapsed' : ''}`}>
           <div className="manager-position-sticky">
             <ul className="nav flex-column">
-              <li className="manager-nav-item">
+              {/* <li className="manager-nav-item">
                 <Link className="nav-link" to="/m-dashboard" onClick={handleNavItemClick}>
                   <FaHome className="manager-nav-icon" />
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
-              </li>
+              </li> */}
 
               <li className="manager-nav-item">
                 <Link className="nav-link" to="/m-view-leads" onClick={handleNavItemClick}>

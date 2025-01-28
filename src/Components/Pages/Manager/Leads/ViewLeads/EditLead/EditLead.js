@@ -5,7 +5,7 @@ import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditLead.css';
-import {baseURL} from "../../../../../Apiservices/Api";
+import { baseURL } from "../../../../../Apiservices/Api";
 
 const EditOppLead = () => {
   const location = useLocation();
@@ -103,7 +103,7 @@ const EditOppLead = () => {
       primarySource: formData.primarySource,
       secondarySource: formData.secondarySource,
     };
-
+    console.log(JSON.stringify(leadData, null, 2));
     try {
       await axios.put(`${baseURL}/api/leads/${leadid}`, leadData);
       setMessage('Updated Successfully');
@@ -117,10 +117,10 @@ const EditOppLead = () => {
   const [leadDropdownOptions] = useState({
     primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
     secondary: {
-      New: ["Yet to Contact", "Not picking up call ", "Asked to call later"],
-      "No Response": ["No Response"],
-      Duplicate: ["Duplicate"],
-      "False Lead": ["False Lead"],
+      New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
+      "No Response": [],
+      Duplicate: [],
+      "False Lead": [],
       Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   });
@@ -138,20 +138,20 @@ const EditOppLead = () => {
               <h5>Lead Details</h5>
               {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
               {error && <div className="alert alert-danger">{error}</div>} {/* Display error message */}
-              
+
               <Row>
-                 <Col md={4}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Lead Type</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="name"
-                                      value={formData.lead_type}
-                                      onChange={handleChange}
-                                      readOnly
-                                    />
-                                  </Form.Group>
-                                </Col>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Lead Type</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="name"
+                      value={formData.lead_type}
+                      onChange={handleChange}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>
@@ -191,7 +191,7 @@ const EditOppLead = () => {
                     <Form.Select
                       name="primarySource"
                       value={formData.primarySource}
-                      onChange={ handleChange}
+                      onChange={handleChange}
                     >
                       <option value="">Select Source</option>
                       <option value="Referral">Referral/Repeat</option>
@@ -270,7 +270,7 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={4}>
+                {/* <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Corporate ID</Form.Label>
                     <Form.Control
@@ -280,7 +280,7 @@ const EditOppLead = () => {
                       onChange={handleChange}
                     />
                   </Form.Group>
-                </Col>
+                </Col> */}
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Primary Status</Form.Label>
@@ -299,27 +299,30 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Secondary Status</Form.Label>
-    <Form.Select
-      name="secondaryStatus"
-      value={formData.secondaryStatus}
-      onChange={handleChange}
-      disabled={!formData.primaryStatus} // Disable if primaryStatus is not selected
-    >
-      <option value="">Select Status</option>
-      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
-        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
-          <option key={status} value={status}>
-            {status}
-          </option>
-        ))
-      ) : (
-        <option value="" disabled>No options available</option>
-      )}
-    </Form.Select>
-  </Form.Group>
-</Col>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Secondary Status</Form.Label>
+                    <Form.Select
+                      name="secondaryStatus"
+                      value={formData.secondaryStatus}
+                      onChange={handleChange}
+                      disabled={
+                        !formData.primaryStatus ||
+                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus) // Disable for specific statuses
+                      }
+                    >
+                      <option value="">Select Status</option>
+                      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
+                        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No options available</option>
+                      )}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
                 <Col md={12}>
                   <Form.Group className="mb-3">
                     <Form.Label>Description</Form.Label>

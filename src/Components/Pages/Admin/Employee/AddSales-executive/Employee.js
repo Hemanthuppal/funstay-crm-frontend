@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import InputField from './../../../../Layout/Form/InputField'; // Import InputField component
 import Navbar from '../../../../Shared/Navbar/Navbar_old';
 import axios from 'axios';
+import { baseURL } from '../../../../Apiservices/Api';
 
 const Employee = () => {
     const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const Employee = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
     
-        axios.post('http://localhost:5000/add-users', formData)
+        axios.post(`${baseURL}/add-users`, formData)
             .then((response) => {
                 alert('User added successfully!');
                 console.log(response.data);

@@ -172,30 +172,201 @@ console.log(leadid, employeeId, employeeName);
   };
 
   // Columns for DataTable with dynamic employee assignment
+  // const columns = useMemo(
+  //   () => [
+  //     {
+  //       Header: "S.No",
+  //       accessor: (row, index) => index + 1,
+  //     },
+  //     {
+  //       Header: "Lead Details",
+  //       accessor: "leadDetails",
+  //       Cell: ({ row }) => (
+  //         <div>
+  //           <div>{row.original.leadcode}</div>
+  //           <div>{row.original.lead_type}</div>
+  //         </div>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Contact Info",
+  //       accessor: "contactInfo",
+  //       Cell: ({ row }) => (
+  //         <div>
+  //           <div>{row.original.name}</div>
+  //           <div>{row.original.phone_number}</div>
+  //           <div>{row.original.email}</div>
+  //         </div>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Lead Status",
+  //       Cell: ({ row }) => {
+  //         const primaryStatus = row.original.primaryStatus;
+  //         const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
+  //         const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
+
+  //         return (
+  //           <div className="d-flex align-items-center">
+  //             <select
+  //               value={primaryStatus}
+  //               onChange={(e) =>
+  //                 handlePrimaryStatusChange(e.target.value, row.original.leadid)
+  //               }
+  //               className="form-select me-2"
+  //             >
+  //               <option value="">Select Primary Status</option>
+  //               {dropdownOptions.primary.map((option) => (
+  //                 <option key={option} value={option}>
+  //                   {option}
+  //                 </option>
+  //               ))}
+  //             </select>
+  //             <select
+  //               value={row.original.secondaryStatus}
+  //               onChange={(e) =>
+  //                 handleSecondaryStatusChange(e.target.value, row.original.leadid)
+  //               }
+  //               className="form-select"
+  //               disabled={isSecondaryDisabled} // Disable if no primary status or no secondary options
+  //             >
+  //               <option value="">Select Secondary Status</option>
+  //               {secondaryOptions.map((option) => (
+  //                 <option key={option} value={option}>
+  //                   {option}
+  //                 </option>
+  //               ))}
+  //             </select>
+  //           </div>
+  //         );
+  //       },
+  //     },
+  //     {
+  //       Header: "Source",
+  //       accessor: "sources",
+  //     },
+  //     {
+  //       Header: "Assign",
+  //       accessor: "id",
+  //       Cell: ({ cell: { row } }) => {
+  //         const assignedSalesName = row.original.assignedSalesName; // Fetch assignedSalesName from the data row
+
+  //         return assignedSalesName ? (
+  //           <button className="btn btn-secondary" disabled>
+  //             {assignedSalesName}
+  //           </button>
+  //         ) : (
+  //           <Form.Select
+  //             value=""
+  //             onChange={(e) => handleAssignLead(row.original.leadid, e.target.value)}
+  //           >
+  //             <option value="">Select Employee</option>
+  //             {employees.map((employee) => (
+  //               <option key={employee.id} value={employee.id}>
+  //                 {employee.name}
+  //               </option>
+  //             ))}
+  //           </Form.Select>
+  //         );
+  //       },
+  //     },
+  //     {
+  //       Header: "Actions",
+  //       Cell: ({ row }) => (
+  //         <div>
+  //           <button
+  //             className="btn btn-warning edit-button me-1 mb-1"
+  //             onClick={() => handleEdit(row.original.leadid)}
+  //           >
+  //             <FaEdit />
+  //           </button>
+  //           <button
+  //             className="btn btn-danger delete-button me-1 mb-1"
+  //             onClick={() => handleDelete(row.original.leadid)}
+  //           >
+  //             <FaTrash />
+  //           </button>
+  //           <button
+  //             className="btn btn-info view-button me-1"
+  //             onClick={() => handleViewLeads(row.original)}
+  //           >
+  //             <FaEye />
+  //           </button>
+  //           <button
+  //             className="btn btn-success add-user-button me-1"
+  //             onClick={() => handleAddUser (row.original)}
+  //           >
+  //             <FaUserPlus />
+  //           </button>
+  //         </div>
+  //       ),
+  //     },
+  //     // {
+  //     //   Header: 'Comments',
+  //     //   accessor: 'comments',
+  //     //   Cell: ({ row }) => (
+  //     //     <button
+  //     //       className="btn btn-info"
+  //     //       onClick={() => {
+  //     //         navigate(`/m-comments/${row.original.leadid}`);
+  //     //       }}
+  //     //     >
+  //     //       <FaComment />
+  //     //     </button>
+  //     //   ),
+  //     // },
+  //   ],
+  //   [employees]
+  // );
+
+  // Columns for DataTable with dynamic employee assignment
   const columns = useMemo(
     () => [
+      // {
+      //   Header: "S.No",
+      //   accessor: (row, index) => index + 1,
+      // },
       {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,
-      },
-      {
-        Header: "Lead Details",
-        accessor: "leadDetails",
+        Header: "Lead Id",
+        accessor: "leadid",
         Cell: ({ row }) => (
           <div>
             <div>{row.original.leadcode}</div>
-            <div>{row.original.lead_type}</div>
+            {/* <div>{row.original.lead_type}</div> */}
           </div>
         ),
       },
       {
-        Header: "Contact Info",
-        accessor: "contactInfo",
+        Header: "Name",
+        accessor: "name",
         Cell: ({ row }) => (
           <div>
-            <div>{row.original.name}</div>
-            <div>{row.original.phone_number}</div>
-            <div>{row.original.email}</div>
+            <div
+              style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+              onClick={() => handleViewLeads(row.original)} // Navigate on click
+            >
+              {row.original.name}
+            </div>
+          </div>
+        ),
+      },
+       // Phone Number Column
+       {
+        Header: "Mobile",
+        accessor: "phone_number",
+        Cell: ({ row }) => (
+          <div  >
+            {row.original.phone_number}
+          </div>
+        ),
+      },
+      // Email Column
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div  >
+            {row.original.email}
           </div>
         ),
       },
@@ -245,6 +416,23 @@ console.log(leadid, employeeId, employeeName);
         Header: "Source",
         accessor: "sources",
       },
+      // Customer Status Column
+      // {
+      //   Header: "Customer Status",
+      //   accessor: "customerStatus",
+      //   Cell: ({ row }) => (
+      //     <div>
+      //       {row.index % 2 === 0 ? "New Customer" : "Existing Customer"}
+      //     </div>
+      //   ),
+      // },
+      {
+        Header: "Customer Status",
+        accessor: "customer_status",
+        
+       
+      },
+
       {
         Header: "Assign",
         accessor: "id",
@@ -252,7 +440,13 @@ console.log(leadid, employeeId, employeeName);
           const assignedSalesName = row.original.assignedSalesName; // Fetch assignedSalesName from the data row
 
           return assignedSalesName ? (
-            <button className="btn btn-secondary" disabled>
+            <button className="btn btn-secondary" disabled
+            style={{
+              maxWidth: '150px', // Adjust as needed
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>
               {assignedSalesName}
             </button>
           ) : (
@@ -270,51 +464,77 @@ console.log(leadid, employeeId, employeeName);
           );
         },
       },
+      // {
+      //   Header: "Actions",
+      //   Cell: ({ row }) => (
+      //     <div>
+      //       <button
+      //         className="btn btn-warning edit-button me-1 mb-1"
+      //         onClick={() => handleEdit(row.original.leadid)}
+      //       >
+      //         <FaEdit />
+      //       </button>
+      //       {/* <button
+      //         className="btn btn-danger delete-button me-1 mb-1"
+      //         onClick={() => handleDelete(row.original.leadid)}
+      //       >
+      //         <FaTrash />
+      //       </button> */}
+      //       <button
+      //         className="btn btn-info view-button me-1"
+      //         onClick={() => handleViewLeads(row.original)}
+      //       >
+      //         <FaEye />
+      //       </button>
+      //       {/* <button
+      //         className="btn btn-success add-user-button me-1"
+      //         onClick={() => handleAddUser(row.original)}
+      //       >
+      //         <FaUserPlus />
+      //       </button> */}
+      //     </div>
+      //   ),
+      // },
+
+
+
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div>
-            <button
-              className="btn btn-warning edit-button me-1 mb-1"
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <FaEdit
+              style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleEdit(row.original.leadid)}
-            >
-              <FaEdit />
-            </button>
-            <button
-              className="btn btn-danger delete-button me-1 mb-1"
-              onClick={() => handleDelete(row.original.leadid)}
-            >
-              <FaTrash />
-            </button>
-            <button
-              className="btn btn-info view-button me-1"
+            />
+            <FaEye
+              style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleViewLeads(row.original)}
-            >
-              <FaEye />
-            </button>
-            <button
-              className="btn btn-success add-user-button me-1"
-              onClick={() => handleAddUser (row.original)}
-            >
-              <FaUserPlus />
-            </button>
+            />
+            <FaTrash
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() => handleDelete(row.original.leadid)}
+            />
+             <FaUserPlus
+                          style={{ color: "ff9966", cursor: "pointer" }}
+                          onClick={() => handleAddUser(row.original)}
+                        />
           </div>
         ),
-      },
-      {
-        Header: 'Comments',
-        accessor: 'comments',
-        Cell: ({ row }) => (
-          <button
-            className="btn btn-info"
-            onClick={() => {
-              navigate(`/m-comments/${row.original.leadid}`);
-            }}
-          >
-            <FaComment />
-          </button>
-        ),
-      },
+      }
+      // {
+      //   Header: 'Comments',
+      //   accessor: 'comments',
+      //   Cell: ({ row }) => (
+      //     <button
+      //       className="btn btn-info"
+      //       onClick={() => {
+      //         navigate( `/m-comments/${row.original.leadid}`);
+      //       }}
+      //     >
+      //       <FaComment />
+      //     </button>
+      //   ),
+      // },
     ],
     [employees]
   );

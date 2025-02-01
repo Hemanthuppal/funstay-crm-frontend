@@ -148,6 +148,10 @@
     color: #ff5757;
     text-decoration: none;
 }
+.forgot-password{
+    color: #ff5757;
+    text-decoration: none;
+}
 
 .login-btn {
     width: 100%;
@@ -214,3 +218,18 @@
         height: 250px;
     }
 }
+
+.password-input-group {
+    position: relative;
+  }
+  
+  .password-toggle-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ff5757; /* Change color as needed */
+  }

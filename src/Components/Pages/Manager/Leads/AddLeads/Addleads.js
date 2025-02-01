@@ -1,18 +1,20 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "./AddLeads.css";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
-import {baseURL} from "../../../../Apiservices/Api";
+import { baseURL } from "../../../../Apiservices/Api";
+import { AuthContext } from '../../../../AuthContext/AuthContext';
 
 const DynamicForm = () => {
+  const { authToken, userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
     email: '',
     phone_number: '',
-    country_code: '+1', // Default country code
+    country_code: '+91', // Default country code
     primarySource: '',
     secondarySource: '',
     destination: '',
@@ -21,7 +23,10 @@ const DynamicForm = () => {
     another_phone_number: '',
     corporate_id: 1,
     description: '',
-    
+    assignedSalesId: "",
+    assignedSalesName: "",
+    assign_to_manager: userName,
+    managerid: userId,
   });
 
 
@@ -31,31 +36,59 @@ const DynamicForm = () => {
   const nameInputRef = useRef(null);
   const [phoneError, setPhoneError] = useState(""); // State for phone number error
   const [emailError, setEmailError] = useState("");
-const [error, setError] = useState(null);
+  const [error, setError] = useState(null);
+  const [employees, setEmployees] = useState([]);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/employeesassign`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      setEmployees(response.data); // Set the fetched employees in the state
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
+  // Call fetchEmployees when authToken or userId changes
+  useEffect(() => {
+    fetchEmployees();
+  }, [authToken, userId]);
+
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
   
-    if (name === "phone_number") {
-      // Allow only numeric input and limit to 10 digits
-      const formattedValue = value.replace(/\D/g, ""); // Remove non-numeric characters
-      if (formattedValue.length <= 10) {
-        setFormData({ ...formData, [name]: formattedValue });
-      }
+    if (name === "assignedSalesId") {
+      const selectedEmployeeId = Number(value); // Convert to number
+      const selectedEmployee = employees.find(employee => employee.id === selectedEmployeeId);
+      
+      setFormData({
+        ...formData,
+        assignedSalesId: selectedEmployeeId,
+        assignedSalesName: selectedEmployee ? selectedEmployee.name : '', // Update the employee name
+      });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
+  
   const validateEmail = (email) => {
     // Basic email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
 
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(""); // Clear previous messages
-  
+
     // Validate phone_number length
     if (formData.phone_number.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits.");
@@ -67,20 +100,28 @@ const [error, setError] = useState(null);
       setEmailError("Please enter a valid email address.");
       return;
     }
-console.log(JSON.stringify(formData));
+
+    // Prepare the data to be sent to the server
+    const dataToSubmit = {
+      ...formData,
+      assignedSalesName: formData.assignedSalesName, // Ensure assignedSalesName is included
+    };
+
+    console.log(JSON.stringify(dataToSubmit));
     try {
-      const response = await axios.post(`${baseURL}/api/leads`, formData);
+      const response = await axios.post(`${baseURL}/api/leads`, dataToSubmit);
       console.log(response.data);
-  
+
       // Set success message
       setMessage("Lead added successfully!");
-  
+
       // Reset form data
       setFormData({
+        lead_type: "group",
         name: '',
         email: '',
         phone_number: '',
-        country_code: '+91', // Reset to default country code
+        country_code: '+1', // Reset to default country code
         primarySource: '',
         secondarySource: '',
         another_name: '',
@@ -88,6 +129,10 @@ console.log(JSON.stringify(formData));
         another_phone_number: '',
         destination: '',
         description: '',
+        assignedSalesId: "",
+        assignedSalesName: "", // Reset to empty
+        assign_to_manager: userName,
+        managerid: userId,
       });
     } catch (error) {
       console.error("Error adding lead:", error);
@@ -95,6 +140,7 @@ console.log(JSON.stringify(formData));
       setMessage("Error: Failed to add lead. Please try again.");
     }
   };
+
 
   const renderForm = () => {
     const subDropdownOptions = {
@@ -124,7 +170,7 @@ console.log(JSON.stringify(formData));
 
     return (
       <div className="addleads-form-grid">
-       <div className="addleads-input-group">
+        <div className="addleads-input-group">
           <label>Name<span style={{ color: "red" }}> *</span></label>
           <input
             type="text"
@@ -235,6 +281,28 @@ console.log(JSON.stringify(formData));
           </select>
         </div>
 
+        <div className="addleads-input-group">
+          <label>Assign To</label>
+          <select
+            name="assignedSalesId"  // Use assignedSalesId here to store the ID in formData
+            value={formData.assignedSalesId}  // Set value to assignedSalesId
+            onChange={handleChange}
+          >
+            <option value="">Select Employee</option>
+            {employees.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
+            ))}
+          </select>
+          {/* <input
+            type="text"
+            value={formData.assignedSalesName}  // Set the selected name in the input field
+            readOnly
+          /> */}
+        </div>
+
+
         {/* Conditionally render the subdropdown */}
         {formData.primarySource && subDropdownOptions[formData.primarySource] && (
           <div className="addleads-input-group">
@@ -333,3 +401,5 @@ console.log(JSON.stringify(formData));
 };
 
 export default DynamicForm;
+
+

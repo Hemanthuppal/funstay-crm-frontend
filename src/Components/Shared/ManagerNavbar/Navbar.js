@@ -5,10 +5,11 @@ import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate ,useLocation} from 'react-router-dom';
 import { AuthContext } from "../../AuthContext/AuthContext";
 
 const Manager = ({ onToggleSidebar }) => {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
@@ -92,6 +93,7 @@ const Manager = ({ onToggleSidebar }) => {
           </div>
         </div>
 
+        
         <div className={`manager-sidebar ${collapsed ? 'collapsed' : ''}`}>
           <div className="manager-position-sticky">
             <ul className="nav flex-column">
@@ -102,32 +104,63 @@ const Manager = ({ onToggleSidebar }) => {
                 </Link>
               </li> */}
 
-              <li className="manager-nav-item">
+              <li
+                className={`manager-nav-item ${location.pathname.startsWith("/m-view-leads") ||
+                  location.pathname.startsWith("/m-edit-lead") ||
+                  location.pathname.startsWith("/m-add-leads") ||
+                  location.pathname.startsWith("/m-comments") ||
+                  location.pathname.startsWith("/m-view-lead") ||
+                  location.pathname.startsWith("/m-create-customer-opportunity")
+                  ? "active"
+                  : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/m-view-leads" onClick={handleNavItemClick}>
                   <FaClipboardList className="manager-nav-icon" />
                   {!collapsed && <span className="link_text">All Leads</span>}
                 </Link>
               </li>
 
-              <li className="manager-nav-item">
+              <li
+                className={`manager-nav-item ${location.pathname.startsWith("/m-potential-leads") ||
+                    location.pathname.startsWith("/m-edit-opportunity") ||
+                    location.pathname.startsWith("/m-opportunity-comments") ||
+                    location.pathname.startsWith("/m-details")
+                    ? "active"
+                    : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/m-potential-leads" onClick={handleNavItemClick}>
                   <FaChartLine className="manager-nav-icon" />
                   {!collapsed && <span className="link_text">My Teams Opportunities</span>}
                 </Link>
               </li>
 
-              <li className="manager-nav-item">
-                <Link className="nav-link" to="/m-customers" onClick={handleNavItemClick}>
-                  <FaUserFriends className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">My Teams customer</span>}
-                </Link>
-              </li>
-              <li className="manager-nav-item">
+              <li
+  className={`manager-nav-item ${
+    location.pathname.startsWith("/m-customers") ||
+    location.pathname.startsWith("/m-customer-details") ||
+    location.pathname.startsWith("/m-customerdetails")
+      ? "active"
+      : ""
+  }`}
+>
+  <Link className="nav-link" to="/m-customers" onClick={handleNavItemClick}>
+    <FaUserFriends className="manager-nav-icon" />
+    {!collapsed && <span className="link_text">My Teams customer</span>}
+  </Link>
+</li>
+
+              <li
+                className={`manager-nav-item ${location.pathname === "/m-myteam" ? "active" : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/m-myteam" onClick={handleNavItemClick}>
                   <FaPeopleCarry className="manager-nav-icon" />
                   {!collapsed && <span className="link_text">My Teams </span>}
                 </Link>
               </li>
+
             </ul>
           </div>
         </div>

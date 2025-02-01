@@ -3,6 +3,7 @@ import "./CreateandOpportunity.css";
 import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
+import { baseURL } from "../../../Apiservices/Api";
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const CreateCustomerOpportunity = () => {
 
     // Update customer data
     try {
-      const response = await axios.put(`http://localhost:5000/api/leads/update/${leadid}`, formData);
+      const response = await axios.put(`${baseURL}/api/leads/update/${leadid}`, formData);
       if (response.status === 200) {
         setActiveTab("opportunity"); // Switch to opportunity tab
         // Focus on the destination input after switching tabs
@@ -85,7 +86,7 @@ const CreateCustomerOpportunity = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/opportunities/create', opportunityData);
+      const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);
       if (response.status === 201) {
         navigate("/potential-leads");
       }
@@ -101,7 +102,7 @@ const CreateCustomerOpportunity = () => {
     const fetchLeadData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/leads/${leadid}`);
+        const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         setFormData({
           leadid: response.data.leadid,
           lead_type: response.data.lead_type,

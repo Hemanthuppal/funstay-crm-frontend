@@ -274,10 +274,10 @@ const EditOppLead = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="editleads-form-container">
-          <h2 className="editleads-form-header">Edit Leads</h2>
+          <h2 className="editleads-form-header">Edit Customer and Opportunity Details</h2>
           <form className="editleads-form" onSubmit={handleSubmit}>
             <div className="s-edit-opp-lead-FormLable">
-              <h5>Lead Details</h5>
+              <h5>Customer Details</h5>
               {message && <div className="alert alert-info">{message}</div>}
               <Row>
                 <Col md={4}>

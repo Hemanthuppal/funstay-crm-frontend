@@ -1,22 +1,102 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTable, usePagination, useGlobalFilter, useSortBy } from 'react-table';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaCalendarAlt, FaTimes } from "react-icons/fa";
 
 // Global Search Filter Component
-function GlobalFilter({ globalFilter, setGlobalFilter }) {
+function GlobalFilter({ globalFilter, setGlobalFilter, handleDateFilter }) {
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [showDateFilters, setShowDateFilters] = useState(false);
+
+  const applyDateFilter = () => {
+    handleDateFilter(fromDate, toDate);
+  };
+
+  const clearDateFilter = () => {
+    setFromDate('');
+    setToDate('');
+    handleDateFilter('', ''); // Clear the date filter
+    setShowDateFilters(false); // Hide the date filters
+  };
+
   return (
-    <input
-      value={globalFilter || ''}
-      onChange={(e) => setGlobalFilter(e.target.value)}
-      className="form-control"
-      placeholder="Search..."
-      style={{ maxWidth: '200px' }} // Fixed width for search input
-    />
+    <div className="dataTable_search mb-3 d-flex align-items-center gap-2">
+      <input
+        value={globalFilter || ''}
+        onChange={(e) => setGlobalFilter(e.target.value)}
+        className="form-control"
+        placeholder="Search..."
+        style={{ maxWidth: '200px' }} // Fixed width for search input
+      />
+      {showDateFilters || fromDate || toDate ? (
+        <button
+          className="btn btn-light"
+          onClick={clearDateFilter}
+        >
+          <FaTimes color="#ff5e62" size={20} />
+        </button>
+      ) : (
+        <button
+          className="btn btn-light"
+          onClick={() => setShowDateFilters(!showDateFilters)}
+        >
+          <FaCalendarAlt color="#ff5e62" size={20} />
+        </button>
+      )}
+      {showDateFilters && (
+        <div className="d-flex gap-2 align-items-center">
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              if (toDate && e.target.value > toDate) {
+                setToDate(''); // Reset "To" date if it's earlier than the new "From" date
+              }
+            }}
+            className="form-control"
+            style={{ maxWidth: "150px" }}
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="form-control"
+            style={{ maxWidth: "150px" }}
+            min={fromDate} // Set the minimum date for "To" date based on "From" date
+          />
+          <button onClick={applyDateFilter} className="btn btn-primary" style={{color:'white',backgroundColor: '#ff5e62',borderColor: '#ff5e62'}}>
+            OK
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
 // Reusable DataTable Component
 export default function DataTable({ columns, data, initialSearchValue }) {
+  const [filteredData, setFilteredData] = useState(data);
+  useEffect(() => {
+    setFilteredData(data); // Sync filteredData with data whenever data changes
+  }, [data]);
+
+  const handleDateFilter = (fromDate, toDate) => {
+    if (fromDate || toDate) {
+      const filtered = data.filter((item) => {
+        const itemDate = new Date(item.updated_at).setHours(0, 0, 0, 0); // Normalize to midnight for accurate comparison
+        const from = fromDate ? new Date(fromDate).setHours(0, 0, 0, 0) : null;
+        const to = toDate ? new Date(toDate).setHours(0, 0, 0, 0) : null;
+
+        return (!from || itemDate >= from) && (!to || itemDate <= to);
+      });
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(data); // Reset to original data if no date filters
+    }
+  };
+
   const {
     getTableProps,
     getTableBodyProps,
@@ -34,21 +114,14 @@ export default function DataTable({ columns, data, initialSearchValue }) {
   } = useTable(
     {
       columns,
-      data,
-      initialState: { pageIndex: 0, pageSize: 5, globalFilter: initialSearchValue }
+      data: filteredData,
+      initialState: {  pageIndex: 0, pageSize: 5, globalFilter: initialSearchValue  },
  // Set initial global filter
     },
     useGlobalFilter,
     useSortBy,
     usePagination
   );
-
-  // Set the global filter to the initial value when the component mounts
-  useEffect(() => {
-    if (initialSearchValue) {
-      setGlobalFilter(initialSearchValue);
-    }
-  }, [initialSearchValue, setGlobalFilter]);
 
   return (
     <div className="dataTable_wrapper container-fluid">
@@ -71,7 +144,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
         </div>
 
         {/* Global Search Filter */}
-        <GlobalFilter globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} />
+        <GlobalFilter globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} handleDateFilter={handleDateFilter}/>
       </div>
 
       {/* Table */}

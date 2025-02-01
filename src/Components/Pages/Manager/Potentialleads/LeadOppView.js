@@ -38,7 +38,7 @@ const LeadOppView = ({ show, handleClose, lead }) => {
             <p><strong>Notes: </strong>{lead?.notes}</p>
             <div className="m-Opp-Notesection"></div>
             <hr />
-            <p><strong>Comments with Date: </strong>{lead?.comments}</p>
+            <p><strong>Comments with Date: </strong>{lead?.name}{lead?.comments}</p>
             <div className="m-Opp-Commentsection"></div>
           </Col>
         </Row>

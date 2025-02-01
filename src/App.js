@@ -58,6 +58,13 @@ import A_CreateCustomerOpportunity from "./Components/Pages/Admin/Leads/ViewLead
 import AddEmployeeModal from "./Components/Pages/Admin/AllTeams/AddEmployeeModal";
 import A_Addleads from "./Components/Pages/Admin/Leads/AddLeads/Addleads";
 import Manager_Addleads from "./Components/Pages/Manager/Leads/AddLeads/Addleads";
+import S_Allleads from "./Components/Pages/Sales-Executive/Allleads/Alllead";
+import MyTeamSales from "./Components/Pages/Sales-Executive/MyTeam/MyTeamSales";
+import Customerdetails from "./Components/Pages/Sales-Executive/Customer/LeadOptions";
+import A_Customerdetails from "./Components/Pages/Admin/Customer/LeadOptions";
+import M_Customerdetails from "./Components/Pages/Manager/Customer/LeadOptions";
+import TeamMembers from "./Components/Pages/Admin/AllTeams/TeamMembersTable";
+import EditCustomer from "./Components/Pages/Sales-Executive/Customer/Editcustomer";
 
 
 function App() {
@@ -134,6 +141,33 @@ function App() {
                 <Route path="/sales-details/:leadid" element={<LeadDetailss />} />
                 <Route path="/opportunity-comments/:leadid" element={<CommentsPage />} />
 
+
+
+                <Route path="/s-allleads" element={<S_Allleads />} />
+                
+                <Route path="/s-myteam" element={<MyTeamSales />} />
+
+
+
+
+                <Route path="/m-customer-details/:leadid" element={<M_LeadDetailss />} />
+                <Route path="/m-opportunity-comments/:leadid" element={<M_CommentsPage />} />
+              <Route path="/a-customer-details/:leadid" element={<A_LeadDetailss />} />
+                <Route path="/a-opportunity-comments/:leadid" element={<A_CommentsPage />} />
+
+
+                <Route path="/customerdetails/:leadid" element={<Customerdetails />} />
+                <Route path="/m-customerdetails/:leadid" element={<M_Customerdetails />} />
+                <Route path="/a-customerdetails/:leadid" element={<A_Customerdetails />} />
+
+
+
+                <Route path="/s-view-lead/:leadid" element={<InDetailViewLeads />} />
+
+                <Route path="/team-members" element={<TeamMembers />} />
+
+                <Route path="/editcustomerdetails/:leadid" element={<EditCustomer />} />
+            
             </Routes>
         </Router>
         </AuthProvider>

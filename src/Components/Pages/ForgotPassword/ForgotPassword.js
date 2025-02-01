@@ -1,21 +1,69 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa"; // Import arrow and eye icons
 import "./ForgotPassword.css";
+import { baseURL } from "../../Apiservices/Api";
 
 const Forgot = () => {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for confirm password visibility
 
-  const handleSubmit = (e) => {
+  // Function to send OTP
+  const handleSendOtp = async () => {
+    if (!email) {
+      setMessage("Please enter your email.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(`${baseURL}/send-otp`, { email });
+      setOtpSent(true);
+      setMessage(response.data.message);
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Failed to send OTP.");
+    }
+    setLoading(false);
+  };
+
+  // Function to update password
+  const handleUpdatePassword = async (e) => {
     e.preventDefault();
-    
-    // Add your password update logic here (e.g., validate fields, API call)
 
-    // On successful password update, navigate to a new path, e.g., "/login"
-    navigate("/");
+    if (!otp || !password || !confirmPassword) {
+      setMessage("All fields are required.");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axios.post(`${baseURL}/update-password`, {
+        email,
+        otp,
+        newpassword: password,
+        confirmpassword: confirmPassword,
+      });
+
+      setMessage(response.data.message);
+      navigate("/"); // Redirect to login after successful password update
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Failed to update password.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -31,47 +79,77 @@ const Forgot = () => {
       </div>
       <div className="forgot-reset-side">
         <h1>Welcome Back</h1>
-        <p className="forgot-subtitle">Welcome back! Please enter your details.</p>
-        <form onSubmit={handleSubmit}>
+        {message && <p className="forgot-message">{message}</p>} {/* Display messages */}
+
+        <form onSubmit={handleUpdatePassword}>
           <div className="forgot-input-group">
             <label>Email</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <div className="email-input-wrapper">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={otpSent}
+              />
+              <button type="button" className="send-otp-btn" onClick={handleSendOtp} disabled={loading || otpSent}>
+                <FaArrowRight />
+              </button>
+            </div>
           </div>
-          <div className="forgot-input-group">
-            <label>Enter OTP</label>
-            <input
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-            />
-          </div>
-          <div className="forgot-input-group">
-            <label>Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="forgot-input-group">
-            <label>Confirm Password</label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          <button className="forgot-btn" type="submit">
-            Update Password
-          </button>
+
+          {otpSent && (
+            <>
+              <div className="forgot-input-group">
+                <label>Enter OTP</label>
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+              </div>
+              <div className="forgot-input-group">
+                <label>New Password</label>
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <div className="forgot-input-group">
+                <label>Confirm Password</label>
+                <div className="password-input-wrapper">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="toggle-password-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+              <button className="forgot-btn" type="submit" disabled={loading}>
+                {loading ? "Updating..." : "Update Password"}
+              </button>
+            </>
+          )}
         </form>
       </div>
     </div>

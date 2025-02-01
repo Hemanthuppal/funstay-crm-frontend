@@ -50,7 +50,7 @@ const LeadOppView = () => {
                 <div className="lead-opportunity-view">
                     <Card className="mb-4">
                         <Card.Header className='s-LeadOppView-modal-header'>
-                            <h2>Lead Details</h2>
+                            <h2> Customer and Opportunity Details</h2>
                         </Card.Header>
                         <Card.Body>
                             <Row>
@@ -105,7 +105,7 @@ const LeadOppView = () => {
                                                     <p>
                                                         <strong>{new Date(comment.timestamp).toLocaleString()}:</strong>
                                                     </p>
-                                                    <p>{comment.text}</p>
+                                                    <p><strong>{comment.name}</strong>{comment.text}</p>
                                                     <hr /> {/* Optional: Add a horizontal line between comments */}
                                                 </div>
                                             ))

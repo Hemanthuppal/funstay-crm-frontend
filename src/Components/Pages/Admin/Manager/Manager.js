@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import InputField from './../../../Layout/Form/InputField'; 
 import axios from 'axios';
+import { baseURL } from '../../../Apiservices/Api';
 
 
 const Manager = () => {
@@ -24,7 +25,7 @@ const Manager = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
     
-        axios.post('http://localhost:5000/add-managers', formData)
+        axios.post(`${baseURL}/add-managers`, formData)
             .then((response) => {
                 alert('Manager added successfully!');
                 console.log(response.data);

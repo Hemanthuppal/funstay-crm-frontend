@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect ,useContext} from "react";
+import React, { useState, useMemo, useEffect ,useContext,useRef} from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css"; 
@@ -12,10 +12,39 @@ import { AuthContext } from '../../../AuthContext/AuthContext';
 
 const Potentialleads = () => {
    const { authToken, userRole ,userId} = useContext(AuthContext);
+     const [opportunityIdMap, setOpportunityIdMap] = useState({});
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
   const navigate = useNavigate();
+  // const fetchLeads = async () => {
+  //   try {
+  //     const response = await axios.get(`${baseURL}/api/allleads`);
+  //     if (response.status === 200) {
+  //       const leads = response.data; // Extract data from the response
+  //       const filteredLeads = leads.filter(
+  //         (enquiry) =>
+  //            enquiry.managerid == userId && enquiry.status == "opportunity"
+  //       );
+  //       setData(filteredLeads); // Set the filtered data
+  //     } else {
+  //       console.error("Error fetching leads:", response.statusText);
+  //       alert("Failed to fetch leads.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching leads:", error);
+  //     alert("Failed to fetch leads.");
+  //   }
+  // };
+  
+  // useEffect(() => {
+  //   fetchLeads();
+  // }, [userId]);
+  
+
+
+  const [leadIds, setLeadIds] = useState([]);
+  const [data, setData] = useState([]);
   const fetchLeads = async () => {
     try {
       const response = await axios.get(`${baseURL}/api/allleads`);
@@ -35,11 +64,73 @@ const Potentialleads = () => {
       alert("Failed to fetch leads.");
     }
   };
+
+   // Log lead IDs when data changes
+    useEffect(() => {
+      if (data.length > 0) {
+        const ids = data.map(lead => lead.leadid);
+        setLeadIds(ids);
+        console.log("Lead IDs:", ids);
+      }
+    }, [data]); // <-- This effect runs when data updates
   
   useEffect(() => {
     fetchLeads();
   }, [userId]);
+
+  const [customerIdMap, setCustomerIdMap] = useState({}); // New state for mapping
+
+  const opportunityIdRef = useRef(null);
   
+
+  const fetchCustomerData = async (leadid) => {
+    try {
+      const response = await axios.get(`${baseURL}/api/customers/by-lead/${leadid}`);
+      if (response.status === 200) {
+        const customerData = response.data;
+        setCustomerIdMap((prev) => ({
+          ...prev,
+          [leadid]: {
+            customerId: customerData.id || "N/A",
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+    }
+  };
+
+  // Fetch opportunity data
+  const fetchOpportunityData = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/travel-opportunity`);
+      if (response.status === 200) {
+        const mapping = response.data.reduce((acc, opportunity) => {
+          acc[opportunity.leadid] = {
+            opportunityId: opportunity.id || "N/A",
+          };
+          return acc;
+        }, {});
+        setOpportunityIdMap(mapping);
+      }
+    } catch (error) {
+      console.error("Error fetching travel opportunities:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Assuming you have a way to get the lead IDs
+    const leadIds = data.map(item => item.leadid); // Replace with your actual lead IDs
+
+    // Fetch data for each lead ID
+    leadIds.forEach(leadid => {
+      fetchCustomerData(leadid);
+    });
+
+    // Fetch opportunity data
+    fetchOpportunityData();
+  }, [data]);
+
 
   const [loading, setLoading] = useState(false);
   const [isPrimaryChanged, setIsPrimaryChanged] = useState(false);
@@ -189,116 +280,306 @@ const Potentialleads = () => {
    
     });
   };
+
   const columns = useMemo(
     () => [
+      // {
+      //   Header: "S.No",
+      //   accessor: (row, index) => index + 1,
+      // },
       {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,
+        Header: "Opp Id",
+        accessor: "leadid",
+        Cell: ({ row }) => {
+          const opportunityData = opportunityIdMap[row.original.leadid] || { opportunityId: "N/A" };
+          return opportunityData.opportunityId !== "N/A"
+            ? `OPP${String(opportunityData.opportunityId).padStart(4, '0')}`
+            : "N/A";
+        },
       },
       {
-        Header: "Opp Details",
-        accessor: "leadDetails",
-        Cell: ({ row }) => (
-          <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
-            <div>{row.original.lead_type}</div>
-            <div>{row.original.leadcode}</div>
-          </div>
-        ),
+        Header: "Customer Id",
+        accessor: "customerid",
+        Cell: ({ row }) => {
+          const customerData = customerIdMap[row.original.leadid] || { customerId: "N/A" };
+          return customerData.customerId !== "N/A"
+            ? `CUS${String(customerData.customerId).padStart(4, '0')}`
+            : "N/A";
+        },
       },
+      // {
+      //   Header: "Opp Details",
+      //   accessor: "leadDetails",
+      //   Cell: ({ row }) => (
+      //     <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
+      //       <div>{row.original.lead_type}</div>
+      //       <div>{row.original.leadcode}</div>
+      //     </div>
+      //   ),
+      // },
       {
-        Header: "Contact Info",
-        accessor: "contactInfo",
+        Header: "Name",
+        accessor: "name",
         Cell: ({ row }) => (
           <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
             <div style={{ color: "blue", textDecoration: "underline" }}>{row.original.name}</div>
-            <div>{row.original.phone_number}</div>
-            <div>{row.original.email}</div>
+            {/* <div>{row.original.phone_number}</div>
+            <div>{row.original.email}</div> */}
           </div>
         ),
       },
       {
-        Header: "Primary Status",
-        accessor: "opportunity_status1",
+        Header: "Mobile",
+        accessor: "phone_number",
         Cell: ({ row }) => (
-          <select
-            value={row.original.opportunity_status1}
-            onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)}
-            className="form-select"
-          >
-            <option value="">Select Status</option>
-            {dropdownOptions.primary.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <div >
+            {row.original.phone_number}
+          </div>
+        ),
+      },
+      // Email Column
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div >
+            {row.original.email}
+          </div>
         ),
       },
       {
-        Header: "Secondary Status",
-        accessor: "opportunity_status2",
+        Header: "Opportunity Status",
+        accessor: "opportunityStatus",
         Cell: ({ row }) => (
-          <select
-            value={row.original.opportunity_status2}
-            onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)}
-            className="form-select"
-            disabled={!row.original.opportunity_status1} // Disable until a primary status is selected
-          >
-            <option value="">Select Status</option>
-            {dropdownOptions.secondary[row.original.opportunity_status1]?.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <div className="d-flex align-items-center gap-2">
+            <select
+              value={row.original.opportunity_status1}
+              onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)}
+              className="form-select"
+            >
+              <option value="">Select Primary Status</option>
+              {dropdownOptions.primary.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={row.original.opportunity_status2}
+              onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)}
+              className="form-select"
+              disabled={!row.original.opportunity_status1}
+            >
+              <option value="">Select Secondary Status</option>
+              {dropdownOptions.secondary[row.original.opportunity_status1]?.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+        ),
+      },
+      {
+        Header: 'Quotation',
+        accessor: 'Quotation',
+        Cell: ({ row }) => (
+          <div>
+            Generate
+          </div>
         ),
       },
       {
         Header: "Assigned ",
         accessor: "assignedSalesName",
       },
+      // {
+      //   Header: "Action",
+      //   Cell: ({ row }) => (
+      //     <div>
+      //       <button
+      //         className="btn btn-warning edit-button me-1 mb-1"
+      //         onClick={() => handleEdit(row.original.leadid)}
+      //       >
+      //         <FaEdit />
+      //       </button>
+      //       <button
+      //         className="btn btn-info view-button me-1"
+      //         onClick={() =>navigateToLead(row.original.leadid)}
+      //       >
+      //         <FaEye />
+      //       </button>
+      //       <button
+      //         className="btn btn-danger delete-button me-1 mb-1"
+      //         onClick={() => handleDelete(row.original.leadid)}
+      //       >
+      //         <FaTrash />
+      //       </button>
+      //     </div>
+      //   ),
+      // },
+      // {
+      //   Header: 'Comments',
+      //   accessor: 'comments',
+      //   Cell: ({ row }) => (
+      //     <button
+      //       className="btn btn-info"
+      //       onClick={() => {
+      //         navigate(`/m-opportunity-comments/${row.original.leadid}`);
+      //       }}
+      //     >
+      //       <FaComment />
+      //     </button>
+      //   ),
+      // }
+
       {
         Header: "Action",
         Cell: ({ row }) => (
-          <div>
-            <button
-              className="btn btn-warning edit-button me-1 mb-1"
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <FaEdit
+              style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleEdit(row.original.leadid)}
-            >
-              <FaEdit />
-            </button>
-            <button
-              className="btn btn-info view-button me-1"
-              onClick={() =>navigateToLead(row.original.leadid)}
-            >
-              <FaEye />
-            </button>
-            <button
-              className="btn btn-danger delete-button me-1 mb-1"
+            />
+            <FaEye
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() => navigateToLead(row.original.leadid)}
+            />
+            <FaTrash
+              style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleDelete(row.original.leadid)}
-            >
-              <FaTrash />
-            </button>
+            />
           </div>
         ),
       },
       {
-        Header: 'Comments',
-        accessor: 'comments',
+        Header: "Comments",
+        accessor: "comments",
         Cell: ({ row }) => (
-          <button
-            className="btn btn-info"
-            onClick={() => {
-              navigate(`/m-comments/${row.original.leadid}`);
-            }}
-          >
-            <FaComment />
-          </button>
+          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <FaComment
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => navigate(`/m-opportunity-comments/${row.original.leadid}`)}
+          />
+          </div>
         ),
       }
     ],
-    [dropdownOptions]
+    [dropdownOptions,customerIdMap]
   );
+
+
+  // const columns = useMemo(
+  //   () => [
+  //     {
+  //       Header: "S.No",
+  //       accessor: (row, index) => index + 1,
+  //     },
+  //     {
+  //       Header: "Opp Details",
+  //       accessor: "leadDetails",
+  //       Cell: ({ row }) => (
+  //         <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
+  //           <div>{row.original.lead_type}</div>
+  //           <div>{row.original.leadcode}</div>
+  //         </div>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Contact Info",
+  //       accessor: "contactInfo",
+  //       Cell: ({ row }) => (
+  //         <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
+  //           <div style={{ color: "blue", textDecoration: "underline" }}>{row.original.name}</div>
+  //           <div>{row.original.phone_number}</div>
+  //           <div>{row.original.email}</div>
+  //         </div>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Primary Status",
+  //       accessor: "opportunity_status1",
+  //       Cell: ({ row }) => (
+  //         <select
+  //           value={row.original.opportunity_status1}
+  //           onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)}
+  //           className="form-select"
+  //         >
+  //           <option value="">Select Status</option>
+  //           {dropdownOptions.primary.map((option) => (
+  //             <option key={option} value={option}>
+  //               {option}
+  //             </option>
+  //           ))}
+  //         </select>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Secondary Status",
+  //       accessor: "opportunity_status2",
+  //       Cell: ({ row }) => (
+  //         <select
+  //           value={row.original.opportunity_status2}
+  //           onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)}
+  //           className="form-select"
+  //           disabled={!row.original.opportunity_status1} // Disable until a primary status is selected
+  //         >
+  //           <option value="">Select Status</option>
+  //           {dropdownOptions.secondary[row.original.opportunity_status1]?.map((option) => (
+  //             <option key={option} value={option}>
+  //               {option}
+  //             </option>
+  //           ))}
+  //         </select>
+  //       ),
+  //     },
+  //     {
+  //       Header: "Assigned ",
+  //       accessor: "assignedSalesName",
+  //     },
+  //     {
+  //       Header: "Action",
+  //       Cell: ({ row }) => (
+  //         <div>
+  //           <button
+  //             className="btn btn-warning edit-button me-1 mb-1"
+  //             onClick={() => handleEdit(row.original.leadid)}
+  //           >
+  //             <FaEdit />
+  //           </button>
+  //           <button
+  //             className="btn btn-info view-button me-1"
+  //             onClick={() =>navigateToLead(row.original.leadid)}
+  //           >
+  //             <FaEye />
+  //           </button>
+  //           <button
+  //             className="btn btn-danger delete-button me-1 mb-1"
+  //             onClick={() => handleDelete(row.original.leadid)}
+  //           >
+  //             <FaTrash />
+  //           </button>
+  //         </div>
+  //       ),
+  //     },
+  //     {
+  //       Header: 'Comments',
+  //       accessor: 'comments',
+  //       Cell: ({ row }) => (
+  //         <button
+  //           className="btn btn-info"
+  //           onClick={() => {
+  //             navigate(`/m-opportunity-comments/${row.original.leadid}`);
+  //           }}
+  //         >
+  //           <FaComment />
+  //         </button>
+  //       ),
+  //     }
+  //   ],
+  //   [dropdownOptions]
+  // );
 
   return (
     <div className="salesOpportunitycontainer">

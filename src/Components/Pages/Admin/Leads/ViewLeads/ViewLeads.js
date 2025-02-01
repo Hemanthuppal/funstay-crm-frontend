@@ -197,31 +197,55 @@ const AdminViewLeads = () => {
 
 
 
+ 
   const columns = useMemo(
     () => [
+      // {
+      //   Header: "S.No",
+      //   accessor: (row, index) => index + 1,
+      // },
       {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,
-      },
-      {
-        Header: "Lead Details",
-        accessor: "leadDetails",
+        Header: "Lead Id",
+        accessor: "leadid",
         Cell: ({ row }) => (
           <div>
 
             <div>{row.original.leadcode}</div>
-            <div>{row.original.lead_type}</div>
+            
           </div>
         ),
       },
       {
-        Header: "Contact Info",
-        accessor: "contactInfo",
+        Header: "Name",
+        accessor: "name",
         Cell: ({ row }) => (
           <div>
-            <div>{row.original.name}</div>
-            <div>{row.original.phone_number}</div>
-            <div>{row.original.email}</div>
+            <div
+              style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+              onClick={() => handleViewLeads(row.original)} // Navigate on click
+            >
+              {row.original.name}
+            </div>
+          </div>
+        ),
+      },
+       // Phone Number Column
+       {
+        Header: "Mobile",
+        accessor: "phone_number",
+        Cell: ({ row }) => (
+          <div  >
+            {row.original.phone_number}
+          </div>
+        ),
+      },
+      // Email Column
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div  >
+            {row.original.email}
           </div>
         ),
       },
@@ -271,6 +295,12 @@ const AdminViewLeads = () => {
         Header: 'Source',
         accessor: 'sources',
       },
+      {
+        Header: "Customer Status",
+        accessor: "customer_status",
+        
+       
+      },
 
       {
         Header: 'Assign To',
@@ -278,7 +308,17 @@ const AdminViewLeads = () => {
           const isAssigned = row.original.assign_to_manager;
       
           return isAssigned ? (
-            <button className="btn btn-secondary" disabled>
+            <button
+              className="btn btn-secondary"
+              disabled
+              style={{
+                maxWidth: '150px', // Adjust as needed
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={isAssigned} // Tooltip to show full name
+            >
               {isAssigned} {/* Display the name directly */}
             </button>
           ) : (
@@ -289,6 +329,7 @@ const AdminViewLeads = () => {
               }}
               className="form-select"
               disabled={isAssigned}
+              style={{ maxWidth: '150px' }} // Adjust as needed
             >
               <option value="">Select Assignee</option>
               {managers.map((manager, index) => (
@@ -308,48 +349,40 @@ const AdminViewLeads = () => {
       {
         Header: "Actions",
         Cell: ({ row }) => (
-          <div>
-            <button
-              className="btn btn-warning edit-button me-1 mb-1"
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <FaEdit
+              style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleEdit(row.original.leadid)}
-            >
-              <FaEdit />
-            </button>
-            <button
-              className="btn btn-danger delete-button me-1 mb-1"
+            />
+            <FaTrash
+              style={{ color: "ff9966", cursor: "pointer" }}
               onClick={() => handleDelete(row.original.leadid)}
-            >
-              <FaTrash />
-            </button>
-            <button
-              className="btn btn-info view-button me-1"
+            />
+            <FaEye
+              style={{ color: "ff9966", cursor: "pointer" }}
               onClick={() => handleViewLeads(row.original)}
-            >
-              <FaEye />
-            </button>
-            <button
-              className="btn btn-success add-user-button me-1"
+            />
+            <FaUserPlus
+              style={{ color: "ff9966", cursor: "pointer" }}
               onClick={() => handleAddUser(row.original)}
-            >
-              <FaUserPlus />
-            </button>
+            />
           </div>
         ),
-      },
-      {
-        Header: 'Comments',
-        accessor: 'comments',
-        Cell: ({ row }) => (
-          <button
-            className="btn btn-info"
-            onClick={() => {
-              navigate(`/a-comments/${row.original.leadid}`);
-            }}
-          >
-            <FaComment />
-          </button>
-        ),
-      },
+      }
+      // {
+      //   Header: 'Comments',
+      //   accessor: 'comments',
+      //   Cell: ({ row }) => (
+      //     <button
+      //       className="btn btn-info"
+      //       onClick={() => {
+      //         navigate(`/a-comments/${row.original.leadid}`);
+      //       }}
+      //     >
+      //       <FaComment />
+      //     </button>
+      //   ),
+      // },
     ],
     [dropdownOptions, managers]
   );

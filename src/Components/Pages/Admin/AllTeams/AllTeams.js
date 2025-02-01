@@ -12,8 +12,6 @@ import { useNavigate } from "react-router-dom";
 const AdminCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
   const [managers, setManagers] = useState([]);
 
   const handleAddEmployee = () => {
@@ -36,7 +34,6 @@ const AdminCustomer = () => {
     try {
       const response = await axios.delete(`${baseURL}/employees/${id}`);
       if (response.status === 204) {
-        // Remove the deleted employee from the state
         setManagers(managers.filter(manager => manager.id !== id));
       }
     } catch (error) {
@@ -46,8 +43,9 @@ const AdminCustomer = () => {
 
   const columns = [
     {
-      Header: "S.No",
-      accessor: (row, index) => index + 1,
+      Header: "Employee ID",
+      accessor: "id",
+      Cell: ({ value }) => `EMP${String(value).padStart(5, "0")}`,
     },
     { Header: "Name", accessor: "name" },
     { Header: "Mobile No", accessor: "mobile" },
@@ -58,62 +56,28 @@ const AdminCustomer = () => {
       accessor: "teamMembers",
       Cell: ({ row }) => (
         <button
-          className="btn btn-link"
-          onClick={() => {
-            setSelectedTeam(row.original.teamMembers);
-            setIsModalOpen(true);
-          }}
-        >
-          {row.original.employeeCount}
-        </button>
+  className="btn btn-link"
+  onClick={() => navigate('/team-members', { state: { teamMembers: row.original.teamMembers } })}
+>
+  {row.original.employeeCount}
+</button>
       ),
     },
     {
       Header: "Actions",
       Cell: ({ row }) => (
-        <div>
-          <button
-            className="btn btn-info me-2"
-            onClick={() => {
-              setSelectedTeam(row.original.teamMembers);
-              setIsModalOpen(true);
-            }}
-          >
-            <FaEye />
-          </button>
-          {/* <button className="btn btn-warning me-2">
-            <FaEdit />
-          </button> */}
-          <button
-            className="btn btn-danger"
-            onClick={() => handleDeleteEmployee(row.original.id)} // Assuming 'id' is the unique identifier
-          >
-            <FaTrash />
-          </button>
+        <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <FaEye
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => navigate('/team-members', { state: { teamMembers: row.original.teamMembers } })}
+          />
+          <FaTrash
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => handleDeleteEmployee(row.original.id)}
+          />
         </div>
       ),
-    },
-  ];
-
-  const memberColumns = [
-    {
-      Header: "S.No",
-      accessor: (row, index) => index + 1,
-    },
-    { Header: "Name", accessor: "name" },
-    { Header: "Mobile", accessor: "mobile" },
-    { Header: "Email", accessor: "email" },
-    { Header: "Designation", accessor: "role" },
-    // {
-    //   Header: "Actions",
-    //   Cell: ({ row }) => (
-    //     <div>
-    //       <button className="btn btn-info me-2">
-    //         <FaEye />
-    //       </button>
-    //     </div>
-    //   ),
-    // },
+    }
   ];
 
   return (
@@ -135,36 +99,6 @@ const AdminCustomer = () => {
           </div>
         </div>
       </div>
-
-      {/* Team Members Modal */}
-      {isModalOpen && (
-        <div className="modal fade show" style={{ display: 'block' }}>
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Team Information</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setIsModalOpen(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <DataTable columns={memberColumns} data={selectedTeam || []} />
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

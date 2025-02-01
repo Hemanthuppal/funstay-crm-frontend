@@ -14,11 +14,17 @@ const MyTeam = () => {
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
+      // {
+      //   Header: "S.No",
+      //   accessor: (row, index) => index + 1,
+      // },
+
       {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,
+        Header: "Employee ID",
+        accessor: "id",
+        Cell: ({ value }) => `EMP${String(value).padStart(5, "0")}`, 
       },
-      {
+            {
         Header: 'Name',
         accessor: 'name',
       },

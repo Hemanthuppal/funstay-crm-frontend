@@ -6,19 +6,41 @@ import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
 
 import {baseURL} from "../../../../../Apiservices/Api";
 
+
+
+
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
   const { leadid } = useParams();
-  const [activeTab, setActiveTab] = useState("customer");
+  const [activeTab, setActiveTab] = useState("customer"); // Default to "customer"
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [duration, setDuration] = useState("");
-  const [formData, setFormData] = useState({});
+  const [customerData, setCustomerData] = useState({
+    name: "",
+    lead_type: "",
+    email: "",
+    travel_type: "",
+    passport_number: "",
+    preferred_contact_method: "",
+    special_requirement: "",
+    customer_status: "", // Add customer_status to the state
+  });
+  const [formData, setFormData] = useState({
+    destination: "",
+    adults_count: "",
+    children_count: "",
+    approx_budget: "",
+    reminder_setting: "",
+    notes: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [collapsed, setCollapsed] = useState(false);
   const [childrenAges, setChildrenAges] = useState([]);
   const [message, setMessage] = useState("");
+  const [leadData, setLeadData] = useState(null); // New state for lead data
+
   const handleTabClick = (tabName) => setActiveTab(tabName);
 
   const calculateDuration = (start, end) => {
@@ -33,11 +55,27 @@ const CreateCustomerOpportunity = () => {
     }
   };
 
+  const handleDurationChange = (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    setDuration(value);
+
+    if (startDate && value) {
+      const startDateObj = new Date(startDate);
+      const newEndDate = new Date(startDateObj);
+      newEndDate.setDate(startDateObj.getDate() + parseInt(value));
+      setEndDate(newEndDate.toISOString().split("T")[0]);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
 
-   
+    if (activeTab === "customer") {
+      setCustomerData((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (name === "children_count") {
       const count = parseInt(value) || 0;
       setChildrenAges(Array.from({ length: count }, (_, i) => childrenAges[i] || ""));
@@ -53,19 +91,18 @@ const CreateCustomerOpportunity = () => {
   const handleSubmitCustomer = async () => {
     setLoading(true);
     setError(null);
-console.log(JSON.stringify(formData, null, 2));
+    console.log("customerData", JSON.stringify(customerData, null, 2));
     try {
-      const response = await axios.put(`${baseURL}/api/leads/update/${leadid}`, formData);
+      const response = await axios.put(`${baseURL}/api/customers/update/by-lead/${leadid}`, customerData);
       console.log(JSON.stringify(response, null, 2));
       if (response.status === 200) {
         setMessage("Customer data submitted successfully!");
-        setActiveTab("opportunity");
+        setActiveTab("opportunity"); // Switch to the "opportunity" tab after submission
       }
     } catch (err) {
-      console.error("Error updating lead data:", err);
-      setError("Error updating lead data.");
-    
-      setMessage('Failed to update customer data. Please try again.')
+      console.error("Error updating customer and lead data:", err);
+      setError("Error updating customer and lead data.");
+      setMessage("Failed to update customer and lead data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -75,35 +112,34 @@ console.log(JSON.stringify(formData, null, 2));
     setLoading(true);
     setError(null);
 
-    // Validation check for required fields
     if (!formData.destination || !startDate || !endDate || !formData.reminder_setting || !formData.notes) {
       setError("All required fields must be filled in.");
-
       setLoading(false);
-      return; // Stop submission if validation fails
+      return;
     }
 
     const opportunityData = {
+      leadid: leadid,
+      customerid: customerData.id, // Ensure customerData.id is available
       destination: formData.destination,
       start_date: startDate,
       end_date: endDate,
       duration: duration,
       adults_count: formData.adults_count,
       children_count: formData.children_count,
-      child_ages: childrenAges.join(','),
+      child_ages: childrenAges.join(","),
       approx_budget: formData.approx_budget,
       notes: formData.notes,
       reminder_setting: formData.reminder_setting,
-      leadid: leadid,
     };
 
-    console.log(JSON.stringify(opportunityData, null, 2));
+    console.log("Opportunity data being submitted:", JSON.stringify(opportunityData, null, 2));
 
     try {
       const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);
       if (response.status === 201) {
         setMessage("Opportunity created successfully!");
-        navigate("/m-potential-leads");
+        navigate("/a-potential-leads");
       }
     } catch (err) {
       console.error("Error creating opportunity:", err);
@@ -119,16 +155,13 @@ console.log(JSON.stringify(formData, null, 2));
       setLoading(true);
       try {
         const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
-        setFormData({
-          leadid: response.data.leadid,
-          lead_type: response.data.lead_type,
-          name: response.data.name,
-          email: response.data.email,
-          travel_type: response.data.travel_type,
-          passport_number: response.data.passport_number,
-          preferred_contact_method: response.data.preferred_contact_method,
-          special_requirement: response.data.special_requirement,
-        });
+        console.log("Fetched lead data:", JSON.stringify(response.data, null, 2));
+        setLeadData(response.data);
+
+        // Pre-fill destination if available in lead data
+        if (response.data.destination) {
+          setFormData((prev) => ({ ...prev, destination: response.data.destination }));
+        }
       } catch (err) {
         console.error("Error fetching lead data:", err);
         setError("Error fetching lead data.");
@@ -136,7 +169,37 @@ console.log(JSON.stringify(formData, null, 2));
         setLoading(false);
       }
     };
-    fetchLeadData();
+
+    const fetchCustomerData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${baseURL}/api/customers/by-lead/${leadid}`);
+        console.log("Fetched customer data:", JSON.stringify(response.data, null, 2));
+        setCustomerData(response.data);
+        setFormData({
+          name: response.data.name || "",
+          lead_type: response.data.lead_type || "",
+          email: response.data.email || "",
+          travel_type: response.data.travel_type || "",
+          passport_number: response.data.passport_number || "",
+          preferred_contact_method: response.data.preferred_contact_method || "",
+          special_requirement: response.data.special_requirement || "",
+        });
+
+        // If customer is existing, set the active tab to "opportunity"
+        if (response.data.customer_status === "existing") {
+          setActiveTab("opportunity");
+        }
+      } catch (err) {
+        console.error("Error fetching customer data:", err);
+        setError("Error fetching customer data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeadData(); // Fetch lead data first
+    fetchCustomerData(); // Fetch customer data
   }, [leadid]);
 
   return (
@@ -144,14 +207,18 @@ console.log(JSON.stringify(formData, null, 2));
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="createcustomer-form-container">
-          <h2 className="createcustomer-form-header">Create Customer and Opportunity</h2>
-          {message && <div className="alert alert-info">{message}</div>} 
+          <h2 className="createcustomer-form-header">
+            {customerData.customer_status === "existing" ? "Customer and Opportunity" : "Create Customer and Opportunity"}
+          </h2>
+          {message && <div className="alert alert-info">{message}</div>}
+
+          {/* Always show both tabs */}
           <div className="createcustomer-tabs">
             <button
               className={`createcustomer-tab-button ${activeTab === "customer" ? "active" : ""}`}
               onClick={() => handleTabClick("customer")}
             >
-              Create Customer
+              {customerData.customer_status === "existing" ? "Customer Details" : "Create Customer"}
             </button>
             <button
               className={`createcustomer-tab-button ${activeTab === "opportunity" ? "active" : ""}`}
@@ -161,67 +228,62 @@ console.log(JSON.stringify(formData, null, 2));
             </button>
           </div>
 
+          {/* Render the appropriate tab content based on activeTab */}
           <div className={`createcustomer-tab-content ${activeTab === "customer" ? "active" : ""}`}>
-            
             <div className="createcustomer-form-grid">
               <div className="createcustomer-input-group">
                 <label>Name</label>
-                <input type="text" name="name" value={formData.name || ""} onChange={handleChange} />
+                <input type="text" name="name" value={customerData.name} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
                 <label>Customer Type</label>
-                <input type="text" name="lead_type" value={formData.lead_type || ""} onChange={handleChange} />
+                <input type="text" name="lead_type" value={customerData.lead_type} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
                 <label>Email ID</label>
-                <input type="email" name="email" value={formData.email || ""} onChange={handleChange} />
+                <input type="email" name="email" value={customerData.email} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
                 <label>Type of Travel</label>
-                <input
-                  type="text"
-                  name="travel_type"
-                  value={formData.travel_type || ""}
-                  onChange={handleChange}
-                  autoFocus={activeTab === "customer"}
-                />
+                <input type="text" name="travel_type" value={customerData.travel_type} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
                 <label>Passport Number</label>
-                <input type="text" name="passport_number" value={formData.passport_number || ""} onChange={handleChange} />
+                <input type="text" name="passport_number" value={customerData.passport_number} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
                 <label>Preferred Contact Method</label>
-                <select 
-                  name="preferred_contact_method" 
-                  value={formData.preferred_contact_method || ""} 
+                <select
+                  name="preferred_contact_method"
+                  value={customerData.preferred_contact_method}
                   onChange={handleChange}
                 >
                   <option value="">Select a contact method</option>
                   <option value="Email">Email</option>
                   <option value="Phone">Phone</option>
                   <option value="WhatsApp">WhatsApp</option>
-                 
                 </select>
               </div>
               <div className="createcustomer-input-group full-width">
                 <label>Special Requirement</label>
-                <textarea name="special_requirement" value={formData.special_requirement || ""} onChange={handleChange}></textarea>
+                <textarea
+                  name="special_requirement"
+                  value={customerData.special_requirement}
+                  onChange={handleChange}
+                ></textarea>
               </div>
             </div>
           </div>
 
           <div className={`createcustomer-tab-content ${activeTab === "opportunity" ? "active" : ""}`}>
-           
             <div className="createcustomer-form-grid">
               <div className="createcustomer-input-group">
                 <label>Destination<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
                   name="destination"
-                  value={formData.destination || ""}
+                  value={formData.destination}
                   onChange={handleChange}
-                  autoFocus={activeTab === "opportunity"}
                   required
                 />
               </div>
@@ -230,7 +292,7 @@ console.log(JSON.stringify(formData, null, 2));
                 <input
                   type="date"
                   value={startDate}
-                  min={new Date().toISOString().split("T")[0]} // Restrict start date to today or later
+                  min={new Date().toISOString().split("T")[0]}
                   onChange={(e) => {
                     const newStartDate = e.target.value;
                     setStartDate(newStartDate);
@@ -244,7 +306,7 @@ console.log(JSON.stringify(formData, null, 2));
                 <input
                   type="date"
                   value={endDate}
-                  min={startDate || new Date().toISOString().split("T")[0]} // Restrict end date to start date or later
+                  min={startDate || new Date().toISOString().split("T")[0]}
                   onChange={(e) => {
                     const newEndDate = e.target.value;
                     setEndDate(newEndDate);
@@ -255,7 +317,7 @@ console.log(JSON.stringify(formData, null, 2));
               </div>
               <div className="createcustomer-input-group">
                 <label>Duration (Calculated)</label>
-                <input type="text" value={duration} readOnly />
+                <input type="text" value={duration} onChange={handleDurationChange} />
               </div>
 
               <div className="createcustomer-input-group">
@@ -263,7 +325,7 @@ console.log(JSON.stringify(formData, null, 2));
                 <input
                   type="number"
                   name="adults_count"
-                  value={formData.adults_count || ""}
+                  value={formData.adults_count}
                   onChange={handleChange}
                   placeholder="Optional"
                 />
@@ -273,13 +335,12 @@ console.log(JSON.stringify(formData, null, 2));
                 <input
                   type="number"
                   name="children_count"
-                  value={formData.children_count || ""}
+                  value={formData.children_count}
                   onChange={handleChange}
                   placeholder="Optional"
                 />
               </div>
 
-             
               {Array.from({ length: formData.children_count || 0 }, (_, index) => (
                 <div className="createcustomer-input-group" key={index}>
                   <label>Child Age {index + 1}</label>
@@ -300,7 +361,7 @@ console.log(JSON.stringify(formData, null, 2));
                 <input
                   type="number"
                   name="approx_budget"
-                  value={formData.approx_budget || ""}
+                  value={formData.approx_budget}
                   onChange={handleChange}
                   placeholder="Optional"
                 />
@@ -312,9 +373,8 @@ console.log(JSON.stringify(formData, null, 2));
                   name="reminder_setting"
                   min={new Date().toISOString().split("T")[0]}
                   max={startDate}
-                  value={formData.reminder_setting || ""}
+                  value={formData.reminder_setting}
                   onChange={handleChange}
-                  placeholder="Optional"
                   required
                 />
               </div>
@@ -322,9 +382,8 @@ console.log(JSON.stringify(formData, null, 2));
                 <label>Notes<span style={{ color: "red" }}> *</span></label>
                 <textarea
                   name="notes"
-                  value={formData.notes || ""}
+                  value={formData.notes}
                   onChange={handleChange}
-                  placeholder="Optional"
                   required
                 />
               </div>

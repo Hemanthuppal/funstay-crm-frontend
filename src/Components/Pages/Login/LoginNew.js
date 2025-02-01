@@ -3,16 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import './LoginNew.css';
 import {baseURL} from '../../Apiservices/Api';
 import { AuthContext } from "../../AuthContext/AuthContext";
+import { Form, Button } from 'react-bootstrap';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false); 
   const { login } = useContext(AuthContext);
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     const userData = { email, password };
-
+  
     try {
       const response = await fetch(`${baseURL}/login`, {
         method: 'POST',
@@ -21,20 +24,21 @@ const Login = () => {
         },
         body: JSON.stringify(userData),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.status === 200) {
-        login(data.token, data.role, data.id ,data.name); // Use context to manage auth state
-
-        // if (data.role === 'employee') {
-        //   navigate('/s-dashboard');
-        // } else if (data.role === 'manager') {
-        //   navigate('/m-dashboard');
-        // } else {
-        //   navigate('/dashboard');
-        // }
-
+        login(
+          data.token,
+          data.id,
+          data.name,
+          data.mobile,
+          data.email,
+          data.role,
+          data.assign_manager,
+          data.managerId
+        ); // Use context to manage auth state
+  
         if (data.role === 'employee') {
           navigate('/View-lead');
         } else if (data.role === 'manager') {
@@ -42,7 +46,7 @@ const Login = () => {
         } else {
           navigate('/a-view-lead');
         }
-
+  
       } else {
         alert(data.message);
       }
@@ -51,6 +55,7 @@ const Login = () => {
       alert('Login failed');
     }
   };
+  
 
   return (
     <div className="login-page">
@@ -84,14 +89,27 @@ const Login = () => {
             </div>
             <div className="login-input-group">
               <label className="login-label">Password</label>
-              <input
-                className="login-input"
-                type="password"
-                placeholder="********"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="password-input-group">
+                <input
+                  className="login-input"
+                  type={showPassword ? 'text' : 'password'} // Toggle between text and password
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="password-toggle-button"
+                  onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show eye icon based on state */}
+                </button>
+              </div>
             </div>
+            <div className="d-flex justify-content-end mb-2">
+            <a href="/forgot" className="forgot-password"> Forgot  Password</a>
+           
+          </div>
             <button className="login-btn login-btn-login">Login</button>
           </form>
         </div>

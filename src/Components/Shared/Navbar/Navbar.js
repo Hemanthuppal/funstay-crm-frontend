@@ -5,7 +5,7 @@ import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext/AuthContext";
 
 const Navbar = ({ onToggleSidebar }) => {
@@ -13,6 +13,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout ,userName} = useContext(AuthContext);
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -100,30 +101,60 @@ const Navbar = ({ onToggleSidebar }) => {
                 </Link>
               </li> */}
 
-              <li className="admin-nav-item">
+              <li
+                className={`admin-nav-item ${location.pathname.startsWith("/a-view-lead") ||
+                  location.pathname.startsWith("/a-edit-lead") ||
+                  location.pathname.startsWith("/a-add-leads") ||
+                  location.pathname.startsWith("/a-comments") ||
+                  location.pathname.startsWith("/a-view-lead") ||
+                  location.pathname.startsWith("/a-create-customer-opportunity")
+                  ? "active"
+                  : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/a-view-lead" onClick={handleNavItemClick}>
-                  <FaClipboardList   className="admin-nav-icon" />
+                  <FaClipboardList className="admin-nav-icon" />
                   {!collapsed && <span className="link_text">All Leads</span>}
                 </Link>
               </li>
-
-              <li className="admin-nav-item">
+              <li
+                className={`admin-nav-item ${location.pathname.startsWith("/a-potential-leads") ||
+                    location.pathname.startsWith("/a-edit-opportunity") ||
+                    location.pathname.startsWith("/a-opportunity-comments") ||
+                    location.pathname.startsWith("/a-details")
+                    ? "active"
+                    : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/a-potential-leads" onClick={handleNavItemClick}>
-                  <FaChartLine    className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">My Teams Opportunities</span>}
+                  <FaChartLine className="admin-nav-icon" />
+                  {!collapsed && <span className="link_text">All Opportunities</span>}
                 </Link>
               </li>
-
-              <li className="admin-nav-item">
+              <li
+                className={`admin-nav-item ${location.pathname.startsWith("/a-customers") ||                   
+                    location.pathname.startsWith("/a-customer-details") ||
+                    location.pathname.startsWith("/a-customerdetails")
+                    ? "active"
+                    : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/a-customers" onClick={handleNavItemClick}>
-                  <FaUserFriends    className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">My Teams customer</span>}
+                  <FaUserFriends className="admin-nav-icon" />
+                  {!collapsed && <span className="link_text">All customer</span>}
                 </Link>
               </li>
-              <li className="admin-nav-item">
+              <li
+                className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||                   
+                    location.pathname.startsWith("/addemployee") ||
+                    location.pathname.startsWith("/team-members") 
+                    ? "active"
+                    : ""
+                  }`}
+              >
                 <Link className="nav-link" to="/a-allteams" onClick={handleNavItemClick}>
                   <FaPeopleCarry className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">My Teams </span>}
+                  {!collapsed && <span className="link_text">All Teams </span>}
                 </Link>
               </li>
             </ul>

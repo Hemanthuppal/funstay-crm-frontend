@@ -105,6 +105,21 @@ const { logout,userName } = useContext(AuthContext);
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
               </li> */}
+               <li
+                className={`sales-nav-item ${location.pathname.startsWith ("/s-allleads")||
+                    location.pathname.startsWith( "/s-view-lead")
+                   ? "active" : ""
+                  }`}
+              >
+                <Link
+                  className="nav-link"
+                  to="/s-allleads"
+                  onClick={handleNavItemClick}
+                >
+                  <FaHome className="sales-nav-icon" />
+                  {!collapsed && <span className="link_text">All Leads</span>}
+                </Link>
+              </li>
               <li
                 className={`sales-nav-item ${location.pathname.startsWith("/View-lead") ||
                     location.pathname.startsWith("/edit-lead") ||
@@ -148,7 +163,8 @@ const { logout,userName } = useContext(AuthContext);
 
               <li
                 className={`sales-nav-item ${location.pathname.startsWith("/s-customers") ||                   
-                    location.pathname.startsWith("/sales-details")
+                    location.pathname.startsWith("/sales-details") ||
+                    location.pathname.startsWith("/customerdetails")
                     ? "active"
                     : ""
                   }`}
@@ -160,6 +176,23 @@ const { logout,userName } = useContext(AuthContext);
                 >
                   <FaUserFriends className="sales-nav-icon" />
                   {!collapsed && <span className="link_text">My Customers</span>}
+                </Link>
+              </li>
+              <li
+                className={`sales-nav-item ${location.pathname.startsWith("/s-myteam") ||                   
+                    location.pathname.startsWith("/s-myteam")
+                    
+                    ? "active"
+                    : ""
+                  }`}
+              >
+                <Link
+                  className="nav-link"
+                  to="/s-myteam"
+                  onClick={handleNavItemClick}
+                >
+                  <FaUserFriends className="sales-nav-icon" />
+                  {!collapsed && <span className="link_text">My Team</span>}
                 </Link>
               </li>
             </ul>

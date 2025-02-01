@@ -1,18 +1,20 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "./AddLeads.css";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
-import {baseURL} from "../../../../Apiservices/Api";
+import { baseURL } from "../../../../Apiservices/Api";
+import { AuthContext } from '../../../../AuthContext/AuthContext';
 
 const DynamicForm = () => {
+  const {  userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
     email: '',
     phone_number: '',
-    country_code: '+1', // Default country code
+    country_code: '+91', // Default country code
     primarySource: '',
     secondarySource: '',
     destination: '',
@@ -21,21 +23,26 @@ const DynamicForm = () => {
     another_phone_number: '',
     corporate_id: 1,
     description: '',
-    
+    assignedSalesId: userId,
+    assignedSalesName: userName,
+    assign_to_manager: assignManager,
+    managerid: managerId,
+
   });
 
-
+  console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
   const [message, setMessage] = useState(""); // State for success/error message
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const nameInputRef = useRef(null);
   const [phoneError, setPhoneError] = useState(""); // State for phone number error
   const [emailError, setEmailError] = useState("");
-const [error, setError] = useState(null);
+  const [error, setError] = useState(null);
 
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "phone_number") {
       // Allow only numeric input and limit to 10 digits
       const formattedValue = value.replace(/\D/g, ""); // Remove non-numeric characters
@@ -53,10 +60,12 @@ const [error, setError] = useState(null);
     return emailRegex.test(email);
   };
 
+  console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(""); // Clear previous messages
-  
+
     // Validate phone_number length
     if (formData.phone_number.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits.");
@@ -72,10 +81,10 @@ const [error, setError] = useState(null);
     try {
       const response = await axios.post(`${baseURL}/api/leads`, formData);
       console.log(response.data);
-  console.log(JSON.stringify(formData));
+      console.log(JSON.stringify(formData));
       // Set success message
       setMessage("Lead added successfully!");
-  
+
       // Reset form data
       setFormData({
         name: '',
@@ -125,7 +134,7 @@ const [error, setError] = useState(null);
 
     return (
       <div className="addleads-form-grid">
-       <div className="addleads-input-group">
+        <div className="addleads-input-group">
           <label>Name<span style={{ color: "red" }}> *</span></label>
           <input
             type="text"
@@ -334,3 +343,4 @@ const [error, setError] = useState(null);
 };
 
 export default DynamicForm;
+

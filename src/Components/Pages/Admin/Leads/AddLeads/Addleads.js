@@ -1,12 +1,14 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "./AddLeads.css";
 import Navbar from '../../../../Shared/Navbar/Navbar';
 import { useNavigate } from "react-router-dom";
-import {baseURL} from "../../../../Apiservices/Api";
+import { baseURL } from "../../../../Apiservices/Api";
+import { AuthContext } from "../../../../AuthContext/AuthContext";
 
 const DynamicForm = () => {
+  const { authToken, userId } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
@@ -21,9 +23,9 @@ const DynamicForm = () => {
     another_phone_number: '',
     corporate_id: 1,
     description: '',
-    
+    assign_to_manager: "",
+    managerid: '',
   });
-
 
   const [message, setMessage] = useState(""); // State for success/error message
   const navigate = useNavigate();
@@ -31,55 +33,90 @@ const DynamicForm = () => {
   const nameInputRef = useRef(null);
   const [phoneError, setPhoneError] = useState(""); // State for phone number error
   const [emailError, setEmailError] = useState("");
-const [error, setError] = useState(null);
+  const [error, setError] = useState(null);
+  const [managers, setManagers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const response = await fetch(`${baseURL}/managers`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`, // Include token if needed
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch managers");
+        }
+        const result = await response.json();
+        setManagers(result.data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching managers:", err.message);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchManagers();
+  }, [authToken]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
     if (name === "phone_number") {
-      // Allow only numeric input and limit to 10 digits
-      const formattedValue = value.replace(/\D/g, ""); // Remove non-numeric characters
+      const formattedValue = value.replace(/\D/g, "");
       if (formattedValue.length <= 10) {
         setFormData({ ...formData, [name]: formattedValue });
       }
+    } else if (name === "managerid") {
+      const selectedEmployeeId = Number(value);
+      const selectedEmployee = managers.find(employee => employee.id === selectedEmployeeId);
+      setFormData({
+        ...formData,
+        managerid: selectedEmployeeId,
+        assign_to_manager: selectedEmployee ? selectedEmployee.name : '',
+      });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
   const validateEmail = (email) => {
-    // Basic email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(""); // Clear previous messages
-  
-    // Validate phone_number length
+    setMessage("");
+
     if (formData.phone_number.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits.");
       return;
     }
 
-    // Validate email
     if (!validateEmail(formData.email)) {
       setEmailError("Please enter a valid email address.");
       return;
     }
 
+    const dataToSubmit = {
+      ...formData,
+      assign_to_manager: formData.assign_to_manager,
+    };
+
     try {
-      const response = await axios.post(`${baseURL}/api/leads`, formData);
+      const response = await axios.post(`${baseURL}/api/leads`, dataToSubmit);
       console.log(response.data);
-  
-      // Set success message
       setMessage("Lead added successfully!");
-  
+
       // Reset form data
       setFormData({
+        lead_type: "group",
         name: '',
         email: '',
         phone_number: '',
-        country_code: '+1', // Reset to default country code
+        country_code: '+91',
         primarySource: '',
         secondarySource: '',
         another_name: '',
@@ -87,10 +124,11 @@ const [error, setError] = useState(null);
         another_phone_number: '',
         destination: '',
         description: '',
+        managerid: "",
+        assign_to_manager: "",
       });
     } catch (error) {
       console.error("Error adding lead:", error);
-      // Set error message
       setMessage("Error: Failed to add lead. Please try again.");
     }
   };
@@ -123,7 +161,7 @@ const [error, setError] = useState(null);
 
     return (
       <div className="addleads-form-grid">
-      <div className="addleads-input-group">
+        <div className="addleads-input-group">
           <label>Name<span style={{ color: "red" }}> *</span></label>
           <input
             type="text"
@@ -175,10 +213,10 @@ const [error, setError] = useState(null);
               }}
             >
               <option value="+1">+1</option>
-              <option value="+91">+91 </option>
-              <option value="+44">+44 </option>
-              <option value="+61">+61 </option>
-              <option value="+81">+81 </option>
+              <option value="+91">+91</option>
+              <option value="+44">+44</option>
+              <option value="+61">+61</option>
+              <option value="+81">+81</option>
               {/* Add more country codes as needed */}
             </select>
 
@@ -224,13 +262,29 @@ const [error, setError] = useState(null);
             <option value="Referral">Referral/Repeat</option>
             <option value="Partner Promotion">Partner Promotion</option>
             <option value="Media Coverage">Media Coverage</option>
-            <option value="Blog">Blog</option>
+            <option value="Blog ">Blog</option>
             <option value="Community">Community</option>
             <option value="Purchased Leads">Purchased Leads</option>
             <option value="Social Media">Social Media</option>
             <option value="Google">Google</option>
             <option value="Meta">Meta</option>
             <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div className="addleads-input-group">
+          <label>Assign To</label>
+          <select
+            name="managerid"  // Use managerid here to store the ID in formData
+            value={formData.managerid}  // Set value to managerid
+            onChange={handleChange}
+          >
+            <option value="">Select Employee</option>
+            {managers.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
+            ))}
           </select>
         </div>
 

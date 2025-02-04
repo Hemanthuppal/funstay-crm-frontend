@@ -1,9 +1,11 @@
 import React, { useState, useEffect,useContext } from "react";
 import axios from "axios";
 import { AuthContext } from '../../../AuthContext/AuthContext';
-import { baseURL } from '../../../Apiservices/Api';
+import { baseURL } from "../../../Apiservices/Api";
+import { useNavigate } from "react-router-dom";
 
 function FollowUp() {
+  const navigate = useNavigate();
   const today = new Date();
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const currentDay = weekdays[today.getDay()];
@@ -18,7 +20,7 @@ function FollowUp() {
   useEffect(() => {
     const fetchTravelOpportunity = async () => {
       try {
-        const response = await axios.get(`${baseURL}/travel-opportunity`); // Replace with your actual API endpoint
+        const response = await axios.get( `${baseURL}/travel-opportunity`); // Replace with your actual API endpoint
         setTravelOpportunity(response.data);
       } catch (err) {
         console.log("Failed to fetch schedule data");
@@ -43,19 +45,22 @@ function FollowUp() {
   }, []);
   
   useEffect(() => {
-    // Create a lookup object for leads where leadid is the key
-    const leadsLookup = leads.reduce((acc, lead) => {
+    // Filter leads based on assignedSalesId matching the current userId
+    const filteredLeads = leads.filter((lead) => lead.managerid == userId);
+  
+    // Create a lookup object for filtered leads where leadid is the key
+    const leadsLookup = filteredLeads.reduce((acc, lead) => {
       acc[lead.leadid] = lead;
       return acc;
     }, {});
   
-    // Create dynamic schedule data based on the API response and selected day
+    // Create dynamic schedule data based on the filtered leads and selected day
     const dynamicSchedule = travelOpportunity
       .filter((opportunity) => {
         // Convert reminder_setting to the weekday format
         const reminderDate = new Date(opportunity.reminder_setting);
         const reminderDay = weekdays[reminderDate.getDay()];
-        return reminderDay === selectedDay;
+        return reminderDay == selectedDay && leadsLookup[opportunity.leadid];
       })
       .map((opportunity) => {
         // Use the lookup object to get the lead by leadid
@@ -71,6 +76,7 @@ function FollowUp() {
           title: opportunity.notes || "Untitled Task",
           color: "Sales-badge-orange", // Adjust color dynamically if required
           lead: leadName, // Display lead name instead of leadid
+          leadid: opportunity.leadid,
         };
       });
   
@@ -80,7 +86,7 @@ function FollowUp() {
         schedules: dynamicSchedule,
       },
     ]);
-  }, [selectedDay, travelOpportunity, leads]); // Add 'leads' to dependencies to update when leads change
+  }, [selectedDay, travelOpportunity, leads, userId]); // Include userId in the dependencies// Add 'leads' to dependencies to update when leads change
   
   
   
@@ -101,7 +107,7 @@ function FollowUp() {
 
   const daysOfWeek = getWeekDays();
 
-  const todaySchedule = scheduleData.find((data) => data.day === selectedDay);
+  const todaySchedule = scheduleData.find((data) => data.day == selectedDay);
 
   return (
     <div>
@@ -109,7 +115,7 @@ function FollowUp() {
         <div className="Sales-schedule-header d-flex justify-content-between align-items-center">
           <h5>Follow-up Schedule</h5>
           <div className="dropdown">
-            <button
+            {/* <button
               className="btn btn-outline-primary dropdown-toggle"
               type="button"
               id="dropdownMenuButton"
@@ -134,14 +140,14 @@ function FollowUp() {
                   Option 3
                 </a>
               </li>
-            </ul>
+            </ul> */}
           </div>
         </div>
         <div className="Sales-day-selector mt-3 d-flex justify-content-between">
           {daysOfWeek.map(({ day, date }) => (
             <div
               key={day}
-              className={`Sales-day ${selectedDay === day ? "active" : ""}`}
+              className={`Sales-day ${selectedDay == day ? "active" : ""}`}
               onClick={() => setSelectedDay(day)}
             >
               <div className="Sales-day-label">{day}</div>
@@ -154,9 +160,9 @@ function FollowUp() {
       <div className="card Sales-lead-card p-3 mt-4 Sales-schedule-container">
         <div className="Sales-schedule-header d-flex justify-content-between align-items-center">
           <h5>Today's Schedule</h5>
-          <a href="#" className="Sales-add-schedule-link">
+          {/* <a href="#" className="Sales-add-schedule-link">
             Add A Schedule
-          </a>
+          </a> */}
         </div>
         {/* <div className="Sales-schedule-legends d-flex mb-3">
           <div className="Sales-legend me-3">
@@ -183,7 +189,8 @@ function FollowUp() {
                 Lead by <span className="Sales-schedule-lead">{item.lead}</span>
                 </small>
             </div>
-            <button className="btn btn-outline-primary Sales-view-details-btn">
+            <button className="btn btn-outline-primary Sales-view-details-btn"
+             onClick={() => navigate(`/m-details/${item.leadid}`, { state: { leadid: item.leadid } })}>
                 View Details
             </button>
             </li>

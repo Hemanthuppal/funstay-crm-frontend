@@ -39,12 +39,21 @@ const Login = () => {
           data.managerId
         ); // Use context to manage auth state
   
+        // if (data.role === 'employee') {
+        //   navigate('/View-lead');
+        // } else if (data.role === 'manager') {
+        //   navigate('/m-view-leads');
+        // } else {
+        //   navigate('/a-view-lead');
+        // }
+
+
         if (data.role === 'employee') {
-          navigate('/View-lead');
+          navigate('/s-dashboard');
         } else if (data.role === 'manager') {
-          navigate('/m-view-leads');
+          navigate('/m-dashboard');
         } else {
-          navigate('/a-view-lead');
+          navigate('/dashboard');
         }
   
       } else {

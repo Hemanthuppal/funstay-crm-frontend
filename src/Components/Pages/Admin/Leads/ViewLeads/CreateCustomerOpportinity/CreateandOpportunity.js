@@ -13,7 +13,7 @@ const CreateCustomerOpportunity = () => {
   const [duration, setDuration] = useState("");
   const [customerData, setCustomerData] = useState({
     name: "",
-    lead_type: "",
+    phone_number: "",
     email: "",
     travel_type: "",
     passport_number: "",
@@ -47,18 +47,6 @@ const CreateCustomerOpportunity = () => {
       setDuration(diffDays >= 0 ? `${diffDays} days` : "Invalid duration");
     } else {
       setDuration("");
-    }
-  };
-
-  const handleDurationChange = (e) => {
-    let value = e.target.value.replace(/\D/g, "");
-    setDuration(value);
-
-    if (startDate && value) {
-      const startDateObj = new Date(startDate);
-      const newEndDate = new Date(startDateObj);
-      newEndDate.setDate(startDateObj.getDate() + parseInt(value));
-      setEndDate(newEndDate.toISOString().split("T")[0]);
     }
   };
 
@@ -171,15 +159,16 @@ const CreateCustomerOpportunity = () => {
         const response = await axios.get(`${baseURL}/api/customers/by-lead/${leadid}`);
         console.log("Fetched customer data:", JSON.stringify(response.data, null, 2));
         setCustomerData(response.data);
-        setFormData({
+        setFormData((prev) => ({
+          ...prev,
           name: response.data.name || "",
-          lead_type: response.data.lead_type || "",
+          phone_number: response.data.phone_number || "",
           email: response.data.email || "",
           travel_type: response.data.travel_type || "",
           passport_number: response.data.passport_number || "",
           preferred_contact_method: response.data.preferred_contact_method || "",
           special_requirement: response.data.special_requirement || "",
-        });
+        }));
 
         // If customer is existing, set the active tab to "opportunity"
         if (response.data.customer_status === "existing") {
@@ -231,8 +220,8 @@ const CreateCustomerOpportunity = () => {
                 <input type="text" name="name" value={customerData.name} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
-                <label>Customer Type</label>
-                <input type="text" name="lead_type" value={customerData.lead_type} onChange={handleChange} />
+                <label>Mobile</label>
+                <input type="number" name="phone_number" value={customerData.phone_number} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
                 <label>Email ID</label>
@@ -312,7 +301,7 @@ const CreateCustomerOpportunity = () => {
               </div>
               <div className="createcustomer-input-group">
                 <label>Duration (Calculated)</label>
-                <input type="text" value={duration} onChange={handleDurationChange} />
+                <input type="text" value={duration} readOnly />
               </div>
 
               <div className="createcustomer-input-group">

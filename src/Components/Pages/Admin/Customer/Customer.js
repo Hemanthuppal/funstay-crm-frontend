@@ -55,6 +55,14 @@ const [message, setMessage] = useState(null);
     });
   };
 
+
+    const navigateToEditLead = (id) => {
+      navigate(`/a-editcustomerdetails/${id}`, {
+        state: { id: id },
+      });
+    };
+  
+   
   const handleDeleteCustomer = async (customerId) => {
    
     try {
@@ -151,6 +159,10 @@ const [message, setMessage] = useState(null);
                     style={{ color: "#ff9966", cursor: "pointer" }}
                     onClick={() => handleDeleteCustomer(row.original.id)}
                   />
+                   <FaEdit
+    style={{ color: "#ff9966", cursor: "pointer" }}
+    onClick={() => navigateToEditLead(row.original.id)}
+  />
 {/* <button
               className="btn btn-danger btn-sm"
               onClick={() => handleDeleteCustomer(row.original.id)}

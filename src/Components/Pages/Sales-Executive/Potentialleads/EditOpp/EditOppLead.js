@@ -34,7 +34,7 @@ const EditOppLead = () => {
     children_count: '',
     child_ages: [],
     approx_budget: '',
-    assignee: '',
+   
     notes: '',
     comments: '',
     reminder_setting: '',
@@ -219,7 +219,7 @@ const EditOppLead = () => {
       children_count: formData.children_count,
       child_ages: formData.child_ages.join(','),
       approx_budget: formData.approx_budget,
-      assignee: formData.assignee,
+     
       notes: formData.notes,
       comments: formData.comments,
       reminder_setting: formData.reminder_setting,

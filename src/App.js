@@ -65,6 +65,8 @@ import A_Customerdetails from "./Components/Pages/Admin/Customer/LeadOptions";
 import M_Customerdetails from "./Components/Pages/Manager/Customer/LeadOptions";
 import TeamMembers from "./Components/Pages/Admin/AllTeams/TeamMembersTable";
 import EditCustomer from "./Components/Pages/Sales-Executive/Customer/Editcustomer";
+import M_EditCustomer from "./Components/Pages/Manager/Customer/Editcustomer";
+import A_EditCustomer from "./Components/Pages/Admin/Customer/Editcustomer";
 
 
 function App() {
@@ -167,7 +169,8 @@ function App() {
                 <Route path="/team-members" element={<TeamMembers />} />
 
                 <Route path="/editcustomerdetails/:leadid" element={<EditCustomer />} />
-            
+                <Route path="/a-editcustomerdetails/:leadid" element={<A_EditCustomer />} />
+                <Route path="/m-editcustomerdetails/:leadid" element={<M_EditCustomer />} />
             </Routes>
         </Router>
         </AuthProvider>

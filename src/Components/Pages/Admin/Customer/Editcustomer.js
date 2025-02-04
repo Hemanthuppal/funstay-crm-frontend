@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion, Form, Button } from "react-bootstrap";
-import "../Potentialleads/OppDetails/LeadDetails.css";
-import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
+import "../Potentialleads/LeadDetails.css";
+import Navbar from "../../../Shared/Navbar/Navbar";
 import { FaPhone, FaEnvelope } from "react-icons/fa";
 import { baseURL } from "../../../Apiservices/Api";
 const EditLeadOppView = () => {
@@ -481,6 +481,5 @@ const EditLeadOppView = () => {
         </div>
     );
 };
-
 
 export default EditLeadOppView;

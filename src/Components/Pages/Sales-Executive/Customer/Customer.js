@@ -80,6 +80,8 @@ const SalesCustomer = () => {
       state: { id: id },
     });
   };
+
+ 
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
@@ -159,10 +161,10 @@ const SalesCustomer = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToLead(row.original.id)}
             />
-             {/* <FaEdit
+             <FaEdit
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToEditLead(row.original.id)}
-            /> */}
+            />
           </div>
         ),
       }

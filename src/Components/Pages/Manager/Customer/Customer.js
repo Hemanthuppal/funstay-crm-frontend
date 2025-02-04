@@ -122,6 +122,13 @@ const [message, setMessage] = useState(null);
       state: { id: id },
     });
   };
+    const navigateToEditLead = (id) => {
+      navigate(`/m-editcustomerdetails/${id}`, {
+        state: { id: id },
+      });
+    };
+  
+   
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
@@ -198,6 +205,10 @@ const [message, setMessage] = useState(null);
                                             style={{ color: "#ff9966", cursor: "pointer" }}
                                             onClick={() => handleDeleteCustomer(row.original.id)}
                                           />
+                                           <FaEdit
+    style={{ color: "#ff9966", cursor: "pointer" }}
+    onClick={() => navigateToEditLead(row.original.id)}
+  />
                       </div>
                     ),
                   }

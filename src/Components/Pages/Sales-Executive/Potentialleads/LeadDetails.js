@@ -83,7 +83,8 @@ const LeadOppView = () => {
                                             <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
                                             {/* <p><strong>Notes:</strong> {lead.travelOpportunities[0].notes || 'N/A'}</p> */}
                                             <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
-                                            <p><strong>Created Date:</strong>{lead.travelOpportunities[0].created_at? new Date(lead.travelOpportunities[0].created_at).toLocaleString() : 'N/A'}</p>
+                                       
+                                      <p><strong>Created Date:</strong>{lead.travelOpportunities[0].created_at? new Date(lead.travelOpportunities[0].created_at).toLocaleString() : 'N/A'}</p>
                                         </>
                                     )}
                                 </Col>

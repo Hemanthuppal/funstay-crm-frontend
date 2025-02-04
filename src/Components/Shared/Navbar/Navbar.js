@@ -57,14 +57,14 @@ const Navbar = ({ onToggleSidebar }) => {
            
 
             <div className="admin-header-icons">
-              <div className="admin-nav-icon-container">
+              {/* <div className="admin-nav-icon-container">
                 <FaBell className="admin-nav-icon" />
                 <span className="admin-nav-badge">12</span>
-              </div>
-              <div className="admin-nav-icon-container">
+              </div> */}
+              {/* <div className="admin-nav-icon-container">
                 <FaEnvelope className="admin-nav-icon" />
                 <span className="admin-nav-badge">24</span>
-              </div>
+              </div> */}
 
               <div className="admin-nav-icon-container" onClick={handleProfileClick}>
                 <div className="admin-nav-profile">
@@ -94,12 +94,14 @@ const Navbar = ({ onToggleSidebar }) => {
         <div className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
           <div className="admin-position-sticky">
             <ul className="nav flex-column">
-              {/* <li className="admin-nav-item">
+              <li  className={`admin-nav-item ${location.pathname.startsWith("/dashboard") ? "active"
+                  : ""
+                  }`}>
                 <Link className="nav-link" to="/dashboard" onClick={handleNavItemClick}>
                   <FaHome className="admin-nav-icon" />
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
-              </li> */}
+              </li>
 
               <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-view-lead") ||
@@ -147,7 +149,8 @@ const Navbar = ({ onToggleSidebar }) => {
               <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||                   
                     location.pathname.startsWith("/addemployee") ||
-                    location.pathname.startsWith("/team-members") 
+                    location.pathname.startsWith("/team-members") ||
+                    location.pathname.startsWith("/a-editcustomerdetails") 
                     ? "active"
                     : ""
                   }`}

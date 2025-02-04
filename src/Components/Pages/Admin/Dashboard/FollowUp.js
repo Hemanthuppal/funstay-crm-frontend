@@ -1,9 +1,8 @@
-import React, { useState, useEffect,useContext } from "react";
-import axios from "axios";
-import { AuthContext } from '../../../AuthContext/AuthContext';
-import { baseURL } from "../../../Apiservices/Api";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
+import { AuthContext } from "../../../AuthContext/AuthContext";
+import { baseURL } from "../../../Apiservices/Api";
 
 function FollowUp() {
   const navigate = useNavigate();
@@ -15,18 +14,16 @@ function FollowUp() {
   const [travelOpportunity, setTravelOpportunity] = useState([]);
   const [leads, setLeads] = useState([]);
   const [scheduleData, setScheduleData] = useState([]);
-  const [loading, setLoading] = useState(true); // To prevent processing empty data
   const { authToken, userRole, userId } = useContext(AuthContext);
-
   console.log("User ID=", userId);
 
   useEffect(() => {
     const fetchTravelOpportunity = async () => {
       try {
         const response = await axios.get(`${baseURL}/travel-opportunity`);
-        setTravelOpportunity(response.data || []);
+        setTravelOpportunity(response.data);
       } catch (err) {
-        console.log("Failed to fetch travel opportunity data", err);
+        console.log("Failed to fetch travel opportunities");
       }
     };
 
@@ -37,11 +34,10 @@ function FollowUp() {
     const fetchLeads = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/allleads`);
-        setLeads(response.data || []);
-        setLoading(false); // Set loading to false once data is fetched
+        setLeads(response.data);
+        console.log("Leads=", response.data);
       } catch (err) {
-        console.log("Failed to fetch leads", err);
-        setLoading(false);
+        console.log("Failed to fetch leads");
       }
     };
 
@@ -49,43 +45,38 @@ function FollowUp() {
   }, []);
 
   useEffect(() => {
-    if (loading || !userId) return; // Prevent processing if still loading or userId is missing
-
-    // Filter leads based on assignedSalesId matching the current userId
-    const filteredLeads = leads.filter((lead) => lead.assignedSalesId == userId);
-
-    // Create a lookup object for filtered leads where leadid is the key
-    const leadsLookup = filteredLeads.reduce((acc, lead) => {
+    const leadsLookup = leads.reduce((acc, lead) => {
       acc[lead.leadid] = lead;
       return acc;
     }, {});
 
-    // Create dynamic schedule data based on filtered leads and selected day
     const dynamicSchedule = travelOpportunity
       .filter((opportunity) => {
-        if (!opportunity.leadid) return false; // Prevent errors from undefined values
-
-        // Convert reminder_setting to the weekday format
         const reminderDate = new Date(opportunity.reminder_setting);
         const reminderDay = weekdays[reminderDate.getDay()];
-        return reminderDay == selectedDay && leadsLookup[opportunity.leadid];
+        return reminderDay === selectedDay;
       })
       .map((opportunity) => {
         const lead = leadsLookup[opportunity.leadid];
-
         console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
+        const leadName = lead ? lead.name : "Unknown Lead";
 
         return {
           time: "9:00 - 10:00 AM",
           title: opportunity.notes || "Untitled Task",
           color: "Sales-badge-orange",
-          lead: lead ? lead.name : "Unknown Lead",
-          leadid: opportunity.leadid,
+          lead: leadName,
+          leadid: opportunity.leadid, // Store lead ID for navigation
         };
       });
 
-    setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
-  }, [selectedDay, travelOpportunity, leads, userId, loading]);
+    setScheduleData([
+      {
+        day: selectedDay,
+        schedules: dynamicSchedule,
+      },
+    ]);
+  }, [selectedDay, travelOpportunity, leads]);
 
   const getWeekDays = () => {
     const days = [];
@@ -102,7 +93,7 @@ function FollowUp() {
   };
 
   const daysOfWeek = getWeekDays();
-  const todaySchedule = scheduleData.find((data) => data.day == selectedDay);
+  const todaySchedule = scheduleData.find((data) => data.day === selectedDay);
 
   return (
     <div>
@@ -114,7 +105,7 @@ function FollowUp() {
           {daysOfWeek.map(({ day, date }) => (
             <div
               key={day}
-              className={`Sales-day ${selectedDay == day ? "active" : ""}`}
+              className={`Sales-day ${selectedDay === day ? "active" : ""}`}
               onClick={() => setSelectedDay(day)}
             >
               <div className="Sales-day-label">{day}</div>
@@ -128,7 +119,6 @@ function FollowUp() {
         <div className="Sales-schedule-header d-flex justify-content-between align-items-center">
           <h5>Today's Schedule</h5>
         </div>
-
         <ul className="Sales-schedule-list">
           {todaySchedule?.schedules.length > 0 ? (
             todaySchedule.schedules.map((item, index) => (
@@ -143,15 +133,19 @@ function FollowUp() {
                     Lead by <span className="Sales-schedule-lead">{item.lead}</span>
                   </small>
                 </div>
-                <button className="btn btn-outline-primary Sales-view-details-btn"
-                 onClick={() => navigate(`/details/${item.leadid}`, { state: { leadid: item.leadid } })}>
+                <button
+                  className="btn btn-outline-primary Sales-view-details-btn"
+                  onClick={() => navigate(`/a-details/${item.leadid}`, { state: { leadid: item.leadid } })}
+                >
                   View Details
                 </button>
               </li>
             ))
           ) : (
             <li className="Sales-schedule-item d-flex align-items-center justify-content-center">
-              <p className="text-muted mt-2"><strong>No schedule today</strong></p>
+              <p className="text-muted mt-2">
+                <strong>No schedule today</strong>
+              </p>
             </li>
           )}
         </ul>

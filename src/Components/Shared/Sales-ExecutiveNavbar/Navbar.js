@@ -55,14 +55,14 @@ const { logout,userName } = useContext(AuthContext);
             {/* <button className="btn lead-button">Add Leads</button> */}
 
             <div className="sales-header-icons">
-              <div className="sales-nav-icon-container">
+              {/* <div className="sales-nav-icon-container">
                 <FaBell className="sales-nav-icon" />
                 <span className="sales-nav-badge">12</span>
               </div>
               <div className="sales-nav-icon-container">
                 <FaEnvelope className="sales-nav-icon" />
                 <span className="sales-nav-badge">24</span>
-              </div>
+              </div> */}
 
               <div className="sales-nav-icon-container" onClick={handleProfileClick}>
                 <div className="sales-nav-profile">
@@ -92,7 +92,7 @@ const { logout,userName } = useContext(AuthContext);
         <div className={`sales-sidebar ${collapsed ? "collapsed" : ""}`}>
           <div className="sales-position-sticky">
             <ul className="nav flex-column">
-              {/* <li
+              <li
                 className={`sales-nav-item ${location.pathname === "/s-dashboard" ? "active" : ""
                   }`}
               >
@@ -104,7 +104,7 @@ const { logout,userName } = useContext(AuthContext);
                   <FaHome className="sales-nav-icon" />
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
-              </li> */}
+              </li>
                <li
                 className={`sales-nav-item ${location.pathname.startsWith ("/s-allleads")||
                     location.pathname.startsWith( "/s-view-lead")
@@ -164,7 +164,8 @@ const { logout,userName } = useContext(AuthContext);
               <li
                 className={`sales-nav-item ${location.pathname.startsWith("/s-customers") ||                   
                     location.pathname.startsWith("/sales-details") ||
-                    location.pathname.startsWith("/customerdetails")
+                    location.pathname.startsWith("/customerdetails")||
+                    location.pathname.startsWith("/editcustomerdetails") 
                     ? "active"
                     : ""
                   }`}

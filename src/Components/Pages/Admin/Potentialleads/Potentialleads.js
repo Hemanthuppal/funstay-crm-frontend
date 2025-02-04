@@ -389,15 +389,15 @@ const AdminDashboard = () => {
         ),
       },
 
-      {
-        Header: 'Quotation',
-        accessor: 'Quotation',
-        Cell: ({ row }) => (
-          <div>
-            Generate
-          </div>
-        ),
-      },
+      // {
+      //   Header: 'Quotation',
+      //   accessor: 'Quotation',
+      //   Cell: ({ row }) => (
+      //     <div>
+      //       Generate
+      //     </div>
+      //   ),
+      // },
 
       { Header: 'Assigned', accessor: 'assign_to_manager' },
     //  {

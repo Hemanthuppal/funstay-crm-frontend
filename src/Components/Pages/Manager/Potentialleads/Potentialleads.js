@@ -381,15 +381,15 @@ const Potentialleads = () => {
           </div>
         ),
       },
-      {
-        Header: 'Quotation',
-        accessor: 'Quotation',
-        Cell: ({ row }) => (
-          <div>
-            Generate
-          </div>
-        ),
-      },
+      // {
+      //   Header: 'Quotation',
+      //   accessor: 'Quotation',
+      //   Cell: ({ row }) => (
+      //     <div>
+      //       Generate
+      //     </div>
+      //   ),
+      // },
       {
         Header: "Assigned ",
         accessor: "assignedSalesName",

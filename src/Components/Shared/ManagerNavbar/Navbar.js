@@ -1,11 +1,11 @@
-import React, { useState ,useContext} from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaTachometerAlt, FaBell, FaEnvelope, FaCaretDown,FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry          } from "react-icons/fa";
+import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaTachometerAlt, FaBell, FaEnvelope, FaCaretDown, FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry } from "react-icons/fa";
 import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate ,useLocation} from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext/AuthContext";
 
 const Manager = ({ onToggleSidebar }) => {
@@ -14,7 +14,7 @@ const Manager = ({ onToggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
-  const { logout,userName } = useContext(AuthContext);
+  const { logout, userName } = useContext(AuthContext);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -58,14 +58,14 @@ const Manager = ({ onToggleSidebar }) => {
             {/* <button className="btn btn-primary lead-button">Add Leads</button> */}
 
             <div className="manager-header-icons">
-              <div className="manager-nav-icon-container">
+              {/* <div className="manager-nav-icon-container">
                 <FaBell className="manager-nav-icon" />
                 <span className="manager-nav-badge">12</span>
               </div>
               <div className="manager-nav-icon-container">
                 <FaEnvelope className="manager-nav-icon" />
                 <span className="manager-nav-badge">24</span>
-              </div>
+              </div> */}
 
               <div className="manager-nav-icon-container" onClick={handleProfileClick}>
                 <div className="manager-nav-profile">
@@ -79,7 +79,7 @@ const Manager = ({ onToggleSidebar }) => {
                 {showDropdown && (
                   <div className="manager-nav-profile-dropdown">
                     <div className="manager-nav-profile-header">
-                    <strong> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1) : ""}</strong>
+                      <strong> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1) : ""}</strong>
 
                     </div>
                     <div className="manager-nav-profile-item">Your Profile</div>
@@ -93,16 +93,18 @@ const Manager = ({ onToggleSidebar }) => {
           </div>
         </div>
 
-        
+
         <div className={`manager-sidebar ${collapsed ? 'collapsed' : ''}`}>
           <div className="manager-position-sticky">
             <ul className="nav flex-column">
-              {/* <li className="manager-nav-item">
+              <li className={`manager-nav-item ${location.pathname.startsWith("/m-dashboard") ? "active"
+                : ""
+                }`}>
                 <Link className="nav-link" to="/m-dashboard" onClick={handleNavItemClick}>
                   <FaHome className="manager-nav-icon" />
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
-              </li> */}
+              </li>
 
               <li
                 className={`manager-nav-item ${location.pathname.startsWith("/m-view-leads") ||
@@ -123,11 +125,11 @@ const Manager = ({ onToggleSidebar }) => {
 
               <li
                 className={`manager-nav-item ${location.pathname.startsWith("/m-potential-leads") ||
-                    location.pathname.startsWith("/m-edit-opportunity") ||
-                    location.pathname.startsWith("/m-opportunity-comments") ||
-                    location.pathname.startsWith("/m-details")
-                    ? "active"
-                    : ""
+                  location.pathname.startsWith("/m-edit-opportunity") ||
+                  location.pathname.startsWith("/m-opportunity-comments") ||
+                  location.pathname.startsWith("/m-details")
+                  ? "active"
+                  : ""
                   }`}
               >
                 <Link className="nav-link" to="/m-potential-leads" onClick={handleNavItemClick}>
@@ -137,19 +139,19 @@ const Manager = ({ onToggleSidebar }) => {
               </li>
 
               <li
-  className={`manager-nav-item ${
-    location.pathname.startsWith("/m-customers") ||
-    location.pathname.startsWith("/m-customer-details") ||
-    location.pathname.startsWith("/m-customerdetails")
-      ? "active"
-      : ""
-  }`}
->
-  <Link className="nav-link" to="/m-customers" onClick={handleNavItemClick}>
-    <FaUserFriends className="manager-nav-icon" />
-    {!collapsed && <span className="link_text">My Teams customer</span>}
-  </Link>
-</li>
+                className={`manager-nav-item ${location.pathname.startsWith("/m-customers") ||
+                    location.pathname.startsWith("/m-customer-details") ||
+                    location.pathname.startsWith("/m-customerdetails") ||
+                    location.pathname.startsWith("/m-editcustomerdetails")
+                    ? "active"
+                    : ""
+                  }`}
+              >
+                <Link className="nav-link" to="/m-customers" onClick={handleNavItemClick}>
+                  <FaUserFriends className="manager-nav-icon" />
+                  {!collapsed && <span className="link_text">My Teams customer</span>}
+                </Link>
+              </li>
 
               <li
                 className={`manager-nav-item ${location.pathname === "/m-myteam" ? "active" : ""

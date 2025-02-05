@@ -81,12 +81,12 @@ const InDetailViewLeads = () => {
               {leadid ? (
                 <div className="row">
                   <div className="col-md-6">
-                    <div className="mb-3 d-flex flex-wrap">
+                    {/* <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Lead Type:
                       </span>
                       <span>{formData.lead_type}</span>
-                    </div>
+                    </div> */}
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Lead ID:

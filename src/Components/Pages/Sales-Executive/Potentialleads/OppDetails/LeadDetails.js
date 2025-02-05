@@ -59,12 +59,12 @@ console.log("API Response:", response);
                             {leadData ? (
                                 <div className="row mb-4">
                                     <div className="col-md-6">
-                                        <div className="mb-3 d-flex flex-wrap">
+                                        {/* <div className="mb-3 d-flex flex-wrap">
                                             <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                                                 Lead Type:
                                             </span>
                                             <span className="text-muted">{leadData.lead_type}</span>
-                                        </div>
+                                        </div> */}
                                         <div className="mb-3 d-flex flex-wrap">
                                             <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                                                 Name:

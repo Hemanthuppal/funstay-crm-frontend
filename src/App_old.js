@@ -76,12 +76,6 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/login" element={<Login />} />
-                <Route path="/" element={<LoginNew />} />
-                <Route path="/forgot" element={<Forgot />} />
-
-
-                
-                <Route element={<ProtectedRoute />}>
                 <Route path="/add-lead" element={<Addleads />} />
                 <Route path="/view-lead" element={<ViewLeads />} />
                 
@@ -91,7 +85,8 @@ function App() {
                 <Route path="/m-dashboard" element={<ManagerDashboard />} />
                 <Route path="/s-dashboard" element={<SalesDashboard />} />
                 <Route path="/dashboard" element={<AdminDashboard />} />
-               
+                <Route path="/" element={<LoginNew />} />
+                <Route path="/forgot" element={<Forgot />} />
                 <Route path="/m-customers" element={<ManagerCustomer />} />
                 <Route path="/a-customers" element={<AdminCustomer />} />
                 <Route path="/s-customers" element={<SalesCustomer />} />
@@ -177,11 +172,7 @@ function App() {
                 <Route path="/editcustomerdetails/:leadid" element={<EditCustomer />} />
                 <Route path="/a-editcustomerdetails/:leadid" element={<A_EditCustomer />} />
                 <Route path="/m-editcustomerdetails/:leadid" element={<M_EditCustomer />} />
-                </Route>
             </Routes>
-
-         
- 
         </Router>
         </AuthProvider>
     );

@@ -140,7 +140,7 @@ const EditOppLead = () => {
               {error && <div className="alert alert-danger">{error}</div>} {/* Display error message */}
 
               <Row>
-                <Col md={4}>
+                {/* <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Lead Type</Form.Label>
                     <Form.Control
@@ -151,7 +151,7 @@ const EditOppLead = () => {
                       readOnly
                     />
                   </Form.Group>
-                </Col>
+                </Col> */}
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>

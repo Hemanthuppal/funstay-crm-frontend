@@ -280,7 +280,7 @@ const EditOppLead = () => {
               <h5>Customer Details</h5>
               {message && <div className="alert alert-info">{message}</div>}
               <Row>
-                <Col md={4}>
+                {/* <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Lead Type</Form.Label>
                     <Form.Control
@@ -291,7 +291,7 @@ const EditOppLead = () => {
                       readOnly
                     />
                   </Form.Group>
-                </Col>
+                </Col> */}
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>
@@ -411,7 +411,7 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col> */}
-                <Col md={4}>
+                {/* <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Primary Status</Form.Label>
                     <Form.Select
@@ -437,8 +437,8 @@ const EditOppLead = () => {
                       onChange={handleChange}
                       disabled={
                         !formData.primaryStatus ||
-                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus) // Disable for specific statuses
-                      } // Disable if primaryStatus is not selected
+                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus) 
+                      } 
                     >
                       <option value="">Select Status</option>
                       {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
@@ -452,7 +452,7 @@ const EditOppLead = () => {
                       )}
                     </Form.Select>
                   </Form.Group>
-                </Col>
+                </Col> */}
                 <Col md={12}>
                   <Form.Group className="mb-3">
                     <Form.Label>Description</Form.Label>

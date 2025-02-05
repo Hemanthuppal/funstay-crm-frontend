@@ -60,8 +60,8 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div className="loading-spinner">Loading dashboard...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+  // if (loading) return <div className="loading-spinner">Loading dashboard...</div>;
+  // if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="dashboardContainer1">

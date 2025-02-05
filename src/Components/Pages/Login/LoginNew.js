@@ -1,21 +1,28 @@
-import React, { useState,useContext  } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginNew.css';
-import {baseURL} from '../../Apiservices/Api';
+import { baseURL } from '../../Apiservices/Api';
 import { AuthContext } from "../../AuthContext/AuthContext";
-import { Form, Button } from 'react-bootstrap';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false); 
   const { login } = useContext(AuthContext);
+
+  // Clear local storage when the component mounts
+  useEffect(() => {
+    localStorage.clear(); // Clear local storage
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     const userData = { email, password };
-  
+    console.log("Logging in with data:", userData); // Log the user data being sent
+
     try {
       const response = await fetch(`${baseURL}/login`, {
         method: 'POST',
@@ -24,9 +31,10 @@ const Login = () => {
         },
         body: JSON.stringify(userData),
       });
-  
+
       const data = await response.json();
-  
+      console.log("Response from login API:", data); // Log the response from the API
+
       if (response.status === 200) {
         login(
           data.token,
@@ -37,17 +45,9 @@ const Login = () => {
           data.role,
           data.assign_manager,
           data.managerId
-        ); // Use context to manage auth state
-  
-        // if (data.role === 'employee') {
-        //   navigate('/View-lead');
-        // } else if (data.role === 'manager') {
-        //   navigate('/m-view-leads');
-        // } else {
-        //   navigate('/a-view-lead');
-        // }
+        );
 
-
+        // Navigate based on user role
         if (data.role === 'employee') {
           navigate('/s-dashboard');
         } else if (data.role === 'manager') {
@@ -55,16 +55,14 @@ const Login = () => {
         } else {
           navigate('/dashboard');
         }
-  
       } else {
-        alert(data.message);
+        alert(data.message || "Login failed. Please check your credentials.");
       }
     } catch (err) {
       console.error('Login failed:', err);
       alert('Login failed');
     }
   };
-  
 
   return (
     <div className="login-page">
@@ -94,6 +92,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoFocus
+                required
               />
             </div>
             <div className="login-input-group">
@@ -105,6 +104,7 @@ const Login = () => {
                   placeholder="********"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
@@ -116,9 +116,8 @@ const Login = () => {
               </div>
             </div>
             <div className="d-flex justify-content-end mb-2">
-            <a href="/forgot" className="forgot-password"> Forgot  Password</a>
-           
-          </div>
+              <a href="/forgot" className="forgot-password"> Forgot Password</a>
+            </div>
             <button className="login-btn login-btn-login">Login</button>
           </form>
         </div>

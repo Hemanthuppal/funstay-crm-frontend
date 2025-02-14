@@ -110,7 +110,7 @@ const Dashboard = () => {
         <div className="container">
           {/* Cards Section */}
           <div className="row Manager-dashboard-cards-container justify-content-center mt-4">
-            <div className="col-lg-7 col-md-7">
+            <div className="col-lg-7 col-md-12">
               <div className="row">
                 {[
                   {
@@ -138,11 +138,11 @@ const Dashboard = () => {
                   //   navigateTo: "#" // Keep static if no backend data
                   // },
                 ].map((card, index) => (
-                  <div className="col-lg-6 col-md-6 col-sm-6 mb-3" key={index}
+                  <div className="col-lg-6 col-md-6 col-sm-6 mb-3  mt-2" key={index}
                   onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} // Navigate only if not static
                   style={{ cursor: card.navigateTo !== "#" ? "pointer" : "default" }}>
                     <div className="card Manager-gradient-card">
-                      <h5>{card.title}</h5>
+                      <h5 className="pt-3">{card.title}</h5>
                       <h2>{card.value}</h2>
                       <p>{card.subtitle}</p>
                     </div>

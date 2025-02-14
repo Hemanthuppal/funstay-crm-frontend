@@ -1,37 +1,22 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect ,useContext,useRef} from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css"; 
 import { FaEdit, FaEye, FaComment, FaTrash } from "react-icons/fa";
 import {  Row, Col, } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayout"; 
-import baseURL from "../../../Apiservices/Api";
+import {baseURL} from "../../../Apiservices/Api";
 import './PotentialLeads.css';
 import axios from 'axios';
+import { AuthContext } from '../../../AuthContext/AuthContext';
 
 const Potentialleads = () => {
+   const { authToken, userRole ,userId} = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
   const navigate = useNavigate();
-  const fetchLeads = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/api/allleads`);
-      if (response.status === 200) {
-       
-        const filteredLeads = response.data.filter(lead => lead.status === 'opportunity');
-        setData(filteredLeads); 
-      } else {
-        console.error('Error fetching leads:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching leads:', error);
-      alert('Failed to fetch leads.');
-    }
-  };
-  useEffect(() => {
-    fetchLeads();
-  }, []);
+ 
 
   const [loading, setLoading] = useState(false);
   const [isPrimaryChanged, setIsPrimaryChanged] = useState(false);
@@ -104,7 +89,7 @@ const Potentialleads = () => {
       opportunity_status1: primaryStatus,
       opportunity_status2: secondaryStatus,
     };
-  
+  console.log(JSON.stringify(body, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/update-status/${leadId}`, body);
       
@@ -124,6 +109,7 @@ const Potentialleads = () => {
         if (primaryStatus && secondaryStatus) {
         
           setMessage(statusChangeMessage)
+          setTimeout(() => setMessage(""), 3000);
         }
   
         console.log('Status updated:', response.data);
@@ -131,12 +117,14 @@ const Potentialleads = () => {
         console.error('Failed to update status:', response.data);
         
         setMessage('Failed to update status. Please try again.')
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error('Error updating status:', error);
     
     
       setMessage('An error occurred while updating the status. Please try again.')
+      setTimeout(() => setMessage(""), 3000);
     }
   };
   
@@ -150,6 +138,7 @@ const Potentialleads = () => {
       if (response.ok) {
         setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
         setMessage('Opportunity has been deleted successfully.');
+        
         setTimeout(() => {
           setMessage('');
         }, 1000);
@@ -181,154 +170,248 @@ const Potentialleads = () => {
    
     });
   };
+ 
+  const [leadIds, setLeadIds] = useState([]);
+ 
+
+  const fetchLeads = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/api/allleads`);
+      if (response.status === 200) {
+        const leads = response.data;
+        const filteredLeads = leads.filter(
+          (enquiry) =>
+            enquiry.assignedSalesId == userId && enquiry.status == "opportunity"
+        );
+        setData(filteredLeads);
+      }
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+      alert("Failed to fetch leads.");
+    }
+  };
+
+  // Log lead IDs when data changes
+  useEffect(() => {
+    if (data.length > 0) {
+      const ids = data.map(lead => lead.leadid);
+      setLeadIds(ids);
+      console.log("Lead IDs:", ids);
+    }
+  }, [data]); // <-- This effect runs when data updates
+
+  // Fetch leads on component mount
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  const [customerIdMap, setCustomerIdMap] = useState({}); // New state for mapping
+
+  const opportunityIdRef = useRef(null);
+    const [opportunityIdMap, setOpportunityIdMap] = useState({});
+
+    const fetchCustomerData = async (leadid) => {
+      try {
+        const response = await axios.get(`${baseURL}/api/customers/by-lead/${leadid}`);
+        if (response.status === 200) {
+          const customerData = response.data;
+          setCustomerIdMap((prev) => ({
+            ...prev,
+            [leadid]: {
+              customerId: customerData.id || "N/A",
+            },
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+      }
+    };
+  
+    // Fetch opportunity data
+    const fetchOpportunityData = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/travel-opportunity`);
+        if (response.status === 200) {
+          const mapping = response.data.reduce((acc, opportunity) => {
+            acc[opportunity.leadid] = {
+              opportunityId: opportunity.id || "N/A",
+            };
+            return acc;
+          }, {});
+          setOpportunityIdMap(mapping);
+        }
+      } catch (error) {
+        console.error("Error fetching travel opportunities:", error);
+      }
+    };
+  
+
+  
+
+
+const formattedData = useMemo(() => {
+  return data.map(item => {
+    const customerData = customerIdMap[item.leadid] || { customerId: "N/A" };
+    const opportunityData = opportunityIdMap[item.leadid] || { opportunityId: "N/A" };
+
+    return {
+      ...item,
+      formattedOppId: opportunityData.opportunityId !== "N/A" ? 
+        `OPP${String(opportunityData.opportunityId).padStart(4, '0')}` : "N/A",
+      formattedCustomerId: customerData.customerId !== "N/A" ? 
+        `CUS${String(customerData.customerId).padStart(4, '0')}` : "N/A"
+    };
+  });
+}, [data, customerIdMap, opportunityIdMap]); 
+
+    
+    useEffect(() => {
+      // Assuming you have a way to get the lead IDs
+      const leadIds = data.map(item => item.leadid); // Replace with your actual lead IDs
+  
+      // Fetch data for each lead ID
+      leadIds.forEach(leadid => {
+        fetchCustomerData(leadid);
+      });
+  
+      // Fetch opportunity data
+      fetchOpportunityData();
+    }, [data]);
+
   const columns = useMemo(
     () => [
-      // {
-      //   Header: "S.No",
-      //   accessor: (row, index) => index + 1,
-      // },
+     
+      
       {
-        Header: "Lead Id ",
-        accessor: "leadcode",
-        Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
-            {row.original.lead_type}
-          </span>
-        ),
+        Header: "Opp Id",
+        accessor: "leadid", // Direct access to pre-formatted value
       },
       {
-        Header: "Opportunity Type",
-        accessor: "lead_type",
-        Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
-            {row.original.lead_type}
-          </span>
-        ),
+        Header: "Customer Id",
+        accessor: "customerid",
       },
+      
       {
         Header: "Name",
         accessor: "name",
         Cell: ({ row }) => (
-          <span
-            className="name-link"
+          <div
+            style={{
+              cursor: "pointer",
+              color: "blue",
+              textDecoration: "underline"
+            }}
             onClick={() => navigateToLead(row.original.leadid)}
-            style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
           >
             {row.original.name}
-          </span>
+          </div>
         ),
       },
+      // Phone Number Column
       {
-        Header: "Mobile No",
+        Header: "Mobile",
         accessor: "phone_number",
         Cell: ({ row }) => (
-          <span className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
+          <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
             {row.original.phone_number}
-          </span>
+          </div>
         ),
       },
+      // Email Column
       {
         Header: "Email",
         accessor: "email",
         Cell: ({ row }) => (
-          <span
-            className="name-link"
-            onClick={() => navigateToLead(row.original.leadid)}
-            style={{ cursor: "pointer" }}
-          >
+          <div   style={{ cursor: "pointer",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "200px" // Adjust width as needed
+          }}
+          title={row.original.email} onClick={() => navigateToLead(row.original.leadid)}>
             {row.original.email}
-          </span>
-        ),
-      },
-      {
-        Header: "Opportunity Status 1",
-        accessor: "opportunity_status1",
-        Cell: ({ row }) => (
-          <select
-            value={row.original.opportunity_status1}
-            onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)}
-            className="form-select"
-          >
-            <option value="">Select Status</option>
-            {dropdownOptions.primary.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        ),
-      },
-      {
-        Header: "Opportunity Status 2",
-        accessor: "opportunity_status2",
-        Cell: ({ row }) => (
-          <select
-            value={row.original.opportunity_status2}
-            onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)}
-            className="form-select"
-            disabled={!row.original.opportunity_status1} // Disable until a primary status is selected
-          >
-            <option value="">Select Status</option>
-            {dropdownOptions.secondary[row.original.opportunity_status1]?.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        ),
-      },
-      {
-        Header: "Action",
-        Cell: ({ row }) => (
-          <div>
-            <button
-              className="btn btn-warning edit-button me-1 mb-1"
-              onClick={() => handleEdit(row.original.leadid)}
-            >
-              <FaEdit />
-            </button>
-            <button
-              className="btn btn-info view-button me-1"
-              onClick={() =>navigateToLead(row.original.leadid)}
-            >
-              <FaEye />
-            </button>
-            <button
-              className="btn btn-danger delete-button me-1 mb-1"
-              onClick={() => handleDelete(row.original.leadid)}
-            >
-              <FaTrash />
-            </button>
           </div>
         ),
       },
       {
-        Header: 'Comments',
-        accessor: 'comments',
+        Header: "Opportunity Status",
+        accessor: "opportunityStatus",
+        Cell: ({ row }) => {
+          const primaryStatus = row.original.opportunity_status1;
+          const secondaryStatus = row.original.opportunity_status2;
+          const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
+          const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
+      
+          return (
+            <div className="d-flex align-items-center gap-2">
+              <select
+                value={primaryStatus}
+                onChange={(e) =>
+                  handlePrimaryStatusChange(e.target.value, row.original.leadid)
+                }
+                className="form-select fixed-select opp-dropdown" // Added fixed-select
+              >
+                {!primaryStatus && <option value="">Select Primary Status</option>}
+                {dropdownOptions.primary.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+      
+              <select
+                value={secondaryStatus}
+                onChange={(e) =>
+                  handleSecondaryStatusChange(e.target.value, row.original.leadid)
+                }
+                className="form-select fixed-select" // Added fixed-select
+                disabled={isSecondaryDisabled}
+              >
+                {!secondaryStatus && <option value="">Select Secondary Status</option>}
+                {secondaryOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        },
+      },
+      
+      
+      {
+        Header: "Action",
         Cell: ({ row }) => (
-          <button
-            className="btn btn-info"
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <FaEdit
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() => handleEdit(row.original.leadid)}
+            />
+            <FaEye
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() => navigateToLead(row.original.leadid)}
+            />
+          </div>
+        ),
+      },
+      {
+        Header: "Comments",
+        accessor: "comments",
+        Cell: ({ row }) => (
+          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <FaComment
+            style={{ color: "#ff9966", cursor: "pointer", }}
             onClick={() => {
-              navigate(`/comments/${row.original.leadid}`);
+              navigate(`/opportunity-comments/${row.original.leadid}`);
             }}
-          >
-            <FaComment />
-          </button>
+          />
+          </div>
         ),
       }
+
     ],
-    [dropdownOptions]
+    [dropdownOptions,customerIdMap]
   );
 
   return (
@@ -337,7 +420,7 @@ const Potentialleads = () => {
       <div className={`salesOpportunity ${collapsed ? "collapsed" : ""}`}>
         <div className="potentialleads-table-container">
           <Row className="mb-3">
-            <Col className="d-flex justify-content-between align-items-center">
+            <Col className="d-flex justify-content-between align-items-center fixed">
               <h3>Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
 
@@ -346,7 +429,7 @@ const Potentialleads = () => {
           {loading ? (
             <div>Loading...</div>
           ) : (
-            <DataTable columns={columns} data={data} />
+            <DataTable columns={columns} data={formattedData} />
           )}
         </div>
       </div>

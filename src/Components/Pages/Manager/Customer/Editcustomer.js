@@ -3,9 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion, Form, Button } from "react-bootstrap";
 import "../Potentialleads/LeadDetails.css";
-import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
+import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import { FaPhone, FaEnvelope } from "react-icons/fa";
 import { baseURL } from "../../../Apiservices/Api";
+import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
 const EditLeadOppView = () => {
     const [message, setMessage] = useState(null);
@@ -17,12 +18,26 @@ const EditLeadOppView = () => {
     const [error, setError] = useState(null);
     const [travelError, setTravelError] = useState(null);
     const [activeKey, setActiveKey] = useState("0");
-    const [editCustomerMode, setEditCustomerMode] = useState(true); // Toggle for Customer Edit Mode
-    const [editOpportunityMode, setEditOpportunityMode] = useState({}); // Toggle for Opportunity Edit Mode
+    const [editCustomerMode, setEditCustomerMode] = useState(true);
+    const [editOpportunityMode, setEditOpportunityMode] = useState({});
     const location = useLocation();
     const navigate = useNavigate();
     const [originalOpportunities, setOriginalOpportunities] = useState({});
     const customerId = location.state?.id || null;
+
+    const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+
+
+    useEffect(() => {
+        const countries = getCountries();
+        const callingCodes = countries.map(
+            (country) => `+${getCountryCallingCode(country)}`
+        );
+        const uniqueCodes = [...new Set(callingCodes)];
+        uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+        setCountryCodeOptions(uniqueCodes);
+    }, []);
 
     const fetchCustomerDetails = async (id) => {
         try {
@@ -44,15 +59,23 @@ const EditLeadOppView = () => {
         try {
             const response = await axios.get(`${baseURL}/api/travel-opportunities/${id}`);
             const opportunities = response.data;
+
             const opportunitiesWithComments = await Promise.all(
                 opportunities.map(async (trip) => {
                     const commentsResponse = await axios.get(`${baseURL}/comments/${trip.leadid}`);
+
+
+                    const childAgesArray = trip.child_ages ? trip.child_ages.split(',') : [];
+                    const reminder = trip.reminder_setting ? new Date(trip.reminder_setting).toISOString().slice(0, 16) : '';
                     return {
                         ...trip,
                         comments: commentsResponse.data,
+                        reminder_setting: reminder,
+                        child_ages: childAgesArray,
                     };
                 })
             );
+
             setTravelOpportunity(opportunitiesWithComments);
         } catch (err) {
             setTravelError("Failed to fetch TravelOpportunity details");
@@ -75,10 +98,53 @@ const EditLeadOppView = () => {
         setCustomer({ ...customer, [name]: value });
     };
 
+
+
     const handleOpportunityChange = (index, e) => {
         const { name, value } = e.target;
         const updatedOpportunities = [...travelOpportunity];
-        updatedOpportunities[index] = { ...updatedOpportunities[index], [name]: value };
+        const currentTrip = updatedOpportunities[index];
+
+
+        currentTrip[name] = value;
+
+        if (name === 'duration') {
+
+            const durationDays = parseInt(value, 10);
+            if (!isNaN(durationDays) && currentTrip.start_date) {
+                const startDate = new Date(currentTrip.start_date);
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + durationDays);
+                currentTrip.end_date = endDate.toISOString().split('T')[0];
+            }
+        } else if (name === 'end_date') {
+
+            if (currentTrip.start_date && value) {
+                const startDate = new Date(currentTrip.start_date);
+                const endDate = new Date(value);
+                const timeDiff = endDate.getTime() - startDate.getTime();
+                const durationDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                currentTrip.duration = durationDays >= 0 ? durationDays.toString() : '0';
+            }
+        } else if (name === 'start_date') {
+
+            if (currentTrip.duration) {
+                const durationDays = parseInt(currentTrip.duration, 10);
+                if (!isNaN(durationDays) && value) {
+                    const startDate = new Date(value);
+                    const endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + durationDays);
+                    currentTrip.end_date = endDate.toISOString().split('T')[0];
+                }
+            } else if (currentTrip.end_date) {
+                const startDate = new Date(value);
+                const endDate = new Date(currentTrip.end_date);
+                const timeDiff = endDate.getTime() - startDate.getTime();
+                const durationDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                currentTrip.duration = durationDays >= 0 ? durationDays.toString() : '0';
+            }
+        }
+
         setTravelOpportunity(updatedOpportunities);
     };
 
@@ -98,11 +164,12 @@ const EditLeadOppView = () => {
 
     const handleCustomerSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form submitted"); // Debugging line
+        console.log("Form submitted");
         try {
             const response = await axios.put(`${baseURL}/api/customers/${customerId}`, customer);
             if (response.status === 200) {
                 setMessage("Customer details updated successfully!");
+                setTimeout(() => setMessage(""), 3000);
                 setEditCustomerMode(false);
             } else {
                 throw new Error("Failed to update customer details");
@@ -110,18 +177,54 @@ const EditLeadOppView = () => {
         } catch (err) {
             console.error("Error updating customer details:", err);
             setMessage("Failed to update customer details");
+            setTimeout(() => setMessage(""), 3000);
         }
     };
     const handleOpportunitySubmit = async (index) => {
         try {
             const trip = travelOpportunity[index];
-            await axios.put(`${baseURL}/api/travel-opportunities/${trip.id}`, trip);
+
+            const childAgesString = trip.child_ages.join(',');
+
+
+            const updatedTrip = {
+                ...trip,
+                child_ages: childAgesString,
+            };
+
+            await axios.put(`${baseURL}/api/travel-opportunities/${trip.id}`, updatedTrip);
             setMessage("Opportunity details updated successfully!");
-            setEditOpportunityMode({ ...editOpportunityMode, [index]: false }); // Exit edit mode after saving
+            setTimeout(() => setMessage(""), 3000);
+            setEditOpportunityMode({ ...editOpportunityMode, [index]: false });
         } catch (err) {
             console.error("Error updating opportunity details:", err);
             setMessage("Failed to update opportunity details");
+            setTimeout(() => setMessage(""), 3000);
         }
+    };
+
+
+    const handleChildrenCountChange = (index, e) => {
+        const { value } = e.target;
+        const count = parseInt(value, 10);
+        const newChildAges = Array.from({ length: count }, (_, i) => travelOpportunity[index].child_ages[i] || '');
+
+        setTravelOpportunity((prev) => {
+            const updatedOpportunities = [...prev];
+            updatedOpportunities[index] = { ...updatedOpportunities[index], children_count: count, child_ages: newChildAges };
+            return updatedOpportunities;
+        });
+    };
+
+
+    const handleChildAgeChange = (index, childIndex, value) => {
+        setTravelOpportunity((prev) => {
+            const updatedOpportunities = [...prev];
+            const updatedChildAges = [...updatedOpportunities[index].child_ages];
+            updatedChildAges[childIndex] = value;
+            updatedOpportunities[index] = { ...updatedOpportunities[index], child_ages: updatedChildAges };
+            return updatedOpportunities;
+        });
     };
 
     return (
@@ -144,8 +247,8 @@ const EditLeadOppView = () => {
                                             {!editCustomerMode ? (
                                                 <Button
                                                     variant="primary"
-                                                    type="button" // Prevents form submission
-                                                    onClick={() => setEditCustomerMode(true)} // Only enables edit mode
+                                                    type="button"
+                                                    onClick={() => setEditCustomerMode(true)}
                                                 >
                                                     Edit
                                                 </Button>
@@ -153,14 +256,14 @@ const EditLeadOppView = () => {
                                                 <>
                                                     <Button
                                                         variant="success"
-                                                        type="submit" // Submits the form
+                                                        type="submit"
                                                     >
                                                         Update
                                                     </Button>
                                                     <Button
                                                         variant="secondary"
-                                                        type="button" // Prevents form submission
-                                                        onClick={() => setEditCustomerMode(false)} // Cancels edit mode
+                                                        type="button"
+                                                        onClick={() => setEditCustomerMode(false)}
                                                         style={{ marginLeft: "10px" }}
                                                     >
                                                         Cancel
@@ -180,7 +283,7 @@ const EditLeadOppView = () => {
                                                             <Form.Label>Customer Id</Form.Label>
                                                             <Form.Control
                                                                 type="text"
-                                                                value={customer.id ? `CUS${String(customer.id).padStart(4, '0')}` : "N/A"}
+                                                                value={customer.id || "N/A"}
                                                                 disabled
                                                             />
                                                         </Form.Group>
@@ -201,16 +304,59 @@ const EditLeadOppView = () => {
                                                 <Row>
                                                     <Col md={6}>
                                                         <Form.Group>
-                                                            <Form.Label><FaPhone /> Phone Number</Form.Label>
-                                                            <Form.Control
-                                                                type="text"
-                                                                name="phone_number"
-                                                                value={customer.phone_number || ""}
-                                                                onChange={handleCustomerChange}
-                                                                disabled={!editCustomerMode}
-                                                            />
+                                                            <Form.Label>
+                                                                <FaPhone /> Phone Number
+                                                            </Form.Label>
+                                                            <div style={{ display: "flex", alignItems: "center" }}>
+
+                                                                <Form.Select
+                                                                    name="country_code"
+                                                                    value={customer.country_code || "+91"}
+                                                                    onChange={handleCustomerChange}
+                                                                    disabled={!editCustomerMode}
+                                                                    style={{
+                                                                        width: "80px",
+                                                                        marginRight: "10px",
+                                                                        padding: "5px",
+                                                                        border: "1px solid #ccc",
+                                                                        borderRadius: "4px",
+                                                                    }}
+                                                                >
+                                                                    {countryCodeOptions.map((code) => (
+                                                                        <option key={code} value={code}>
+                                                                            {code}
+                                                                        </option>
+                                                                    ))}
+                                                                </Form.Select>
+
+
+                                                                <Form.Control
+                                                                    type="text"
+                                                                    name="phone_number"
+                                                                    placeholder="Enter Phone Number"
+                                                                    value={customer.phone_number || ""}
+                                                                    onChange={(e) => {
+                                                                        const value = e.target.value;
+                                                                        if (/^\d*$/.test(value)) {
+                                                                            handleCustomerChange(e);
+                                                                        }
+                                                                    }}
+
+                                                                    disabled={!editCustomerMode}
+                                                                    style={{
+                                                                        flex: 1,
+                                                                        padding: "5px",
+                                                                        border: "1px solid #ccc",
+                                                                        borderRadius: "4px",
+                                                                    }}
+                                                                    required
+                                                                />
+                                                            </div>
+
+
                                                         </Form.Group>
                                                     </Col>
+
                                                     <Col md={6}>
                                                         <Form.Group>
                                                             <Form.Label><FaEnvelope /> Email</Form.Label>
@@ -242,41 +388,41 @@ const EditLeadOppView = () => {
                                                         <Accordion.Header>
                                                             <div className="d-flex justify-content-between align-items-center w-100">
                                                                 <span>
-                                                                    Booked {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                                    InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
                                                                 </span>
                                                                 {!editOpportunityMode[index] ? (
-        <Button
-            variant="primary"
-            size="sm"
-            onClick={(e) => handleEditOpportunity(index, e)}
-        >
-            Edit
-        </Button>
-    ) : (
-        <>
-            <Button
-                variant="success"
-                size="sm"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpportunitySubmit(index);
-                }}
-                style={{ marginRight: "5px" }}
-            >
-                Update
-            </Button>
-            <Button
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    handleCancelOpportunity(index);
-                }}
-            >
-                Cancel
-            </Button>
-        </>
-    )}
+                                                                    <Button
+                                                                        variant="primary"
+                                                                        size="sm"
+                                                                        onClick={(e) => handleEditOpportunity(index, e)}
+                                                                    >
+                                                                        Edit
+                                                                    </Button>
+                                                                ) : (
+                                                                    <>
+                                                                        <Button
+                                                                            variant="success"
+                                                                            size="sm"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleOpportunitySubmit(index);
+                                                                            }}
+                                                                            style={{ marginRight: "5px" }}
+                                                                        >
+                                                                            Update
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="secondary"
+                                                                            size="sm"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleCancelOpportunity(index);
+                                                                            }}
+                                                                        >
+                                                                            Cancel
+                                                                        </Button>
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         </Accordion.Header>
                                                         <Accordion.Body>
@@ -302,6 +448,7 @@ const EditLeadOppView = () => {
                                                                             value={trip.start_date || ""}
                                                                             onChange={(e) => handleOpportunityChange(index, e)}
                                                                             disabled={!editOpportunityMode[index]}
+                                                                            min={new Date().toISOString().split("T")[0]}
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
@@ -316,18 +463,21 @@ const EditLeadOppView = () => {
                                                                             value={trip.end_date || ""}
                                                                             onChange={(e) => handleOpportunityChange(index, e)}
                                                                             disabled={!editOpportunityMode[index]}
+                                                                            min={trip.start_date}
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
+
                                                                 <Col md={6}>
                                                                     <Form.Group>
-                                                                        <Form.Label>Duration</Form.Label>
+                                                                        <Form.Label>Duration(Nights)</Form.Label>
                                                                         <Form.Control
                                                                             type="text"
                                                                             name="duration"
                                                                             value={trip.duration || ""}
                                                                             onChange={(e) => handleOpportunityChange(index, e)}
                                                                             disabled={!editOpportunityMode[index]}
+                                                                            min="1"
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
@@ -352,26 +502,34 @@ const EditLeadOppView = () => {
                                                                             type="number"
                                                                             name="children_count"
                                                                             value={trip.children_count || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
+                                                                            onChange={(e) => handleChildrenCountChange(index, e)}
                                                                             disabled={!editOpportunityMode[index]}
+                                                                            min="0"
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
                                                             </Row>
                                                             <Row>
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Child Age</Form.Label>
-                                                                        <Form.Control
-                                                                            type="text"
-                                                                            name="child_ages"
-                                                                            value={trip.child_ages || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                                <Col md={6}>
+
+                                                                {Array.from({ length: trip.children_count }).map((_, childIndex) => (
+                                                                    <Col md={6} key={childIndex}>
+                                                                        <Form.Group>
+                                                                            <Form.Label>Child Age {childIndex + 1}</Form.Label>
+                                                                            <Form.Select
+                                                                                value={trip.child_ages[childIndex] || ''}
+                                                                                onChange={(e) => handleChildAgeChange(index, childIndex, e.target.value)}
+                                                                                disabled={!editOpportunityMode[index]}
+                                                                            >
+                                                                                <option value="">Select Age</option>
+                                                                                {Array.from({ length: 12 }, (_, i) => (
+                                                                                    <option key={i + 1} value={i + 1}>
+                                                                                        {i + 1}
+                                                                                    </option>
+                                                                                ))}
+                                                                            </Form.Select>
+                                                                        </Form.Group>
+                                                                    </Col>
+                                                                ))}                                                          <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Approx Budget</Form.Label>
                                                                         <Form.Control
@@ -389,11 +547,13 @@ const EditLeadOppView = () => {
                                                                     <Form.Group>
                                                                         <Form.Label>Reminder Setting</Form.Label>
                                                                         <Form.Control
-                                                                            type="date"
+                                                                            type="datetime-local"
                                                                             name="reminder_setting"
                                                                             value={trip.reminder_setting || ""}
                                                                             onChange={(e) => handleOpportunityChange(index, e)}
                                                                             disabled={!editOpportunityMode[index]}
+                                                                            min={new Date().toISOString().slice(0, 16)}
+                                                                            max={trip.start_date ? new Date(trip.start_date).toISOString().slice(0, 16) : ""}
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>

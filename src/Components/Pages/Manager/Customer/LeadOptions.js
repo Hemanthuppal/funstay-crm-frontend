@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
-import "../Potentialleads/LeadOppView.css";
+import "../Potentialleads/LeadDetails.css";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
-import { FaPhone, FaEnvelope } from "react-icons/fa"; // Import FontAwesome icons
-import { Form, Dropdown, Button } from "react-bootstrap"; // Import Bootstrap components
+import { FaPhone, FaEnvelope } from "react-icons/fa"; 
+
 import { baseURL } from "../../../Apiservices/Api";
 
 const LeadOppView = () => {
@@ -19,7 +19,7 @@ const LeadOppView = () => {
     const [activeKey, setActiveKey] = useState("0");
     const location = useLocation();
     const navigate = useNavigate();
-    const customerId = location.state?.id || null; // Ensure customerId is valid
+    const customerId = location.state?.id || null; 
     console.log("customerId=", customerId);
 
     const fetchCustomerDetails = async (id) => {
@@ -27,7 +27,7 @@ const LeadOppView = () => {
             const response = await axios.get(`${baseURL}/api/customers/${id}`);
             console.log("API Response for Customer:", response.data);
 
-            // Ensure correct state update
+           
             if (response.data && typeof response.data === "object") {
                 setCustomer(response.data.customer || response.data);
             } else {
@@ -46,13 +46,13 @@ const LeadOppView = () => {
             const response = await axios.get(`${baseURL}/api/travel-opportunities/${id}`);
             const opportunities = response.data;
 
-            // Fetch comments for each travel opportunity
+            
             const opportunitiesWithComments = await Promise.all(
                 opportunities.map(async (trip) => {
                     const commentsResponse = await axios.get(`${baseURL}/comments/${trip.leadid}`);
                     return {
                         ...trip,
-                        comments: commentsResponse.data, // Assuming the API returns an array of comments
+                        comments: commentsResponse.data, 
                     };
                 })
             );
@@ -86,7 +86,7 @@ const LeadOppView = () => {
                         </Card.Header>
                         <Card.Body>
                             <Row>
-                                {/* Customer Details Section */}
+                                
                                 <Col md={5}>
                                     <h5>Customer Details</h5>
                                     {loading ? (
@@ -97,7 +97,7 @@ const LeadOppView = () => {
                                         <>
                                             <Row>
                                                 <Col md={6}>
-                                                    <p><strong>Customer Id:</strong> {customer.id ? `CUS${String(customer.id).padStart(4, '0')}` : "N/A"}</p>
+                                                    <p><strong>Customer Id:</strong> {customer.id || "N/A"}</p>
                                                 </Col>
                                                 <Col md={6}>
                                                     <p><strong>Name:</strong> {customer.name || "N/A"}</p>
@@ -105,7 +105,7 @@ const LeadOppView = () => {
                                             </Row>
                                             <Row>
                                                 <Col md={6}>
-                                                    <p><strong><FaPhone /> </strong> {customer.phone_number || "N/A"}</p>
+                                                    <p><strong><FaPhone /> </strong>{customer.country_code }&nbsp;{customer.phone_number || "N/A"}</p>
                                                 </Col>
                                                 <Col md={6}>
                                                     <p><strong><FaEnvelope /></strong> {customer.email || "N/A"}</p>
@@ -122,12 +122,12 @@ const LeadOppView = () => {
                                         <Accordion
                                             defaultActiveKey="0"
                                             activeKey={activeKey}
-                                            onSelect={(key) => setActiveKey(key)} // Update activeKey when a different item is opened
+                                            onSelect={(key) => setActiveKey(key)} 
                                         >
                                             {travelOpportunity.map((trip, index) => (
                                                 <Accordion.Item eventKey={index.toString()} key={index}>
                                                     <Accordion.Header>
-                                                        Booked {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                    InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
                                                     </Accordion.Header>
                                                     <Accordion.Body>
                                                         <Row>
@@ -147,7 +147,19 @@ const LeadOppView = () => {
                                                             <Col md={6}><p><strong>Approx Budget:</strong> ${trip.approx_budget}</p></Col>
                                                         </Row>
                                                         <Row>
-                                                            <Col md={12}><p><strong>Reminder Setting:</strong> {new Date(trip.reminder_setting).toLocaleDateString("en-GB")}</p></Col>
+                                                        <Col md={12}>
+    <p>
+        <strong>Reminder Setting:</strong> {new Date(trip.reminder_setting).toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        })}
+    </p>
+</Col>
                                                         </Row>
                                                     </Accordion.Body>
                                                 </Accordion.Item>
@@ -205,7 +217,7 @@ const LeadOppView = () => {
                         </Card.Body>
                         <Card.Footer className="s-LeadOppView-footer">
                             <button className="btn btn-secondary" onClick={() => navigate(-1)}>Back</button>
-                            {/* <button className="btn btn-primary">Edit</button> */}
+                           
                         </Card.Footer>
                     </Card>
                 </div>

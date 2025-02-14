@@ -20,7 +20,7 @@ function FollowUp() {
   useEffect(() => {
     const fetchTravelOpportunity = async () => {
       try {
-        const response = await axios.get( `${baseURL}/travel-opportunity`); // Replace with your actual API endpoint
+        const response = await axios.get( `${baseURL}/travel-opportunity`); 
         setTravelOpportunity(response.data);
       } catch (err) {
         console.log("Failed to fetch schedule data");
@@ -33,7 +33,7 @@ function FollowUp() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/allleads`); // Replace with your actual API endpoint
+        const response = await axios.get(`${baseURL}/api/allleads`); 
         setLeads(response.data);
         console.log("Leads=", response.data);
       } catch (err) {
@@ -44,7 +44,52 @@ function FollowUp() {
     fetchLeads();
   }, []);
   
+  // useEffect(() => {
+    
+  //   const filteredLeads = leads.filter((lead) => lead.managerid == userId);
+  
+   
+  //   const leadsLookup = filteredLeads.reduce((acc, lead) => {
+  //     acc[lead.leadid] = lead;
+  //     return acc;
+  //   }, {});
+  
+  //   const dynamicSchedule = travelOpportunity
+  //     .filter((opportunity) => {
+        
+  //       const reminderDate = new Date(opportunity.reminder_setting);
+  //       const reminderDay = weekdays[reminderDate.getDay()];
+  //       return reminderDay == selectedDay && leadsLookup[opportunity.leadid];
+  //     })
+  //     .map((opportunity) => {
+        
+  //       const lead = leadsLookup[opportunity.leadid];
+  
+        
+  //       console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
+  
+  //       const leadName = lead ? lead.name : "Unknown Lead"; 
+  
+  //       return {
+  //         time: "9:00 - 10:00 AM", 
+  //         title: opportunity.notes || "Untitled Task",
+  //         color: "Sales-badge-orange", 
+  //         lead: leadName, 
+  //         leadid: opportunity.leadid,
+  //       };
+  //     });
+  
+  //   setScheduleData([
+  //     {
+  //       day: selectedDay,
+  //       schedules: dynamicSchedule,
+  //     },
+  //   ]);
+  // }, [selectedDay, travelOpportunity, leads, userId]); 
+  
   useEffect(() => {
+    // Prevent processing if still loading or userId is missing
+  
     // Filter leads based on assignedSalesId matching the current userId
     const filteredLeads = leads.filter((lead) => lead.managerid == userId);
   
@@ -54,40 +99,41 @@ function FollowUp() {
       return acc;
     }, {});
   
-    // Create dynamic schedule data based on the filtered leads and selected day
+    // Create dynamic schedule data based on filtered leads and selected day
     const dynamicSchedule = travelOpportunity
       .filter((opportunity) => {
-        // Convert reminder_setting to the weekday format
+        if (!opportunity.leadid || !opportunity.reminder_setting) return false; // Prevent errors
+  
+        // Convert reminder_setting to a valid date object
         const reminderDate = new Date(opportunity.reminder_setting);
+        if (isNaN(reminderDate)) return false; // Skip invalid dates
+  
         const reminderDay = weekdays[reminderDate.getDay()];
-        return reminderDay == selectedDay && leadsLookup[opportunity.leadid];
+        const reminderYear = reminderDate.getFullYear();
+        const currentYear = new Date().getFullYear(); // Get current year
+  
+        return (
+          reminderDay == selectedDay &&
+          reminderYear == currentYear &&
+          leadsLookup[opportunity.leadid]
+        );
       })
       .map((opportunity) => {
-        // Use the lookup object to get the lead by leadid
         const lead = leadsLookup[opportunity.leadid];
   
-        // Log the lead object to the console to check the matching lead
         console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
   
-        const leadName = lead ? lead.name : "Unknown Lead"; // Fallback if no lead is found
-  
         return {
-          time: "9:00 - 10:00 AM", // Default placeholder for time; update if needed
-          title: opportunity.notes || "Untitled Task",
-          color: "Sales-badge-orange", // Adjust color dynamically if required
-          lead: leadName, // Display lead name instead of leadid
+          time: new Date(opportunity.reminder_setting).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }), // Dynamic time format
+          title: opportunity.notes || "N/A",
+          color: "Sales-badge-orange",
+          lead: lead ? lead.name : "Unknown Lead",
           leadid: opportunity.leadid,
         };
       });
   
-    setScheduleData([
-      {
-        day: selectedDay,
-        schedules: dynamicSchedule,
-      },
-    ]);
-  }, [selectedDay, travelOpportunity, leads, userId]); // Include userId in the dependencies// Add 'leads' to dependencies to update when leads change
-  
+    setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
+  }, [selectedDay, travelOpportunity, leads, userId]);
   
   
 
@@ -96,10 +142,10 @@ function FollowUp() {
     const currentDate = new Date();
     for (let i = 0; i < 7; i++) {
       const date = new Date(currentDate);
-      date.setDate(currentDate.getDate() - currentDate.getDay() + i); // Set to the start of the week (Sunday) and add days
+      date.setDate(currentDate.getDate() - currentDate.getDay() + i); 
       days.push({
         day: weekdays[date.getDay()],
-        date: date.getDate().toString().padStart(2, "0"), // Format to 2-digit date
+        date: date.getDate().toString().padStart(2, "0"), 
       });
     }
     return days;
@@ -115,32 +161,7 @@ function FollowUp() {
         <div className="Sales-schedule-header d-flex justify-content-between align-items-center">
           <h5>Follow-up Schedule</h5>
           <div className="dropdown">
-            {/* <button
-              className="btn btn-outline-primary dropdown-toggle"
-              type="button"
-              id="dropdownMenuButton"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Show
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <li>
-                <a className="dropdown-item" href="#">
-                  Option 1
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item" href="#">
-                  Option 2
-                </a>
-              </li>
-              <li>
-                <a className="dropdown-item" href="#">
-                  Option 3
-                </a>
-              </li>
-            </ul> */}
+           
           </div>
         </div>
         <div className="Sales-day-selector mt-3 d-flex justify-content-between">
@@ -160,21 +181,9 @@ function FollowUp() {
       <div className="card Sales-lead-card p-3 mt-4 Sales-schedule-container">
         <div className="Sales-schedule-header d-flex justify-content-between align-items-center">
           <h5>Today's Schedule</h5>
-          {/* <a href="#" className="Sales-add-schedule-link">
-            Add A Schedule
-          </a> */}
+          
         </div>
-        {/* <div className="Sales-schedule-legends d-flex mb-3">
-          <div className="Sales-legend me-3">
-            <span className="Sales-legend-color Sales-badge-orange"></span> Meetings
-          </div>
-          <div className="Sales-legend me-3">
-            <span className="Sales-legend-color Sales-badge-green"></span> Calls
-          </div>
-          <div className="Sales-legend">
-            <span className="Sales-legend-color Sales-badge-blue"></span> Demos
-          </div>
-        </div> */}
+       
        <ul className="Sales-schedule-list">
         {todaySchedule?.schedules.length > 0 ? (
         todaySchedule.schedules.map((item, index) => (
@@ -185,9 +194,9 @@ function FollowUp() {
             <div className="Sales-schedule-details flex-grow-1 ms-3">
                 <strong>{item.time}</strong>
                 <p className="mb-1">{item.title}</p>
-                <small>
+                {/* <small>
                 Lead by <span className="Sales-schedule-lead">{item.lead}</span>
-                </small>
+                </small> */}
             </div>
             <button className="btn btn-outline-primary Sales-view-details-btn"
              onClick={() => navigate(`/m-details/${item.leadid}`, { state: { leadid: item.leadid } })}>

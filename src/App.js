@@ -19,7 +19,7 @@ import ManagerCustomer from "./Components/Pages/Manager/Customer/Customer";
 import AdminCustomer from "./Components/Pages/Admin/Customer/Customer";
 import SalesCustomer from "./Components/Pages/Sales-Executive/Customer/Customer";
 
-import NavbarAddlead from "./Components/Pages/Sales-Executive/Leads/NavbarAddLeads/Addleads";
+
 
 import ManagerPotentialLeads from "./Components/Pages/Manager/Potentialleads/Potentialleads";
 import ManagerLeadDetails from "./Components/Pages/Manager/Potentialleads/LeadDetails";
@@ -28,14 +28,14 @@ import LeadDetails from "./Components/Pages/Sales-Executive/Potentialleads/OppDe
 import ManagerAddleads from "./Components/Pages/Manager/Leads/AddLeads/Addleads";
 import MyTeam from "./Components/Pages/Manager/MyTeam/MyTeam";
 import ManagerViewLeads from "./Components/Pages/Manager/Leads/ViewLeads/ViewLeads";
-import ProfileForm from "./Components/Pages/Profile/Profile";
+import ProfileForm from "./Components/Pages/Sales-Executive/Profile/Profile";
 // import Service from "./Components/Pages/Admin/Service/ServiceTable/ServiceTable";
 import AllTeams from "./Components/Pages/Admin/AllTeams/AllTeams";
 import AdminViewLeads from "./Components/Pages/Admin/Leads/ViewLeads/ViewLeads";
 import AdminOpportunity from "./Components/Pages/Admin/Potentialleads/Potentialleads";
 
-import AddQuotationModal from "./Components/Pages/Sales-Executive/Quotation/AddQuotationModal";
-import Generatepdf from "./Components/Pages/Sales-Executive/Quotation/GeneratePdf";
+
+
 import CreateCustomerOpportunity from "./Components/Pages/Sales-Executive/Leads/ViewLeads/CreateCustomerOpportinity/CreateandOpportunity";
 import CommentsPage from "./Components/Pages/Sales-Executive/Leads/ViewLeads/Comment/CommentsPage";
 import EditOppLead from './Components/Pages/Sales-Executive/Potentialleads/EditOpp/EditOppLead';
@@ -68,6 +68,12 @@ import EditCustomer from "./Components/Pages/Sales-Executive/Customer/Editcustom
 import M_EditCustomer from "./Components/Pages/Manager/Customer/Editcustomer";
 import A_EditCustomer from "./Components/Pages/Admin/Customer/Editcustomer";
 import ProtectedRoute from "./Components/Pages/ProtectedRoute/ProtectedRoute"; 
+import A_Profile from "./Components/Pages/Admin/Profile/Profile";
+import M_Profile from "./Components/Pages/Manager/Profile/Profile";
+import Addonboarding from "./Components/Pages/Admin/Onboarding/AddEmployeeModal";
+import Viewonboarding from "./Components/Pages/Admin/Onboarding/AllTeams";
+import ViewonboardingId from "./Components/Pages/Admin/Onboarding/TeamMembersTable";
+import Mobile from "./Mobile"
 
 
 function App() {
@@ -95,7 +101,7 @@ function App() {
                 <Route path="/m-customers" element={<ManagerCustomer />} />
                 <Route path="/a-customers" element={<AdminCustomer />} />
                 <Route path="/s-customers" element={<SalesCustomer />} />
-                <Route path="/add-leads" element={<NavbarAddlead />} />
+                
                
                 <Route path="/m-myteam" element={<MyTeam />} />
                 <Route path="/potential-leads" element={<Potentialleads />} />
@@ -105,14 +111,16 @@ function App() {
                 <Route path="/m-add-leads" element={<ManagerAddleads />} />
                 <Route path="/m-view-leads" element={<ManagerViewLeads />} />
                 <Route path="/profile" element={<ProfileForm />} />
+                <Route path="/m-profile" element={<M_Profile />} />
+                <Route path="/a-profile" element={<A_Profile />} />
                 {/* <Route path="/a-service" element={<Service />} /> */}
                 <Route path="/a-allteams" element={<AllTeams />} />
                 <Route path="/a-view-lead" element={<AdminViewLeads />} />
                 <Route path="/a-potential-leads" element={<AdminOpportunity />} />
             
               
-                <Route path="/quo" element={<AddQuotationModal />} />
-                <Route path="/generatepdf" element={<Generatepdf />} />
+               
+               
                 <Route path="/create-customer-opportunity/:leadid" element={<CreateCustomerOpportunity />} />
                 <Route path="/comments/:leadid" element={<CommentsPage />} />
                 <Route path="/edit-lead/:leadid" element={<EditLead />} />
@@ -177,6 +185,18 @@ function App() {
                 <Route path="/editcustomerdetails/:leadid" element={<EditCustomer />} />
                 <Route path="/a-editcustomerdetails/:leadid" element={<A_EditCustomer />} />
                 <Route path="/m-editcustomerdetails/:leadid" element={<M_EditCustomer />} />
+
+
+
+
+                //extra
+                <Route path="/a-onboarding" element={<Addonboarding />} />
+                <Route path="/a-viewonboarding" element={<Viewonboarding />} />
+                <Route path="/a-viewonboarding/:id" element={<ViewonboardingId />} />
+
+
+
+                <Route path="/mobile" element={<Mobile />} />
                 </Route>
             </Routes>
 

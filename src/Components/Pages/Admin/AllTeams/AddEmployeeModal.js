@@ -7,7 +7,7 @@ import "./AddEmployeeModal.css";
 const AddEmployeeModal = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [message, setMessage] = useState(""); // Success message
+  const [message, setMessage] = useState(""); 
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     mobile: "",
@@ -17,7 +17,7 @@ const AddEmployeeModal = () => {
     assignManager: "",
   });
 
-  const [managers, setManagers] = useState([]); // List of managers
+  const [managers, setManagers] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -26,13 +26,13 @@ const AddEmployeeModal = () => {
       try {
         const response = await fetch(`${baseURL}/managers`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // JWT token
+            Authorization: `Bearer ${localStorage.getItem("token")}`, 
           },
         });
         const data = await response.json();
 
         if (response.ok) {
-          setManagers(data.data || []); // Populate managers
+          setManagers(data.data || []); 
         } else {
           throw new Error(data.message || "Failed to fetch managers.");
         }
@@ -45,7 +45,7 @@ const AddEmployeeModal = () => {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
+    e.preventDefault();
 
     const { name, mobile, email, password, role, assignManager } = newEmployee;
 
@@ -62,7 +62,7 @@ const AddEmployeeModal = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // JWT token
+          Authorization: `Bearer ${localStorage.getItem("token")}`, 
         },
         body: JSON.stringify(newEmployee),
       });
@@ -74,7 +74,7 @@ const AddEmployeeModal = () => {
         throw new Error(data.message || "Failed to add employee.");
       }
 
-      // Reset form and show success message
+    
       setNewEmployee({
         name: "",
         mobile: "",
@@ -84,8 +84,10 @@ const AddEmployeeModal = () => {
         assignManager: "",
       });
       setMessage("Employee added successfully!");
+      setTimeout(() => setMessage(""), 3000);
     } catch (error) {
       setError(error.message);
+      setTimeout(() => setMessage(""), 3000);
     } finally {
       setLoading(false);
     }
@@ -166,8 +168,10 @@ const AddEmployeeModal = () => {
                   required
                 >
                   <option value="">Select Role</option>
-                  <option value="manager">Manager</option>
-                  <option value="employee">Employee</option>
+                  <option value="manager">Manager- Sales & Operations
+                  </option>
+                  <option value="employee">Employee- Sales & Operations
+                  </option>
                 </select>
               </div>
               {newEmployee.role === "employee" && (

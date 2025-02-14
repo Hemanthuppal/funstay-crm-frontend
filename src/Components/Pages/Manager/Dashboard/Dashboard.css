@@ -26,7 +26,7 @@
   width: 144%;
 }
 
-/* Gradient Card Styles */
+
 .Manager-gradient-card {
   background: linear-gradient(to right, #ff9966, #ff5e62);
   color: white;
@@ -46,7 +46,7 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* Follow-up Schedule Styles */
+
 .Manager-follow-up-schedule {
   background: #fff;
   padding: 20px;
@@ -83,7 +83,7 @@
   color: #fff;
 }
 
-/* Day Selector Styles */
+
 .Manager-day-selector {
   display: flex;
   justify-content: space-between;
@@ -128,7 +128,7 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Today's Schedule Container */
+
 .Manager-schedule-container {
   margin-top: 20px;
   padding: 20px;
@@ -147,7 +147,7 @@
   text-decoration: underline;
 }
 
-/* Schedule Legends */
+
 .Manager-schedule-legends {
   display: flex;
   align-items: center;
@@ -179,7 +179,7 @@
   background-color: #007bff;
 }
 
-/* Schedule Items */
+
 .Manager-schedule-list {
   list-style: none;
   padding: 0;
@@ -224,7 +224,6 @@
   border-radius: 50%;
 }
 
-/* View Details Button */
 .Manager-view-details-btn {
   background: none;
   border: 1px solid #007bff;
@@ -240,7 +239,8 @@
   color: white;
 }
 
-/* Responsive Adjustments */
+
+
 @media (max-width: 992px) {
   .Manager-gradient-card {
     height: 130px;

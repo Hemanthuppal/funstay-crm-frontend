@@ -7,15 +7,32 @@ import { Form, Row, Col } from 'react-bootstrap';
 import './EditOppLead.css';
 import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
+import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
 const EditOppLead = () => {
   const location = useLocation();
   const { leadid } = location.state;
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+  
+  useEffect(() => {
+   
+    const countries = getCountries();
+    const callingCodes = countries.map(
+      (country) => `+${getCountryCallingCode(country)}`
+    );
+    const uniqueCodes = [...new Set(callingCodes)]; 
+
+ 
+    uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+    setCountryCodeOptions(uniqueCodes);
+  }, []);
   const [formData, setFormData] = useState({
     lead_type: "",
     name: '',
+    country_code: '',
     phone_number: '',
     email: '',
     sources: '',
@@ -34,14 +51,14 @@ const EditOppLead = () => {
     children_count: '',
     child_ages: [],
     approx_budget: '',
-    
+
     notes: '',
     comments: '',
     reminder_setting: '',
     opportunity_status1: '',
     opportunity_status2: '',
     primarySource: '',
-    secondarySource: '',
+    secondarysource: '',
   });
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
@@ -49,13 +66,16 @@ const EditOppLead = () => {
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
+        const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         const leadData = response.data;
-
+        console.log("data",leadData);
+        console.log("Fetched secondarysource:", leadData.secondarysource);
+        console.log("Fetched primarySource:", leadData.primarySource);
         setFormData((prev) => ({
           ...prev,
           lead_type: leadData.lead_type || '',
           name: leadData.name || '',
+          country_code: leadData.country_code || '',
           phone_number: leadData.phone_number || '',
           email: leadData.email || '',
           sources: leadData.sources || '',
@@ -69,7 +89,7 @@ const EditOppLead = () => {
           opportunity_status1: leadData.opportunity_status1 || '',
           opportunity_status2: leadData.opportunity_status2 || '',
           primarySource: leadData.primarySource || '',
-          secondarySource: leadData.secondarySource || '',
+          secondarysource: leadData.secondarysource || '',
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
@@ -83,7 +103,7 @@ const EditOppLead = () => {
         const opportunityData = response.data;
         const formattedStartDate = opportunityData.start_date ? new Date(opportunityData.start_date).toISOString().split('T')[0] : '';
         const formattedEndDate = opportunityData.end_date ? new Date(opportunityData.end_date).toISOString().split('T')[0] : '';
-        const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().split('T')[0] : '';
+        const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().slice(0, 16) : ''; 
         setFormData((prev) => ({
           ...prev,
           destination: opportunityData.destination || '',
@@ -116,35 +136,70 @@ const EditOppLead = () => {
       Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   });
+
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "start_date" || name === "end_date") {
-      const newDate = new Date(value);
-      const endDate = new Date(formData.end_date);
-      const startDate = new Date(formData.start_date);
-
-      if (name === "start_date") {
-        setFormData((prev) => ({
-          ...prev,
-          start_date: value,
-          duration: endDate && startDate ? Math.ceil((endDate - newDate) / (1000 * 60 * 60 * 24)) : '',
-        }));
+  
+    if (name === "start_date") {
+      const newStartDate = new Date(value);
+      const today = new Date();
+  
+      if (newStartDate <= today) {
+        setError("Start date must be a future date.");
+        return;
       } else {
-        setFormData((prev) => ({
-          ...prev,
-          end_date: value,
-          duration: startDate && endDate ? Math.ceil((newDate - startDate) / (1000 * 60 * 60 * 24)) : '',
-        }));
+        setError(null); 
       }
+  
+     
+      setFormData((prev) => ({
+        ...prev,
+        start_date: value,
+        end_date: value, 
+        duration: '0',
+      }));
+    } else if (name === "end_date") {
+      const newEndDate = new Date(value);
+      const startDate = new Date(formData.start_date);
+  
+
+      if (newEndDate < startDate) {
+        setError("End date must be after start date.");
+        return;
+      } else {
+        setError(null); 
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        end_date: value,
+        duration: Math.ceil((newEndDate - startDate) / (1000 * 60 * 60 * 24)),
+      }));
+    } else if (name === "reminder_setting") {
+      const reminderDate = new Date(value);
+      const startDate = new Date(formData.start_date);
+  
+      
+      if (reminderDate > startDate) {
+        setError("Reminder setting must be before the start date.");
+        return;
+      } else {
+        setError(null); 
+      }
+  
+      setFormData((prev) => ({
+        ...prev,
+        reminder_setting: value,
+      }));
     } else {
       setFormData({ ...formData, [name]: value });
     }
-
+  
     if (name === "primaryStatus") {
       setFormData({ ...formData, [name]: value, secondaryStatus: "" });
     }
-
+  
     if (name === "opportunity_status1") {
       setFormData({ ...formData, [name]: value, opportunity_status2: "" });
     }
@@ -173,6 +228,7 @@ const EditOppLead = () => {
   };
 
   const subDropdownOptions = {
+    Referral: ["Grade 3", "Grade 2", "Grade 1"],
     Community: ["BNI", "Rotary", "Lions", "Association", "Others"],
     "Purchased Leads": ["Tripcrafter", "Others"],
     "Social Media": [" Linkedin", "Others"],
@@ -188,10 +244,11 @@ const EditOppLead = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+   
     const leadData = {
       lead_type: formData.lead_type,
       name: formData.name,
+      country_code: formData.country_code,
       phone_number: formData.phone_number,
       email: formData.email,
       sources: formData.sources,
@@ -205,7 +262,7 @@ const EditOppLead = () => {
       opportunity_status1: formData.opportunity_status1,
       opportunity_status2: formData.opportunity_status2,
       primarySource: formData.primarySource,
-      secondarySource: formData.secondarySource,
+      secondarysource: formData.secondarysource,
     };
 
     const opportunityData = {
@@ -217,7 +274,7 @@ const EditOppLead = () => {
       children_count: formData.children_count,
       child_ages: formData.child_ages.join(','),
       approx_budget: formData.approx_budget,
-    
+
       notes: formData.notes,
       comments: formData.comments,
       reminder_setting: formData.reminder_setting,
@@ -228,6 +285,7 @@ const EditOppLead = () => {
       await axios.put(`${baseURL}/api/leads/${leadid}`, leadData);
       await axios.put(`${baseURL}/api/opportunities/${leadid}`, opportunityData);
       setMessage('Updated Successfully');
+      setTimeout(() => setMessage(""), 3000);
     } catch (error) {
       console.error("Error updating data:", error);
       setError("Failed to update data.");
@@ -270,24 +328,13 @@ const EditOppLead = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="editleads-form-container">
-          <h2 className="editleads-form-header">Edit Customer and Opportunity Details</h2> 
+          <h2 className="editleads-form-header">Edit Customer and Opportunity Details</h2>
           <form className="editleads-form" onSubmit={handleSubmit}>
             <div className="s-edit-opp-lead-FormLable">
               <h5>Customer Details</h5>
               {message && <div className="alert alert-info">{message}</div>}
               <Row>
-                {/* <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Lead Type</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="name"
-                      value={formData.lead_type}
-                      onChange={handleChange}
-                      readOnly
-                    />
-                  </Form.Group>
-                </Col> */}
+              
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>
@@ -300,16 +347,58 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Phone Number</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="phone_number"
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
+  <Form.Group className="mb-3">
+    <Form.Label>
+      Phone Number
+    </Form.Label>
+    <div style={{ display: "flex", alignItems: "center" }}>
+      
+      <Form.Select
+        name="country_code"
+        value={formData.country_code || "+91"} 
+        onChange={handleChange}
+        style={{
+          width: "80px",
+          marginRight: "10px",
+          padding: "5px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      >
+        {countryCodeOptions.map((code) => (
+          <option key={code} value={code}>
+            {code}
+          </option>
+        ))}
+      </Form.Select>
+
+     
+      <Form.Control
+        type="text"
+        name="phone_number"
+        placeholder="Enter Phone Number"
+        value={formData.phone_number || ""} 
+        onChange={(e) => {
+          const value = e.target.value;
+          if (/^\d*$/.test(value)) {
+            handleChange(e);
+          }
+        }}
+       
+        style={{
+          flex: 1,
+          padding: "5px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+        required
+      />
+    </div>
+
+    
+  </Form.Group>
+</Col>
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Email</Form.Label>
@@ -343,13 +432,13 @@ const EditOppLead = () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
-                {subDropdownOptions[formData.primarySource] && (
+                {formData.primarySource && subDropdownOptions[formData.primarySource] && (
                   <Col md={4}>
                     <Form.Group className="mb-3">
                       <Form.Label>{formData.primarySource} SubSource</Form.Label>
                       <Form.Select
-                        name="secondarySource"
-                        value={formData.secondarySource || ""}
+                        name="secondarysource"
+                        value={formData.secondarysource || ""}
                         onChange={handleChange}
                       >
                         <option value="">Select SubSource</option>
@@ -363,20 +452,10 @@ const EditOppLead = () => {
                   </Col>
                 )}
 
+           
                 <Col md={4}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Another Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="another_name"
-                      value={formData.another_name}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Another Email</Form.Label>
+                    <Form.Label>Secondary Email</Form.Label>
                     <Form.Control
                       type="email"
                       name="another_email"
@@ -387,7 +466,7 @@ const EditOppLead = () => {
                 </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Another Phone Number</Form.Label>
+                    <Form.Label>Secondary Phone Number</Form.Label>
                     <Form.Control
                       type="text"
                       name="another_phone_number"
@@ -396,70 +475,7 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-                {/* <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Corporate ID</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="corporate_id"
-                      value={formData.corporate_id}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col> */}
-               {/* <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Primary Status</Form.Label>
-                    <Form.Select
-                      name="primaryStatus"
-                      value={formData.primaryStatus}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Status</option>
-                      {leadDropdownOptions.primary.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Secondary Status</Form.Label>
-                    <Form.Select
-                      name="secondaryStatus"
-                      value={formData.secondaryStatus}
-                      onChange={handleChange}
-                      disabled={
-                        !formData.primaryStatus ||
-                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus) 
-                      } 
-                    >
-                      <option value="">Select Status</option>
-                      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
-                        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="" disabled>No options available</option>
-                      )}
-                    </Form.Select>
-                  </Form.Group>
-                </Col> */}
-                <Col md={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
+               
               </Row>
               <hr />
               <h5>Opportunity Details</h5>
@@ -483,6 +499,7 @@ const EditOppLead = () => {
                       name="start_date"
                       value={formData.start_date}
                       onChange={handleChange}
+                      min={new Date().toISOString().split("T")[0]} 
                     />
                   </Form.Group>
                 </Col>
@@ -494,20 +511,30 @@ const EditOppLead = () => {
                       name="end_date"
                       value={formData.end_date}
                       onChange={handleChange}
+                      min={formData.start_date} 
                     />
                   </Form.Group>
                 </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Duration (Days)</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="duration"
-                      value={formData.duration}
-                      readOnly
-                    />
-                  </Form.Group>
-                </Col>
+            
+
+<Col md={4}>
+  <Form.Group className="mb-3">
+    <Form.Label>Duration (Nights)</Form.Label>
+    <Form.Control
+      type="number"
+      name="duration"
+      value={formData.duration}
+      onChange={(e) => {
+        const newDuration = parseInt(e.target.value) || 0;
+        setFormData((prev) => ({
+          ...prev,
+          duration: newDuration,
+          end_date: new Date(new Date(formData.start_date).getTime() + newDuration * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
+        }));
+      }}
+    />
+  </Form.Group>
+</Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>No of Adults</Form.Label>
@@ -564,10 +591,12 @@ const EditOppLead = () => {
                   <Form.Group className="mb-3">
                     <Form.Label>Reminder Setting</Form.Label>
                     <Form.Control
-                      type="date"
+                      type="datetime-local"
                       name="reminder_setting"
                       value={formData.reminder_setting}
                       onChange={handleChange}
+                      min={new Date().toISOString().slice(0, 16)}
+                      max={formData.start_date ? new Date(formData.start_date).toISOString().slice(0, 16) : ""} 
                     />
                   </Form.Group>
                 </Col>
@@ -579,7 +608,7 @@ const EditOppLead = () => {
                       value={formData.opportunity_status1}
                       onChange={handleChange}
                     >
-                      <option value="">Select Status</option>
+                      {!formData.opportunity_status1 && <option value="">Select Status</option>}
                       {dropdownOptions.primary.map((status) => (
                         <option key={status} value={status}>
                           {status}
@@ -588,6 +617,7 @@ const EditOppLead = () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Opportunity Status 2</Form.Label>
@@ -597,16 +627,20 @@ const EditOppLead = () => {
                       onChange={handleChange}
                       disabled={!formData.opportunity_status1}
                     >
-                      <option value="">Select Status</option>
-                      {formData.opportunity_status1 &&
+                      {!formData.opportunity_status2 && <option value="">Select Status</option>}
+                      {formData.opportunity_status1 && dropdownOptions.secondary[formData.opportunity_status1] ? (
                         dropdownOptions.secondary[formData.opportunity_status1].map((status) => (
                           <option key={status} value={status}>
                             {status}
                           </option>
-                        ))}
+                        ))
+                      ) : (
+                        <option value="" disabled>No options available</option>
+                      )}
                     </Form.Select>
                   </Form.Group>
                 </Col>
+
               </Row>
               <Row>
                 <Col md={12}>

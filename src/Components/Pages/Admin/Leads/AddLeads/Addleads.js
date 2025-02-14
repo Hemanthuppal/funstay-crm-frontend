@@ -1,4 +1,5 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
+import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "./AddLeads.css";
@@ -8,15 +9,29 @@ import { baseURL } from "../../../../Apiservices/Api";
 import { AuthContext } from "../../../../AuthContext/AuthContext";
 
 const DynamicForm = () => {
-  const { authToken, userId } = useContext(AuthContext);
+  const { authToken, userId, userName } = useContext(AuthContext);
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+  useEffect(() => {
+    
+    const countries = getCountries();
+    const callingCodes = countries.map(
+      (country) => `+${getCountryCallingCode(country)}`
+    );
+    const uniqueCodes = [...new Set(callingCodes)]; 
+
+   
+    uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+    setCountryCodeOptions(uniqueCodes);
+  }, []);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
     email: '',
     phone_number: '',
-    country_code: '+91', // Default country code
+    country_code: '+91', 
     primarySource: '',
-    secondarySource: '',
+    secondarysource: '',
     destination: '',
     another_name: '',
     another_email: '',
@@ -25,13 +40,14 @@ const DynamicForm = () => {
     description: '',
     assign_to_manager: "",
     managerid: '',
+
   });
 
-  const [message, setMessage] = useState(""); // State for success/error message
+  const [message, setMessage] = useState(""); 
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const nameInputRef = useRef(null);
-  const [phoneError, setPhoneError] = useState(""); // State for phone number error
+  const [phoneError, setPhoneError] = useState(""); 
   const [emailError, setEmailError] = useState("");
   const [error, setError] = useState(null);
   const [managers, setManagers] = useState([]);
@@ -42,7 +58,7 @@ const DynamicForm = () => {
       try {
         const response = await fetch(`${baseURL}/managers`, {
           headers: {
-            Authorization: `Bearer ${authToken}`, // Include token if needed
+            Authorization: `Bearer ${authToken}`,
           },
         });
         if (!response.ok) {
@@ -103,14 +119,17 @@ const DynamicForm = () => {
     const dataToSubmit = {
       ...formData,
       assign_to_manager: formData.assign_to_manager,
+      manager_id: formData.managerid,
+      admin: userName,
     };
 
     try {
       const response = await axios.post(`${baseURL}/api/leads`, dataToSubmit);
       console.log(response.data);
       setMessage("Lead added successfully!");
+      setTimeout(() => setMessage(""), 3000);
 
-      // Reset form data
+      
       setFormData({
         lead_type: "group",
         name: '',
@@ -118,7 +137,7 @@ const DynamicForm = () => {
         phone_number: '',
         country_code: '+91',
         primarySource: '',
-        secondarySource: '',
+        secondarysource: '',
         another_name: '',
         another_email: '',
         another_phone_number: '',
@@ -130,11 +149,13 @@ const DynamicForm = () => {
     } catch (error) {
       console.error("Error adding lead:", error);
       setMessage("Error: Failed to add lead. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
   const renderForm = () => {
     const subDropdownOptions = {
+      Referral: ["Grade 3", "Grade 2", "Grade 1"],
       Community: ["BNI", "Rotary", "Lions", "Association", "Others"],
       "Purchased Leads": ["Tripcrafter", "Others"],
       "Social Media": ["Linkedin", "Others"],
@@ -148,14 +169,14 @@ const DynamicForm = () => {
       ],
     };
 
-    // Handle changes in the main dropdown
+  
     const handleSourceChange = (e) => {
       const { name, value } = e.target;
       setFormData({ ...formData, [name]: value });
 
-      // Clear the subdropdown selection when a new main dropdown is selected
+    
       if (name === "primarySource") {
-        setFormData({ ...formData, [name]: value, secondarySource: "" });
+        setFormData({ ...formData, [name]: value, secondarysource: "" });
       }
     };
 
@@ -192,14 +213,13 @@ const DynamicForm = () => {
                 }
               }}
             />
-            {/* Show email error message below the input */}
+        
             {emailError && <span style={{ color: "red", fontSize: "12px" }}>{emailError}</span>}
           </div>
         </div>
         <div className="addleads-input-group">
           <label>Phone Number<span style={{ color: "red" }}> *</span></label>
           <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Country Code Input */}
             <select
               name="country_code"
               value={formData.country_code}
@@ -212,15 +232,12 @@ const DynamicForm = () => {
                 borderRadius: "4px",
               }}
             >
-              <option value="+1">+1</option>
-              <option value="+91">+91</option>
-              <option value="+44">+44</option>
-              <option value="+61">+61</option>
-              <option value="+81">+81</option>
-              {/* Add more country codes as needed */}
+              {countryCodeOptions.map(code => (
+                <option key={code} value={code}>{code}</option>
+              ))}
             </select>
 
-            {/* Phone Number Input */}
+           
             <input
               type="text"
               name="phone_number"
@@ -229,7 +246,7 @@ const DynamicForm = () => {
               onChange={(e) => {
                 const value = e.target.value;
                 if (/^\d*$/.test(value)) {
-                  handleChange(e); // Update the value if it's a valid number
+                  handleChange(e);
                 }
               }}
               onBlur={(e) => {
@@ -248,7 +265,6 @@ const DynamicForm = () => {
               required
             />
           </div>
-          {/* Show error message below the input */}
           {phoneError && <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>}
         </div>
         <div className="addleads-input-group">
@@ -271,30 +287,12 @@ const DynamicForm = () => {
             <option value="Other">Other</option>
           </select>
         </div>
-
-        <div className="addleads-input-group">
-          <label>Assign To</label>
-          <select
-            name="managerid"  // Use managerid here to store the ID in formData
-            value={formData.managerid}  // Set value to managerid
-            onChange={handleChange}
-          >
-            <option value="">Select Employee</option>
-            {managers.map((employee) => (
-              <option key={employee.id} value={employee.id}>
-                {employee.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Conditionally render the subdropdown */}
         {formData.primarySource && subDropdownOptions[formData.primarySource] && (
           <div className="addleads-input-group">
             <label>{formData.primarySource} SubSource</label>
             <select
-              name="secondarySource"
-              value={formData.secondarySource || ""}
+              name="secondarysource"
+              value={formData.secondarysource || ""}
               onChange={handleChange}
             >
               <option value="">Select SubSource</option>
@@ -307,17 +305,24 @@ const DynamicForm = () => {
           </div>
         )}
         <div className="addleads-input-group">
-          <label>Another Name</label>
-          <input
-            type="text"
-            name="another_name"
-            placeholder="Enter Another Name"
-            value={formData.another_name}
+          <label>Assign To</label>
+          <select
+            name="managerid"
+            value={formData.managerid}  
             onChange={handleChange}
-          />
+          >
+            <option value="">Select Employee</option>
+            {managers.map((employee) => (
+              <option key={employee.id} value={employee.id}>
+                {employee.name}
+              </option>
+            ))}
+          </select>
         </div>
+
+     
         <div className="addleads-input-group">
-          <label>Another Email</label>
+          <label>Secondary Email</label>
           <input
             type="email"
             name="another_email"
@@ -327,7 +332,7 @@ const DynamicForm = () => {
           />
         </div>
         <div className="addleads-input-group">
-          <label>Another Phone Number</label>
+          <label>Secondary Phone Number</label>
           <input
             type="text"
             name="another_phone_number"

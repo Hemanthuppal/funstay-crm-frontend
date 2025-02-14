@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { userId } = useContext(AuthContext); // Get userId from context
+  const { userId } = useContext(AuthContext); 
   const [collapsed, setCollapsed] = useState(false);
   const [selectedDay, setSelectedDay] = useState("Tue");
   const [counts, setCounts] = useState({
@@ -37,7 +37,7 @@ const Dashboard = () => {
           `${baseURL}/leads/yesterday/${userId}`,
           `${baseURL}/leads/confirmed/yesterday/${userId}`,
           `${baseURL}/leads/in-progress/yesterday/${userId}`,
-          `${baseURL}/leads/meta-ads/${userId}`, // New endpoint for Meta Ads
+          `${baseURL}/leads/meta-ads/${userId}`, 
           `${baseURL}/leads/not-meta-ads/${userId}` 
         ];
 
@@ -52,7 +52,7 @@ const Dashboard = () => {
           leadsYesterday: responses[3].data.count,
           confirmedYesterday: responses[4].data.count,
           inProgressYesterday: responses[5].data.count,
-          metaAdsCount: responses[6].data.count, // Count of Meta Ads
+          metaAdsCount: responses[6].data.count, 
           notMetaAdsCount: responses[7].data.count 
         });
         setLoading(false);
@@ -63,14 +63,14 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [userId]); // Add userId as a dependency
+  }, [userId]); 
 
   const totalLeads = counts.metaAdsCount + counts.notMetaAdsCount;
 
-  // Calculate width percentage for Meta Ads
+
   const metaAdsWidth = totalLeads > 0 ? (counts.metaAdsCount / totalLeads) * 100 : 0;
 
-  // Calculate width percentage for Others
+  
   const notMetaAdsWidth = totalLeads > 0 ? (counts.notMetaAdsCount / totalLeads) * 100 : 0;
 
   const scheduleData = [
@@ -106,9 +106,9 @@ const Dashboard = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`dashboard1 ${collapsed ? 'collapsed' : ''}`}>
         <div className="container">
-          {/* Cards Section */}
+       
           <div className="row Manager-dashboard-cards-container justify-content-center mt-4">
-            <div className="col-lg-7 col-md-7">
+            <div className="col-lg-7 col-md-12">
               <div className="row">
                 {[
                  {
@@ -129,18 +129,13 @@ const Dashboard = () => {
                   subtitle: `In-Progress Yesterday: ${counts.inProgressYesterday}`,
                   navigateTo: "/m-view-leads"
                 },
-                // {
-                //   title: "Quotation Generated Today",
-                //   value: "02",
-                //   subtitle: "Leads Rejected Yesterday: 00",
-                //   navigateTo: "#" // Keep static if no backend data
-                // },
+            
                 ].map((card, index) => (
                   <div className="col-lg-6 col-md-6 col-sm-6 mb-3" key={index}
-                  onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} // Navigate only if not static
+                  onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} 
                     style={{ cursor: card.navigateTo !== "#" ? "pointer" : "default" }}>
                     <div className="card Manager-gradient-card">
-                      <h5>{card.title}</h5>
+                      <h5 className="pt-3">{card.title}</h5>
                       <h2>{card.value}</h2>
                       <p>{card.subtitle}</p>
                     </div>
@@ -155,14 +150,14 @@ const Dashboard = () => {
                       label: "Social Media",
                       icon: "fa-solid fa-share-nodes",
                       value: counts.metaAdsCount,
-                      width: `${metaAdsWidth}%`, // Set dynamic width for Meta Ads
+                      width: `${metaAdsWidth}%`, 
                       color: "#6c63ff",
                     },
                     {
                       label: "Others",
                       icon: "fa-solid fa-layer-group",
                       value: counts.notMetaAdsCount,
-                      width: `${notMetaAdsWidth}%`, // Set dynamic width for Others
+                      width: `${notMetaAdsWidth}%`, 
                       color: "#dc3545",
                     },
                   ].map((lead, index) => (
@@ -197,7 +192,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Follow-up Schedule Section */}
+            
             <div className="col-lg-5 col-md-12 mt-4">
               <FollowUp schedule={todaySchedule?.schedules || []} />
             </div>

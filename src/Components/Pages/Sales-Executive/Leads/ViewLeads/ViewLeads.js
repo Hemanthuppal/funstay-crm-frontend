@@ -43,12 +43,15 @@ const ViewLeads = () => {
       if (response.ok) {
         setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
         setMessage('The lead has been deleted successfully.');
+        setTimeout(() => setMessage(""), 3000);
       } else {
         setMessage('Failed to delete the lead. Please try again later.');
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error("Error:", error);
       setMessage('An unexpected error occurred while deleting the lead.');
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
@@ -99,14 +102,17 @@ console.log(JSON.stringify(body, null, 2));
       
       if (response.status === 200) {
         setMessage(response.data.message); // Use the message from the response
+        setTimeout(() => setMessage(""), 3000);
         console.log('Status updated:', response.data);
       } else {
         console.error('Failed to update status:', response.data);
         setMessage('Failed to update status. Please try again.');
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error('Error updating status:', error);
       setMessage('An error occurred while updating the status. Please try again.');
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
@@ -182,20 +188,11 @@ console.log(JSON.stringify(body, null, 2));
 
   const columns = useMemo(
     () => [
-      // {
-      //   Header: "S.No",
-      //   accessor: (row, index) => index + 1,
-      // },
+      
       {
         Header: "Lead Id",
-        accessor: "leadDetails",
-        Cell: ({ row }) => (
-          <div>
-            
-            <div>{row.original.leadcode}</div>
-            {/* <div>{row.original.lead_type}</div> */}
-          </div>
-        ),
+        accessor: "leadid",
+       
       },
       {
         Header: "Name",
@@ -226,18 +223,28 @@ console.log(JSON.stringify(body, null, 2));
         Header: "Email",
         accessor: "email",
         Cell: ({ row }) => (
-          <div  >
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "150px" // Adjust width as needed
+            }}
+            title={row.original.email} // Show full email on hover
+          >
             {row.original.email}
           </div>
         ),
       },
+      
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
           const primaryStatus = row.original.primaryStatus;
+          const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
-
+      
           return (
             <div className="d-flex align-items-center">
               <select
@@ -247,7 +254,7 @@ console.log(JSON.stringify(body, null, 2));
                 }
                 className="form-select me-2"
               >
-                <option value="">Select Primary Status</option>
+                {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -255,14 +262,14 @@ console.log(JSON.stringify(body, null, 2));
                 ))}
               </select>
               <select
-                value={row.original.secondaryStatus}
+                value={secondaryStatus}
                 onChange={(e) =>
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select"
-                disabled={isSecondaryDisabled} // Disable if no primary status or no secondary options
+                disabled={isSecondaryDisabled}
               >
-                <option value="">Select Secondary Status</option>
+                {!secondaryStatus && <option value="">Select Secondary Status</option>}
                 {secondaryOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -273,6 +280,7 @@ console.log(JSON.stringify(body, null, 2));
           );
         },
       },
+      
       {
         Header: "Source",
         accessor: "sources",

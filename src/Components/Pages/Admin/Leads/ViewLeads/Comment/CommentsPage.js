@@ -3,19 +3,21 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
-import './CommentsPage.css'; // Optional: Create a CSS file for styling
-import Navbar from '../../../../../Shared/Navbar/Navbar'; // Update the path
+import './CommentsPage.css';
+import Navbar from '../../../../../Shared/Navbar/Navbar'; 
 import { useNavigate } from 'react-router-dom';
 import { baseURL } from '../../../../../Apiservices/Api';
 
 const CommentsPage = () => {
-  const { leadid } = useParams(); // Gets the lead ID from the URL
+  const { leadid } = useParams(); 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [collapsed, setCollapsed] = useState(false);
+  const [assignedSalesId, setAssignedSalesId] = useState(null);
+  const [managerid, setManagerId] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
-    // Fetch comments based on lead ID when the component mounts
+   
     const fetchComments = async () => {
       try {
         const response = await axios.get(`${baseURL}/comments/${leadid}`);
@@ -31,15 +33,44 @@ const CommentsPage = () => {
     fetchComments();
   }, [leadid]);
 
+
+ 
+  useEffect(() => {
+    const fetchLeadDetails = async () => {
+      try {
+        const leadResponse = await axios.get(`${baseURL}/api/leads/${leadid}`);
+       
+        setAssignedSalesId(leadResponse.data.assignedSalesId);
+        setManagerId(leadResponse.data.managerid);
+        
+      } catch (error) {
+        console.error("Error fetching lead details:", error);
+      }
+    };
+
+    fetchLeadDetails();
+  }, [leadid]);
+
+
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
-
+    const trimmedComment = newComment.trim();
+    const commentName = "Admin";
+    
     const comment = {
-      name: "Admin",
+      name: commentName,
       leadid: leadid,
       timestamp: new Date().toISOString(),
-      text: newComment.trim(),
+      text: trimmedComment,
+      notificationmessage: `${commentName}:${trimmedComment}  `,
+     
+      managerId: managerid,
+      userId: assignedSalesId,
+      email: null
     };
+    
+  
+    
     console.log(JSON.stringify(comment, null, 2));
     try {
       const commenturl = `${baseURL}/comments/add`;
@@ -61,21 +92,7 @@ const CommentsPage = () => {
     }
   };
 
-  // const COLORS = [
-  //   '#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
-  //   '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe'
-  // ];
-
-  // // Function to deterministically get a color based on the name string
-  // function getNameColor(name) {
-  //   let hash = 0;
-  //   for (let i = 0; i < name.length; i++) {
-  //     hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  //   }
-  //   // Use modulo to pick a color from the COLORS array
-  //   const index = Math.abs(hash) % COLORS.length;
-  //   return COLORS[index];
-  // }
+  
 
   return (
     <div className="salesViewLeadsContainer">
@@ -84,7 +101,6 @@ const CommentsPage = () => {
         <div className="comment-form-container">
           <h3 className='comment-form-header'>Comments</h3>
 
-          {/* Input Field for New Comment */}
           <div className="mb-3 opp-modal-footer">
             <Form.Group>
               <Form.Label>Add a New Comment</Form.Label>
@@ -105,27 +121,38 @@ const CommentsPage = () => {
             </Form.Group>
           </div>
 
-          {/* Display Existing Comments */}
+       
           <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
-            {[...comments]
-              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort latest comments on top
-              .map((comment, index) => (
-                <div key={index} className="mb-3 d-flex justify-content-between align-items-start">
-                  <div>
-                    <p className="text-muted mb-1">{new Date(comment.timestamp).toLocaleString()}</p>
-                    <p>
-                      {/* Wrap the name in <strong> to bold it and style it with a specific color */}
-                      <strong >
-                        {comment.name}
-                      </strong>
-                      : {comment.text}
-                    </p>
-                  </div>
-                </div>
-              ))}
-          </div>
+  {[...comments]
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) 
+    .map((comment, index) => (
+      <div key={index} className="mb-3">
+        
+         <p style={{ fontSize: "13px", color: "gray" }}>
+  {new Date(comment.timestamp).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  })}
+</p>
 
-          {/* Close Button */}
+      
+        <p>
+         
+          <strong>{comment.name}</strong>: {comment.text}
+        </p>
+        
+       
+      </div>
+    ))}
+</div>
+
+       
           <div className="mt-3">
             <Button className="comment-close-btn comment-btn" onClick={() => navigate(-1)}>
               Back

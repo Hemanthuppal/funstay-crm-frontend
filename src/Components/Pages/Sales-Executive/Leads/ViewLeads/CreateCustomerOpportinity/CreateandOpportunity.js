@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { baseURL } from "../../../../../Apiservices/Api";
+import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
@@ -12,8 +13,22 @@ const CreateCustomerOpportunity = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [duration, setDuration] = useState("");
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+ 
+
+  useEffect(() => {
+    const countries = getCountries();
+    const callingCodes = countries.map(
+      (country) => `+${getCountryCallingCode(country)}`
+    );
+    const uniqueCodes = [...new Set(callingCodes)];
+    uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+    setCountryCodeOptions(uniqueCodes);
+  }, []);
   const [customerData, setCustomerData] = useState({
     name: "",
+    country_code: "",
     phone_number: "",
     email: "",
     travel_type: "",
@@ -29,6 +44,7 @@ const CreateCustomerOpportunity = () => {
     approx_budget: "",
     reminder_setting: "",
     notes: "",
+    description: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -39,13 +55,25 @@ const CreateCustomerOpportunity = () => {
 
   const handleTabClick = (tabName) => setActiveTab(tabName);
 
+  // const calculateDuration = (start, end) => {
+  //   if (start && end) {
+  //     const startDateObj = new Date(start);
+  //     const endDateObj = new Date(end);
+  //     const diffTime = endDateObj - startDateObj;
+  //     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  //     setDuration(diffDays >= 0 ? `${diffDays} days` : "Invalid duration");
+  //   } else {
+  //     setDuration("");
+  //   }
+  // };
+
   const calculateDuration = (start, end) => {
     if (start && end) {
       const startDateObj = new Date(start);
       const endDateObj = new Date(end);
       const diffTime = endDateObj - startDateObj;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setDuration(diffDays >= 0 ? `${diffDays} days` : "Invalid duration");
+      setDuration(diffDays >= 0 ? diffDays : 0); // Set duration as a number
     } else {
       setDuration("");
     }
@@ -81,12 +109,14 @@ const CreateCustomerOpportunity = () => {
       console.log(JSON.stringify(response, null, 2));
       if (response.status === 200) {
         setMessage("Customer data submitted successfully!");
+        setTimeout(() => setMessage(""), 3000);
         setActiveTab("opportunity"); // Switch to the "opportunity" tab after submission
       }
     } catch (err) {
       console.error("Error updating customer and lead data:", err);
       setError("Error updating customer and lead data.");
       setMessage("Failed to update customer and lead data. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
     } finally {
       setLoading(false);
     }
@@ -96,7 +126,7 @@ const CreateCustomerOpportunity = () => {
     setLoading(true);
     setError(null);
 
-    if (!formData.destination || !startDate || !endDate || !formData.reminder_setting || !formData.notes) {
+    if (!formData.destination || !startDate || !endDate ) {
       setError("All required fields must be filled in.");
       setLoading(false);
       return;
@@ -123,12 +153,14 @@ const CreateCustomerOpportunity = () => {
       const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);
       if (response.status === 201) {
         setMessage("Opportunity created successfully!");
+        setTimeout(() => setMessage(""), 3000);
         navigate("/potential-leads");
       }
     } catch (err) {
       console.error("Error creating opportunity:", err);
       setError("Error creating opportunity. Please try again.");
       setMessage("Failed to create opportunity. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
     } finally {
       setLoading(false);
     }
@@ -143,9 +175,12 @@ const CreateCustomerOpportunity = () => {
         setLeadData(response.data);
 
         // Pre-fill destination if available in lead data
-        if (response.data.destination) {
-          setFormData((prev) => ({ ...prev, destination: response.data.destination }));
-        }
+       
+          setFormData((prev) => ({ ...prev, destination: response.data.destination,
+            notes: response.data.description || "", 
+            description: response.data.description || ""
+          }));
+       
       } catch (err) {
         console.error("Error fetching lead data:", err);
         setError("Error fetching lead data.");
@@ -163,6 +198,7 @@ const CreateCustomerOpportunity = () => {
         setFormData((prev) => ({
           ...prev,
           name: response.data.name || "",
+          country_code: response.data.country_code || "",
           phone_number: response.data.phone_number || "",
           email: response.data.email || "",
           travel_type: response.data.travel_type || "",
@@ -221,9 +257,56 @@ const CreateCustomerOpportunity = () => {
                 <input type="text" name="name" value={customerData.name} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
-                <label>Mobile</label>
-                <input type="number" name="phone_number" value={customerData.phone_number} onChange={handleChange} />
-              </div>
+  <label>
+    Mobile
+  </label>
+  <div style={{ display: "flex", alignItems: "center" }}>
+    {/* Country Code Dropdown */}
+    <select
+      name="country_code"
+      value={customerData.country_code || "+91"} // Default country code
+      onChange={handleChange}
+      style={{
+        width: "80px",
+        marginRight: "10px",
+        padding: "5px",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+      }}
+    >
+      {countryCodeOptions.map((code) => (
+        <option key={code} value={code}>
+          {code}
+        </option>
+      ))}
+    </select>
+
+    {/* Phone Number Input */}
+    <input
+      type="text"
+      name="phone_number"
+      placeholder="Enter Mobile Number"
+      value={customerData.phone_number || ""} // Prevent undefined error
+      onChange={(e) => {
+        const value = e.target.value;
+        if (/^\d*$/.test(value)) {
+          handleChange(e);
+        }
+      }}
+    
+      style={{
+        flex: 1,
+        padding: "5px",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+      }}
+      required
+    />
+  </div>
+
+ 
+</div>
+
               <div className="createcustomer-input-group">
                 <label>Email ID</label>
                 <input type="email" name="email" value={customerData.email} onChange={handleChange} />
@@ -232,10 +315,10 @@ const CreateCustomerOpportunity = () => {
                 <label>Type of Travel</label>
                 <input type="text" name="travel_type" value={customerData.travel_type} onChange={handleChange} />
               </div>
-              <div className="createcustomer-input-group">
+              {/* <div className="createcustomer-input-group">
                 <label>Passport Number</label>
                 <input type="text" name="passport_number" value={customerData.passport_number} onChange={handleChange} />
-              </div>
+              </div> */}
               <div className="createcustomer-input-group">
                 <label>Preferred Contact Method</label>
                 <select
@@ -300,10 +383,27 @@ const CreateCustomerOpportunity = () => {
                   required
                 />
               </div>
-              <div className="createcustomer-input-group">
+              {/* <div className="createcustomer-input-group">
                 <label>Duration (Calculated)</label>
                 <input type="text" value={duration} readOnly />
-              </div>
+              </div> */}
+              <div className="createcustomer-input-group">
+              <label>Duration (Nights)</label>
+  <input
+    type="number"
+    value={duration ? parseInt(duration) : ""}
+    onChange={(e) => {
+      const newDuration = parseInt(e.target.value) || 0;
+      setDuration(newDuration);
+      if (startDate) {
+        const newEndDate = new Date(startDate);
+        newEndDate.setDate(newEndDate.getDate() + newDuration);
+        setEndDate(newEndDate.toISOString().split("T")[0]);
+      }
+    }}
+    required
+  />
+</div>
 
               <div className="createcustomer-input-group">
                 <label>No of Adults</label>
@@ -351,27 +451,27 @@ const CreateCustomerOpportunity = () => {
                   placeholder="Optional"
                 />
               </div>
-              <div className="createcustomer-input-group">
-                <label>Reminder Setting<span style={{ color: "red" }}> *</span></label>
-                <input
-                  type="date"
-                  name="reminder_setting"
-                  min={new Date().toISOString().split("T")[0]}
-                  max={startDate}
-                  value={formData.reminder_setting}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
               <div className="createcustomer-input-group full-width">
-                <label>Notes<span style={{ color: "red" }}> *</span></label>
+                <label>Notes</label>
                 <textarea
                   name="notes"
-                  value={formData.notes}
+                  value={formData.notes}  // Pre-filled with lead's description
                   onChange={handleChange}
                   required
                 />
               </div>
+              <div className="createcustomer-input-group">
+  <label>Reminder Setting</label>
+  <input
+    type="datetime-local" // Change to datetime-local for date and time
+    name="reminder_setting"
+    min={new Date().toISOString().slice(0, 16)} // Set min to current date and time
+    max={startDate ? new Date(startDate).toISOString().slice(0, 16) : ""} // Set max to start date if available
+    value={formData.reminder_setting}
+    onChange={handleChange}
+    required
+  />
+</div>
             </div>
           </div>
 

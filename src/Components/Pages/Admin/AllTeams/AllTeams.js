@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 const AdminCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const [managers, setManagers] = useState([]);
 
@@ -35,9 +36,13 @@ const AdminCustomer = () => {
       const response = await axios.delete(`${baseURL}/employees/${id}`);
       if (response.status === 204) {
         setManagers(managers.filter(manager => manager.id !== id));
+        setMessage("Employee deleted successfully!");
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error("Error deleting employee:", error);
+      setMessage("Failed to delete employee. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
@@ -95,6 +100,7 @@ const AdminCustomer = () => {
                 + Add Employee
               </button>
             </h3>
+            {message && <div className="alert alert-success">{message}</div>}
             <DataTable columns={columns} data={managers} />
           </div>
         </div>

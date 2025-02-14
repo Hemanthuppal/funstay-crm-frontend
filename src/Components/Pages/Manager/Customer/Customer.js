@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import DataTable from './../../../Layout/Table/TableLayout'; // Make sure to import your DataTable component
+import DataTable from './../../../Layout/Table/TableLayout'; 
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "./Customer.css";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
@@ -10,17 +10,17 @@ import { AuthContext } from "../../../AuthContext/AuthContext";
 
 const SalesCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [data, setData] = useState([]); // State for storing customers
+  const [data, setData] = useState([]); 
   const navigate = useNavigate();
   const { authToken, userId } = useContext(AuthContext);
 const [message, setMessage] = useState(null);
-  // Fetch customers on component load
+  
 
 
   useEffect(() => {
     const fetchCustomersAndLeads = async () => {
       try {
-        // Fetch all leads
+       
         const leadsResponse = await axios.get(`${baseURL}/api/allleads`, {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -30,12 +30,12 @@ const [message, setMessage] = useState(null);
         if (leadsResponse.status === 200) {
           const leadsData = leadsResponse.data;
   
-          // Filter leads matching criteria
+          
           const filteredLeads = leadsData.filter(
             (lead) => lead.managerid == userId && lead.status == 'opportunity'
           );
   
-          // Fetch all customers
+       
           const customersResponse = await axios.get(`${baseURL}/api/customers`, {
             headers: {
               Authorization: `Bearer ${authToken}`,
@@ -45,12 +45,17 @@ const [message, setMessage] = useState(null);
           if (customersResponse.status === 200) {
             const customersData = customersResponse.data;
   
-            // Find matching customers based on customerid in filtered leads
-            const matchedCustomers = customersData.filter(customer =>
+           
+            const matchedCustomers = customersData
+            .filter(customer =>
               filteredLeads.some(lead => lead.customerid == customer.id)
-            );
+            )
+            .map(customer => ({
+              ...customer,
+              formattedId: `CUS${String(customer.id).padStart(4, '0')}` 
+            }));
   
-            setData(matchedCustomers); // Update state with matched customer data
+            setData(matchedCustomers); 
           } else {
             console.error("Error fetching customers:", customersResponse.statusText);
           }
@@ -71,52 +76,20 @@ const [message, setMessage] = useState(null);
 
     try {
       const response = await axios.delete(`${baseURL}/api/customers/${customerId}`);
-      setMessage(response.data.message); // Show success message
+      setMessage(response.data.message);
+      setTimeout(() => setMessage(""), 3000);
 
-      // Optionally, update UI by removing the deleted customer
-      // Example: If using state to store customers, filter out the deleted one
+      
       setData((prevCustomers) => prevCustomers.filter(customer => customer.id !== customerId));
 
     } catch (error) {
       console.error("Error deleting customer:", error);
       setMessage("Failed to delete customer. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
-  // useEffect(() => {
-  //   const fetchCustomers = async () => {
-  //     try {
-  //       const response = await axios.get(`${baseURL}/api/customers`, {
-  //         headers: {
-  //           Authorization: `Bearer ${authToken}`, // Include token if needed
-  //         },
-  //       });
-  //       if (response.status === 200) {
-  //         // Filter customers based on manager ID
-  //         const filteredCustomers = response.data.filter(
-  //           (customer) => customer.managerid === userId
-  //         );
-  //         setData(filteredCustomers); // Update state with filtered customer data
-  //       } else {
-  //         console.error("Error fetching customers:", response.statusText);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching customers:", error);
-  //       alert("Failed to fetch customers.");
-  //     }
-  //   };
 
-  //   fetchCustomers();
-  // }, [authToken, userId]); // Add userId to the dependency array
-
-  // const navigateToLead = (leadId) => {
-  //   navigate(`/m-customer-details/${leadId}`, {
-  //     state: { leadid: leadId },
-  //   });
-  // };
-
-
-  //dummy data
   const navigateToLead = (id) => {
     navigate(`/m-customerdetails/${id}`, {
       state: { id: id },
@@ -129,30 +102,25 @@ const [message, setMessage] = useState(null);
     };
   
    
-  // Columns for DataTable component
+
   const columns = React.useMemo(
     () => [
       {
         Header: "S.No",
-        accessor: (row, index) => index + 1,  // This will generate the serial number based on the row index
+        accessor: (row, index) => index + 1,  
       },
       {
         Header: "Customer ID",
-        accessor: "id", // This is the key in your customer data
-        Cell: ({ row }) => {
-          const customerId = row.original.id; // Get the customer ID from the row
-          return customerId !== undefined
-            ? `CUS${String(customerId).padStart(4, '0')}` // Format the ID
-            : "N/A"; // Fallback if ID is not available
-        },
+        accessor: "id", 
+      
       },
       {
         Header: "Name",
-        accessor: "name", // Ensure this matches the key in your customer data
+        accessor: "name", 
         Cell: ({ row }) => (
           <div
             style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-            onClick={() => navigateToLead(row.original.id)} // Navigate on click
+            onClick={() => navigateToLead(row.original.id)} 
           >
             {row.original.name}
           </div>
@@ -160,38 +128,13 @@ const [message, setMessage] = useState(null);
       },
       {
         Header: "Mobile No",
-        accessor: "phone_number", // Ensure this matches the key in your customer data
+        accessor: "phone_number",
       },
       {
         Header: "Email",
-        accessor: "email", // Ensure this matches the key in your customer data
+        accessor: "email", 
       },
-      // {
-      //   Header: "Actions",
-      //   accessor: "actions",
-      //   Cell: ({ row }) => (
-      //     <div>
-      //       <button
-      //         className="btn btn-primary btn-sm me-2"
-      //         onClick={() => navigateToLead(row.original.id)} // Use customer ID
-      //       >
-      //         <FaEye />
-      //       </button>
-      //       {/* <button
-      //         className="btn btn-warning btn-sm me-2"
-      //         onClick={() => editCustomer(row.original)}
-      //       >
-      //         <FaEdit />
-      //       </button>
-      //       <button
-      //         className="btn btn-danger btn-sm"
-      //         onClick={() => deleteCustomer(row.original.id)} // Use customer ID
-      //       >
-      //         <FaTrash />
-      //       </button> */}
-      //     </div>
-      //   ),
-      // },
+   
 
       {
                     Header: "Actions",
@@ -216,19 +159,8 @@ const [message, setMessage] = useState(null);
     []
   );
 
-  // Placeholder actions
-  const editCustomer = (customer) => {
-    alert(`Editing customer: ${customer.name}`);
-    // Implement your edit logic here
-  };
 
-  const deleteCustomer = (customerId) => {
-    if (window.confirm("Are you sure you want to delete this customer?")) {
-      // Perform delete logic here
-      alert(`Customer with ID ${customerId} deleted.`);
-      // Optionally, refresh the customer list after deletion
-    }
-  };
+
 
   return (
     <div className="ManagerCustomercontainer">

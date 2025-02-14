@@ -2,10 +2,10 @@ import React, { useState, useMemo, useEffect,useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Navbar from '../../../Shared/Navbar/Navbar';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 import { FaEdit, FaEye, FaComment ,FaTrash} from 'react-icons/fa';
 import { Button, Row, Col, Modal } from 'react-bootstrap';
-import DataTable from '../../../Layout/Table/TableLayout'; // Import the reusable DataTable component
+import DataTable from '../../../Layout/Table/TableLayout'; 
 
 import './PotentialLeads.css';
 
@@ -23,17 +23,16 @@ const AdminDashboard = () => {
 
   const [isPrimaryChanged, setIsPrimaryChanged] = useState(false);
   const [isSecondaryChanged, setIsSecondaryChanged] = useState(false);
-  const [customerIdMap, setCustomerIdMap] = useState({}); // New state for mapping
+  const [customerIdMap, setCustomerIdMap] = useState({}); 
 
 
   
   const [leadIds, setLeadIds] = useState([]);
 
 
-  // Fetch leads from API
   const fetchLeads = async () => {
     try {
-      setLoading(true); // Show loader
+      setLoading(true); 
       const response = await axios.get(`${baseURL}/api/allleads`);
       if (response.status === 200) {
         const leads = response.data;
@@ -48,27 +47,27 @@ const AdminDashboard = () => {
       console.error('Error fetching leads:', error);
       alert('Failed to fetch leads.');
     } finally {
-      setLoading(false); // Hide loader
+      setLoading(false); 
     }
   };
 
-     // Log lead IDs when data changes
+    
       useEffect(() => {
         if (data.length > 0) {
           const ids = data.map(lead => lead.leadid);
           setLeadIds(ids);
           console.log("Lead IDs:", ids);
         }
-      }, [data]); // <-- This effect runs when data updates
+      }, [data]); 
 
   useEffect(() => {
-    fetchLeads(); // Call fetchLeads when the component mounts
+    fetchLeads();
   }, []);
 
-  // const [customerIdMap, setCustomerIdMap] = useState({});
+ 
   const [opportunityIdMap, setOpportunityIdMap] = useState({});
 
-  const opportunityIdRef = useRef(null);
+ 
   
   const fetchCustomerData = async (leadid) => {
     try {
@@ -87,7 +86,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch opportunity data
+
   const fetchOpportunityData = async () => {
     try {
       const response = await axios.get(`${baseURL}/travel-opportunity`);
@@ -106,46 +105,21 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    // Assuming you have a way to get the lead IDs
-    const leadIds = data.map(item => item.leadid); // Replace with your actual lead IDs
+    
+    const leadIds = data.map(item => item.leadid); 
 
-    // Fetch data for each lead ID
+   
     leadIds.forEach(leadid => {
       fetchCustomerData(leadid);
     });
 
-    // Fetch opportunity data
     fetchOpportunityData();
   }, [data]);
 
 
 
 
-  // // Fetch leads from API
-  // const fetchLeads = async () => {
-  //   try {
-  //     setLoading(true); // Show loader
-  //     const response = await axios.get(`${baseURL}/api/allleads`);
-  //     if (response.status === 200) {
-  //       const leads = response.data;
-  //       const filteredLeads = leads.filter((lead) => lead.status === 'opportunity');
-  //       setData(filteredLeads);
-  //       console.log('Fetched Leads:', filteredLeads);
-  //     } else {
-  //       console.error('Error fetching leads:', response.statusText);
-  //       alert('Failed to fetch leads.');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching leads:', error);
-  //     alert('Failed to fetch leads.');
-  //   } finally {
-  //     setLoading(false); // Hide loader
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchLeads(); // Call fetchLeads when the component mounts
-  // }, []);
+  
 
   const [dropdownOptions] = useState({
     primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
@@ -231,10 +205,10 @@ const AdminDashboard = () => {
           statusChangeMessage = 'Secondary status updated successfully!';
         }
   
-        // Only show the SweetAlert if both statuses have been updated
         if (primaryStatus && secondaryStatus) {
         
           setMessage(statusChangeMessage)
+          setTimeout(() => setMessage(""), 3000);
         }
   
         console.log('Status updated:', response.data);
@@ -242,12 +216,14 @@ const AdminDashboard = () => {
         console.error('Failed to update status:', response.data);
         
         setMessage('Failed to update status. Please try again.')
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error('Error updating status:', error);
     
     
       setMessage('An error occurred while updating the status. Please try again.')
+      setTimeout(() => setMessage(""), 3000);
     }
   };
   
@@ -295,33 +271,33 @@ const AdminDashboard = () => {
       }
     };
 
+const formattedData = useMemo(() => {
+  return data.map(item => {
+    const customerData = customerIdMap[item.leadid] || { customerId: "N/A" };
+    const opportunityData = opportunityIdMap[item.leadid] || { opportunityId: "N/A" };
+
+    return {
+      ...item,
+      formattedOppId: opportunityData.opportunityId !== "N/A" ? 
+        `OPP${String(opportunityData.opportunityId).padStart(4, '0')}` : "N/A",
+      formattedCustomerId: customerData.customerId !== "N/A" ? 
+        `CUS${String(customerData.customerId).padStart(4, '0')}` : "N/A"
+    };
+  });
+}, [data, customerIdMap, opportunityIdMap]); 
  
 
   const columns = useMemo(
     () => [
-      {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,
-      },
+     
       {
         Header: "Opp Id",
-        accessor: "leadid",
-        Cell: ({ row }) => {
-          const opportunityData = opportunityIdMap[row.original.leadid] || { opportunityId: "N/A" };
-          return opportunityData.opportunityId !== "N/A"
-            ? `OPP${String(opportunityData.opportunityId).padStart(4, '0')}`
-            : "N/A";
-        },
+        accessor: "leadid", 
       },
       {
         Header: "Customer Id",
         accessor: "customerid",
-        Cell: ({ row }) => {
-          const customerData = customerIdMap[row.original.leadid] || { customerId: "N/A" };
-          return customerData.customerId !== "N/A"
-            ? `CUS${String(customerData.customerId).padStart(4, '0')}`
-            : "N/A";
-        },
+      
       },
    
       {
@@ -330,8 +306,7 @@ const AdminDashboard = () => {
         Cell: ({ row }) => (
           <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
             <div style={{ color: "blue", textDecoration: "underline" }}>{row.original.name}</div>
-            {/* <div>{row.original.phone_number}</div>
-            <div>{row.original.email}</div> */}
+         
           </div>
         ),
       },
@@ -344,87 +319,75 @@ const AdminDashboard = () => {
           </div>
         ),
       },
-      // Email Column
+  
       {
         Header: "Email",
         accessor: "email",
         Cell: ({ row }) => (
-          <div >
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "200px" 
+            }}
+            title={row.original.email} 
+          >
             {row.original.email}
           </div>
         ),
       },
+      
       {
         Header: "Opportunity Status",
         accessor: "opportunityStatus",
-        Cell: ({ row }) => (
-          <div className="d-flex align-items-center gap-2">
-            <select
-              value={row.original.opportunity_status1}
-              onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)}
-              className="form-select"
-            >
-              <option value="">Select Primary Status</option>
-              {dropdownOptions.primary.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={row.original.opportunity_status2}
-              onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)}
-              className="form-select"
-              disabled={!row.original.opportunity_status1}
-            >
-              <option value="">Select Secondary Status</option>
-              {dropdownOptions.secondary[row.original.opportunity_status1]?.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        ),
+        Cell: ({ row }) => {
+          const primaryStatus = row.original.opportunity_status1;
+          const secondaryStatus = row.original.opportunity_status2;
+          const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
+          const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
+      
+          return (
+            <div className="d-flex align-items-center gap-2">
+              <select
+                value={primaryStatus}
+                onChange={(e) =>
+                  handlePrimaryStatusChange(e.target.value, row.original.leadid)
+                }
+                className="form-select"
+              >
+                {!primaryStatus && <option value="">Select Primary Status</option>}
+                {dropdownOptions.primary.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+      
+              <select
+                value={secondaryStatus}
+                onChange={(e) =>
+                  handleSecondaryStatusChange(e.target.value, row.original.leadid)
+                }
+                className="form-select"
+                disabled={isSecondaryDisabled}
+              >
+                {!secondaryStatus && <option value="">Select Secondary Status</option>}
+                {secondaryOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        },
       },
+      
 
-      // {
-      //   Header: 'Quotation',
-      //   accessor: 'Quotation',
-      //   Cell: ({ row }) => (
-      //     <div>
-      //       Generate
-      //     </div>
-      //   ),
-      // },
 
       { Header: 'Assigned', accessor: 'assign_to_manager' },
-    //  {
-    //          Header: "Action",
-    //          Cell: ({ row }) => (
-    //            <div>
-    //              <button
-    //                className="btn btn-warning edit-button me-1 mb-1"
-    //                onClick={() => handleEdit(row.original.leadid)}
-    //              >
-    //                <FaEdit />
-    //              </button>
-    //              <button
-    //                className="btn btn-info view-button me-1"
-    //                onClick={() =>navigateToLead(row.original.leadid)}
-    //              >
-    //                <FaEye />
-    //              </button>
-    //              <button
-    //                className="btn btn-danger delete-button me-1 mb-1"
-    //                onClick={() => handleDelete(row.original.leadid)}
-    //              >
-    //                <FaTrash />
-    //              </button>
-    //            </div>
-    //          ),
-    //        },
+    
 
     {
       Header: "Action",
@@ -482,10 +445,10 @@ const AdminDashboard = () => {
           {loading ? (
             <div>Loading...</div>
           ) : (
-            <DataTable columns={columns} data={data} />
+            <DataTable columns={columns} data={formattedData} />
           )}
         </div>
-        {/* Other modals and components */}
+        
       </div>
     </div>
   );

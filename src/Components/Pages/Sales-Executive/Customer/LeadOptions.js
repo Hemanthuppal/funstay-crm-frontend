@@ -98,7 +98,7 @@ const LeadOppView = () => {
                                                                                 <>
                                                                                         <Row>
                                                                                                 <Col md={6}>
-                                                                                                        <p><strong>Customer Id:</strong>  {customer.id ? `CUS${String(customer.id).padStart(4, '0')}` : "N/A"}</p>
+                                                                                                        <p><strong>Customer Id:</strong>  {customer.id || "N/A"}</p>
                                                                                                 </Col>
                                                                                                 <Col md={6}>
                                                                                                         <p><strong>Name:</strong> {customer.name || "N/A"}</p>
@@ -106,7 +106,7 @@ const LeadOppView = () => {
                                                                                         </Row>
                                                                                         <Row>
                                                                                                 <Col md={6}>
-                                                                                                        <p><strong><FaPhone /> </strong> {customer.phone_number || "N/A"}</p>
+                                                                                                        <p><strong><FaPhone /> </strong> {customer.country_code }&nbsp;{customer.phone_number || "N/A"}</p>
                                                                                                 </Col>
                                                                                                 <Col md={6}>
                                                                                                         <p><strong><FaEnvelope /></strong> {customer.email || "N/A"}</p>
@@ -128,7 +128,7 @@ const LeadOppView = () => {
                                                                                         {travelOpportunity.map((trip, index) => (
                                                                                                 <Accordion.Item eventKey={index.toString()} key={index}>
                                                                                                         <Accordion.Header>
-                                                                                                                Booked {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                                                                        InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
                                                                                                         </Accordion.Header>
                                                                                                         <Accordion.Body>
                                                                                                                 <Row>
@@ -148,7 +148,19 @@ const LeadOppView = () => {
                                                                                                                         <Col md={6}><p><strong>Approx Budget:</strong> ${trip.approx_budget}</p></Col>
                                                                                                                 </Row>
                                                                                                                 <Row>
-                                                                                                                        <Col md={12}><p><strong>Reminder Setting:</strong> {new Date(trip.reminder_setting).toLocaleDateString("en-GB")}</p></Col>
+                                                                                                                <Col md={12}>
+    <p>
+        <strong>Reminder Setting:</strong> {new Date(trip.reminder_setting).toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        })}
+    </p>
+</Col>
                                                                                                                 </Row>
                                                                                                         </Accordion.Body>
                                                                                                 </Accordion.Item>

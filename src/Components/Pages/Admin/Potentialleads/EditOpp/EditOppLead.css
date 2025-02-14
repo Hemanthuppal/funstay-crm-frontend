@@ -23,7 +23,7 @@
 
 .editleads-form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two columns by default */
+  grid-template-columns: 1fr 1fr; 
   gap: 15px;
 }
 
@@ -76,9 +76,9 @@
   background: #d6791b;
 }
 
-/* Responsive Design */
+
 @media (max-width: 600px) {
   .editleads-form-grid {
-    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-template-columns: 1fr; 
   }
 }

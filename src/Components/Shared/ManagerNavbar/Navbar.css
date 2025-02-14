@@ -225,4 +225,49 @@
     .manager-sidebar.collapsed .manager-nav-link .link_text {
         display: none;
     }
+
+
+    .manager-company-logo {
+        width: 121px;
+        margin-left: 5px;
+      }
+    
+      .user-manager {
+        margin-left: 5px;
+        font-size: 11px;
+    }
+
 }
+
+
+.notification-dropdown {
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: white;
+    width: 250px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .notification-dropdown-header {
+    font-weight: bold;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .notification-dropdown-body {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .notification-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .notification-item:hover {
+    background: #f5f5f5;
+  }

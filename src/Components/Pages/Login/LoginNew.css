@@ -1,11 +1,3 @@
-/* Login.css */
-
-/* * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: system-ui, -apple-system, sans-serif;
-} */
 
 .login-page {
     min-height: 100vh;
@@ -231,5 +223,5 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #ff5757; /* Change color as needed */
+    color: #ff5757; 
   }

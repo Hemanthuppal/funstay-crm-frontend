@@ -17,15 +17,7 @@ const AdminViewLeads = () => {
 
   const [data, setData] = useState([]);
 
-  const handleEdit = (leadId) => {
-    navigate(`/a-edit-lead/${leadId}`, {
-      state: { leadid: leadId },
-    });
-  };
 
-  const handleAddUser = (lead) => {
-    navigate(`/a-create-customer-opportunity/${lead.leadid}`);
-  };
 
 
 
@@ -35,23 +27,7 @@ const AdminViewLeads = () => {
     });
   };
 
-  const handleDelete = async (leadid) => {
-    try {
-      const response = await fetch(`${baseURL}/api/deleteByLeadId/${leadid}`, {
-        method: 'DELETE',
-      });
 
-      if (response.ok) {
-        setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
-        setMessage('The lead has been deleted successfully.');
-      } else {
-        setMessage('Failed to delete the lead. Please try again later.');
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage('An unexpected error occurred while deleting the lead.');
-    }
-  };
 
 
 
@@ -67,52 +43,8 @@ const AdminViewLeads = () => {
     },
   };
 
-  const handlePrimaryStatusChange = (value, rowId) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.leadid === rowId
-          ? {
-            ...row,
-            primaryStatus: value,
-            secondaryStatus: "", // Reset secondary status when primary changes
-          }
-          : row
-      )
-    );
-    updateLeadStatus(rowId, value, ""); // Update without secondary status
-  };
 
-  const handleSecondaryStatusChange = (value, rowId) => {
-    setData((prevData) =>
-      prevData.map((row) =>
-        row.leadid === rowId ? { ...row, secondaryStatus: value } : row
-      )
-    );
-    const lead = data.find((lead) => lead.leadid === rowId);
-    updateLeadStatus(rowId, lead?.primaryStatus || "", value);
-  };
-  const updateLeadStatus = async (leadId, primaryStatus, secondaryStatus) => {
-    const body = {
-      primaryStatus: primaryStatus,
-      secondaryStatus: secondaryStatus,
-    };
-    console.log('JSON:', JSON.stringify(body, null, 2));
-    try {
-      const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
 
-      if (response.status === 200) {
-        // Assuming the response contains a message
-        setMessage(response.data.message || 'Status updated successfully.'); // Use the message from the response or a default message
-        console.log('Status updated:', response.data);
-      } else {
-        console.error('Failed to update status:', response.data);
-        setMessage('Failed to update status. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      setMessage('An error occurred while updating the status. Please try again.');
-    }
-  };
 
   useEffect(() => {
     const fetchEnquiries = async () => {
@@ -132,9 +64,7 @@ const AdminViewLeads = () => {
   const [managers, setManagers] = useState([]); // State to store fetched managers
   const [loading, setLoading] = useState(true); // Loading state for API call
   const [error, setError] = useState(null); // Error state for API call
-  const handleAddLead = () => {
-    navigate('/a-add-leads');
-  };
+
 
   useEffect(() => {
     const fetchManagers = async () => {
@@ -158,37 +88,7 @@ const AdminViewLeads = () => {
     fetchManagers();
   }, []);
 
-  const handleAssignToChange = async (assignee, leadid, managerid) => {
-    try {
-      const response = await fetch(`${baseURL}/update-assignee`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          leadid,
-          assignee,
-          managerid,
-        }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setMessage(data.message);
-        // Update the data to display the assignee name directly
-        setData((prevData) =>
-          prevData.map((lead) =>
-            lead.leadid === leadid
-              ? { ...lead, assign_to_manager: assignee } // Assign the name, not ID
-              : lead
-          )
-        );
-      } else {
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error('Error updating assignee:', error);
-    }
-  };
+ 
 
 
 
@@ -201,12 +101,24 @@ const AdminViewLeads = () => {
     () => [
       {
         Header: "Lead ID",
-        accessor: 'leadcode',
+        accessor: 'leadid',
       },
+
       {
-        Header: 'lead Name',
-        accessor: 'name',
+        Header: "lead Name",
+        accessor: "name",
+        Cell: ({ row }) => (
+          <div>
+            <div
+              style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
+              onClick={() => handleViewLeads(row.original)} // Navigate on click
+            >
+              {row.original.name}
+            </div>
+          </div>
+        ),
       },
+     
       {
         Header: 'Mobile',
         accessor: 'phone_number',
@@ -216,117 +128,13 @@ const AdminViewLeads = () => {
         accessor: 'email',
       },
       
-    //   {
-    //     Header: "Lead Status",
-    //     Cell: ({ row }) => {
-    //       const primaryStatus = row.original.primaryStatus;
-    //       const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
-    //       const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
-
-    //       return (
-    //         <div className="d-flex align-items-center">
-    //           <select
-    //             value={primaryStatus}
-    //             onChange={(e) =>
-    //               handlePrimaryStatusChange(e.target.value, row.original.leadid)
-    //             }
-    //             className="form-select me-2"
-    //           >
-    //             <option value="">Select Primary Status</option>
-    //             {dropdownOptions.primary.map((option) => (
-    //               <option key={option} value={option}>
-    //                 {option}
-    //               </option>
-    //             ))}
-    //           </select>
-    //           <select
-    //             value={row.original.secondaryStatus}
-    //             onChange={(e) =>
-    //               handleSecondaryStatusChange(e.target.value, row.original.leadid)
-    //             }
-    //             className="form-select"
-    //             disabled={isSecondaryDisabled} // Disable if no primary status or no secondary options
-    //           >
-    //             <option value="">Select Secondary Status</option>
-    //             {secondaryOptions.map((option) => (
-    //               <option key={option} value={option}>
-    //                 {option}
-    //               </option>
-    //             ))}
-    //           </select>
-    //         </div>
-    //       );
-    //     },
-    //   },
+   
       {
         Header: 'Source',
         accessor: 'sources',
       },
 
-    //   {
-    //     Header: 'Assign To',
-    //     Cell: ({ row }) => {
-    //       const isAssigned = row.original.assign_to_manager;
-      
-    //       return isAssigned ? (
-    //         <button className="btn btn-secondary" disabled>
-    //           {isAssigned} {/* Display the name directly */}
-    //         </button>
-    //       ) : (
-    //         <select
-    //           onChange={(e) => {
-    //             const [managerid, assignee] = e.target.value.split('|');
-    //             handleAssignToChange(assignee, row.original.leadid, managerid);
-    //           }}
-    //           className="form-select"
-    //           disabled={isAssigned}
-    //         >
-    //           <option value="">Select Assignee</option>
-    //           {managers.map((manager, index) => (
-    //             <option key={index} value={`${manager.id}|${manager.name}`}>
-    //               {manager.name}
-    //             </option>
-    //           ))}
-    //         </select>
-    //       );
-    //     },
-    //   },
-
-      
-
-      ,
-
-      // {
-      //   Header: "Actions",
-      //   Cell: ({ row }) => (
-      //     <div>
-      //       {/* <button
-      //         className="btn btn-warning edit-button me-1 mb-1"
-      //         onClick={() => handleEdit(row.original.leadid)}
-      //       >
-      //         <FaEdit />
-      //       </button>
-      //       <button
-      //         className="btn btn-danger delete-button me-1 mb-1"
-      //         onClick={() => handleDelete(row.original.leadid)}
-      //       >
-      //         <FaTrash />
-      //       </button> */}
-      //       <button
-      //         className="btn btn-info view-button me-1"
-      //         onClick={() => handleViewLeads(row.original)}
-      //       >
-      //         <FaEye />
-      //       </button>
-      //       {/* <button
-      //         className="btn btn-success add-user-button me-1"
-      //         onClick={() => handleAddUser(row.original)}
-      //       >
-      //         <FaUserPlus />
-      //       </button> */}
-      //     </div>
-      //   ),
-      // },
+   
       {
         Header: "Actions",
         Cell: ({ row }) => (
@@ -338,20 +146,7 @@ const AdminViewLeads = () => {
           </div>
         ),
       },
-      // {
-      //   Header: 'Comments',
-      //   accessor: 'comments',
-      //   Cell: ({ row }) => (
-      //     <button
-      //       className="btn btn-info"
-      //       onClick={() => {
-      //         navigate(`/a-comments/${row.original.leadid}`);
-      //       }}
-      //     >
-      //       <FaComment />
-      //     </button>
-      //   ),
-      // },
+     
     ],
     [dropdownOptions, managers]
   );

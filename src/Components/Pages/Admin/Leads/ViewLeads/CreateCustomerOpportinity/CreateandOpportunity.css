@@ -119,17 +119,17 @@
 }
 
 .createcustomer-input-group select {
-  padding: 8px; /* Same padding as input fields */
-  border: 1px solid #ddd; /* Same border style */
-  border-radius: 4px; /* Same border radius */
-  font-size: 14px; /* Same font size */
-  width: 100%; /* Make it full width */
-  box-sizing: border-box; /* Ensure padding is included in width */
+  padding: 8px; 
+  border: 1px solid #ddd;
+  border-radius: 4px; 
+  font-size: 14px; 
+  width: 100%; 
+  box-sizing: border-box; 
 }
 
-/* Responsive Design */
+
 @media (max-width: 600px) {
   .createcustomer-form-grid {
-    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-template-columns: 1fr; 
   }
 }

@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DataTable from './../../../Layout/Table/TableLayout';
-import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../../Shared/Navbar/Navbar';
+import { FaTrash } from "react-icons/fa";
+import { baseURL } from '../../../Apiservices/Api';
+import axios from 'axios';
 
 const TeamMembers = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Use useLocation to access state
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [message, setMessage] = useState("");
+  const [teamMembers, setTeamMembers] = useState(location.state?.teamMembers || []);
 
-  // Access teamMembers from location.state
-  const teamMembers = location.state?.teamMembers || [];
+  useEffect(() => {
+    if (!location.state?.teamMembers) {
+     
+      console.warn("No team members found in state.");
+    }
+  }, [location.state]);
+
+  const handleDeleteEmployee = async (id) => {
+    try {
+      const response = await axios.delete(`${baseURL}/employees/${id}`);
+      if (response.status === 204) {
+        setTeamMembers(prevMembers => prevMembers.filter(member => member.id !== id));
+        setMessage("Employee deleted successfully!");
+        setTimeout(() => setMessage(""), 3000);
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      setMessage("Failed to delete employee. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
+    }
+  };
 
   const memberColumns = [
     {
@@ -21,6 +45,17 @@ const TeamMembers = () => {
     { Header: "Mobile", accessor: "mobile" },
     { Header: "Email", accessor: "email" },
     { Header: "Designation", accessor: "role" },
+    {
+      Header: "Actions",
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+          <FaTrash
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => handleDeleteEmployee(row.original.id)}
+          />
+        </div>
+      ),
+    }
   ];
 
   return (
@@ -29,23 +64,14 @@ const TeamMembers = () => {
       <div className={`Admin-myteam ${collapsed ? "collapsed" : ""}`}>
         <div className="ViewCustomer-container mb-5">
           <div className="ViewCustomer-table-container">
-          <div className="back-button mt-3 d-flex justify-content-start">
-            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-              Back
-            </button>
-          </div>
-            
-                
-              <h2 className='text-center'>Team Members</h2>
-         
-            <DataTable columns={memberColumns} data={teamMembers} />
-            {/* <button
-                className="btn btn-secondary"
-                onClick={() => navigate(-1)}
-              >
+            <div className="back-button mt-3 d-flex justify-content-start">
+              <button className="btn btn-secondary" onClick={() => navigate(-1)}>
                 Back
-              </button> */}
-            
+              </button>
+            </div>
+            <h2 className='text-center'>Team Members</h2>
+            {message && <div className="alert alert-success">{message}</div>}
+            <DataTable columns={memberColumns} data={teamMembers} />
           </div>
         </div>
       </div>

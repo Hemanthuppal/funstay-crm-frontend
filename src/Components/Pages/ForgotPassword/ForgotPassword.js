@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa"; // Import arrow and eye icons
+import { FaArrowRight, FaEye, FaEyeSlash } from "react-icons/fa"; 
 import "./ForgotPassword.css";
 import { baseURL } from "../../Apiservices/Api";
 
@@ -14,13 +14,13 @@ const Forgot = () => {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for confirm password visibility
+  const [showPassword, setShowPassword] = useState(false); 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
 
-  // Function to send OTP
   const handleSendOtp = async () => {
     if (!email) {
       setMessage("Please enter your email.");
+      setTimeout(() => setMessage(""), 3000);
       return;
     }
 
@@ -29,23 +29,27 @@ const Forgot = () => {
       const response = await axios.post(`${baseURL}/send-otp`, { email });
       setOtpSent(true);
       setMessage(response.data.message);
+      setTimeout(() => setMessage(""), 3000);
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to send OTP.");
+      setTimeout(() => setMessage(""), 3000);
     }
     setLoading(false);
   };
 
-  // Function to update password
+
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
 
     if (!otp || !password || !confirmPassword) {
       setMessage("All fields are required.");
+      setTimeout(() => setMessage(""), 3000);
       return;
     }
     
     if (password !== confirmPassword) {
       setMessage("Passwords do not match.");
+      setTimeout(() => setMessage(""), 3000);
       return;
     }
 
@@ -59,9 +63,11 @@ const Forgot = () => {
       });
 
       setMessage(response.data.message);
-      navigate("/"); // Redirect to login after successful password update
+      setTimeout(() => setMessage(""), 3000);
+      navigate("/"); 
     } catch (error) {
       setMessage(error.response?.data?.message || "Failed to update password.");
+      setTimeout(() => setMessage(""), 3000);
     }
     setLoading(false);
   };
@@ -79,7 +85,7 @@ const Forgot = () => {
       </div>
       <div className="forgot-reset-side">
         <h1>Welcome Back</h1>
-        {message && <p className="forgot-message">{message}</p>} {/* Display messages */}
+        {message && <p className="forgot-message">{message}</p>} 
 
         <form onSubmit={handleUpdatePassword}>
           <div className="forgot-input-group">

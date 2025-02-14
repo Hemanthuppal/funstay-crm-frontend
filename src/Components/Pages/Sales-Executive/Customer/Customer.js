@@ -13,7 +13,6 @@ const SalesCustomer = () => {
   const [data, setData] = useState([]); // State for storing matched customer data
   const { authToken, userId } = useContext(AuthContext);
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchCustomersAndLeads = async () => {
       try {
@@ -43,9 +42,14 @@ const SalesCustomer = () => {
             const customersData = customersResponse.data;
   
             // Find matching customers based on customerid in filtered leads
-            const matchedCustomers = customersData.filter(customer =>
-              filteredLeads.some(lead => lead.customerid == customer.id)
-            );
+            const matchedCustomers = customersData
+              .filter(customer =>
+                filteredLeads.some(lead => lead.customerid == customer.id)
+              )
+              .map(customer => ({
+                ...customer,
+                formattedId: `CUS${String(customer.id).padStart(4, '0')}` // Format the ID here
+              }));
   
             setData(matchedCustomers); // Update state with matched customer data
           } else {
@@ -62,7 +66,7 @@ const SalesCustomer = () => {
   
     fetchCustomersAndLeads();
   }, [authToken, userId]);
-  
+
 
   // const navigateToLead = (leadId) => {
   //   navigate(`/sales-details/${leadId}`, {
@@ -92,12 +96,7 @@ const SalesCustomer = () => {
       {
         Header: "Customer ID",
         accessor: "id", // This is the key in your customer data
-        Cell: ({ row }) => {
-          const customerId = row.original.id; // Get the customer ID from the row
-          return customerId !== undefined
-            ? `CUS${String(customerId).padStart(4, '0')}` // Format the ID
-            : "N/A"; // Fallback if ID is not available
-        },
+       
       },
       {
         Header: "Name",
@@ -119,38 +118,7 @@ const SalesCustomer = () => {
         Header: "Email",
         accessor: "email", // Ensure this matches the key in your customer data
       },
-      // {
-      //   Header: "Description",
-      //   accessor: "description", // Ensure this matches the key in your customer data
-      // },
-      // {
-      //   Header: "Actions",
-      //   accessor: "actions",
-      //   Cell: ({ row }) => (
-      //     <div>
-      //       <button
-      //         className="btn btn-primary btn-sm me-2"
-      //         onClick={() => navigateToLead(row.original.id)} // Use leadId for navigation
-      //       >
-      //         <FaEye />
-      //       </button>
-      //       {/* Uncomment if you want to implement edit and delete actions
-      //       <button
-      //         className="btn btn-warning btn-sm me-2"
-      //         onClick={() => editCustomer(row.original)}
-      //       >
-      //         <FaEdit />
-      //       </button>
-      //       <button
-      //         className="btn btn-danger btn-sm"
-      //         onClick={() => deleteCustomer(row.original.leadId)}
-      //       >
-      //         <FaTrash />
-      //       </button>
-      //       */}
-      //     </div>
-      //   ),
-      // },
+     
 
 
       {

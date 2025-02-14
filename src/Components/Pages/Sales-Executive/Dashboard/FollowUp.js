@@ -48,44 +48,94 @@ function FollowUp() {
     fetchLeads();
   }, []);
 
+  // useEffect(() => {
+  //   if (loading || !userId) return; // Prevent processing if still loading or userId is missing
+
+  //   // Filter leads based on assignedSalesId matching the current userId
+  //   const filteredLeads = leads.filter((lead) => lead.assignedSalesId == userId);
+
+  //   // Create a lookup object for filtered leads where leadid is the key
+  //   const leadsLookup = filteredLeads.reduce((acc, lead) => {
+  //     acc[lead.leadid] = lead;
+  //     return acc;
+  //   }, {});
+
+  //   // Create dynamic schedule data based on filtered leads and selected day
+  //   const dynamicSchedule = travelOpportunity
+  //     .filter((opportunity) => {
+  //       if (!opportunity.leadid) return false; // Prevent errors from undefined values
+
+  //       // Convert reminder_setting to the weekday format
+  //       const reminderDate = new Date(opportunity.reminder_setting);
+  //       const reminderDay = weekdays[reminderDate.getDay()];
+  //       return reminderDay == selectedDay && leadsLookup[opportunity.leadid];
+  //     })
+  //     .map((opportunity) => {
+  //       const lead = leadsLookup[opportunity.leadid];
+
+  //       console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
+
+  //       return {
+  //         time: "9:00 - 10:00 AM",
+  //         title: opportunity.notes || "Untitled Task",
+  //         color: "Sales-badge-orange",
+  //         lead: lead ? lead.name : "Unknown Lead",
+  //         leadid: opportunity.leadid,
+  //       };
+  //     });
+
+  //   setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
+  // }, [selectedDay, travelOpportunity, leads, userId, loading]);
+
+
   useEffect(() => {
     if (loading || !userId) return; // Prevent processing if still loading or userId is missing
-
+  
     // Filter leads based on assignedSalesId matching the current userId
     const filteredLeads = leads.filter((lead) => lead.assignedSalesId == userId);
-
+  
     // Create a lookup object for filtered leads where leadid is the key
     const leadsLookup = filteredLeads.reduce((acc, lead) => {
       acc[lead.leadid] = lead;
       return acc;
     }, {});
-
+  
     // Create dynamic schedule data based on filtered leads and selected day
     const dynamicSchedule = travelOpportunity
       .filter((opportunity) => {
-        if (!opportunity.leadid) return false; // Prevent errors from undefined values
-
-        // Convert reminder_setting to the weekday format
+        if (!opportunity.leadid || !opportunity.reminder_setting) return false; // Prevent errors
+  
+        // Convert reminder_setting to a valid date object
         const reminderDate = new Date(opportunity.reminder_setting);
+        if (isNaN(reminderDate)) return false; // Skip invalid dates
+  
         const reminderDay = weekdays[reminderDate.getDay()];
-        return reminderDay == selectedDay && leadsLookup[opportunity.leadid];
+        const reminderYear = reminderDate.getFullYear();
+        const currentYear = new Date().getFullYear(); // Get current year
+  
+        return (
+          reminderDay == selectedDay &&
+          reminderYear == currentYear &&
+          leadsLookup[opportunity.leadid]
+        );
       })
       .map((opportunity) => {
         const lead = leadsLookup[opportunity.leadid];
-
+  
         console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
-
+  
         return {
-          time: "9:00 - 10:00 AM",
-          title: opportunity.notes || "Untitled Task",
+          time: new Date(opportunity.reminder_setting).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }), // Dynamic time format
+          title: opportunity.notes || "N/A",
           color: "Sales-badge-orange",
           lead: lead ? lead.name : "Unknown Lead",
           leadid: opportunity.leadid,
         };
       });
-
+  
     setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
   }, [selectedDay, travelOpportunity, leads, userId, loading]);
+  
 
   const getWeekDays = () => {
     const days = [];
@@ -139,9 +189,9 @@ function FollowUp() {
                 <div className="Sales-schedule-details flex-grow-1 ms-3">
                   <strong>{item.time}</strong>
                   <p className="mb-1">{item.title}</p>
-                  <small>
+                  {/* <small>
                     Lead by <span className="Sales-schedule-lead">{item.lead}</span>
-                  </small>
+                  </small> */}
                 </div>
                 <button className="btn btn-outline-primary Sales-view-details-btn"
                  onClick={() => navigate(`/details/${item.leadid}`, { state: { leadid: item.leadid } })}>

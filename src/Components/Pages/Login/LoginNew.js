@@ -12,16 +12,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false); 
   const { login } = useContext(AuthContext);
 
-  // Clear local storage when the component mounts
   useEffect(() => {
-    localStorage.clear(); // Clear local storage
+    localStorage.clear(); 
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     const userData = { email, password };
-    console.log("Logging in with data:", userData); // Log the user data being sent
+    console.log("Logging in with data:", userData); 
 
     try {
       const response = await fetch(`${baseURL}/login`, {
@@ -33,7 +32,7 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log("Response from login API:", data); // Log the response from the API
+      console.log("Response from login API:", data); 
 
       if (response.status === 200) {
         login(
@@ -47,7 +46,6 @@ const Login = () => {
           data.managerId
         );
 
-        // Navigate based on user role
         if (data.role === 'employee') {
           navigate('/s-dashboard');
         } else if (data.role === 'manager') {
@@ -100,7 +98,7 @@ const Login = () => {
               <div className="password-input-group">
                 <input
                   className="login-input"
-                  type={showPassword ? 'text' : 'password'} // Toggle between text and password
+                  type={showPassword ? 'text' : 'password'} 
                   placeholder="********"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -109,9 +107,9 @@ const Login = () => {
                 <button
                   type="button"
                   className="password-toggle-button"
-                  onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                  onClick={() => setShowPassword(!showPassword)} 
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show eye icon based on state */}
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
             </div>

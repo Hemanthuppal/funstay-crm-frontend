@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import DataTable from './../../../Layout/Table/TableLayout'; // Make sure to import your DataTable component
+import DataTable from './../../../Layout/Table/TableLayout'; 
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+
 import './MyTeam.css';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { baseURL } from '../../../Apiservices/Api';
@@ -11,13 +11,10 @@ const MyTeam = () => {
   const { authToken, userRole, userId } = useContext(AuthContext);
   const [data, setData] = useState([]);
 
-  // Columns for DataTable component
+
   const columns = React.useMemo(
     () => [
-      // {
-      //   Header: "S.No",
-      //   accessor: (row, index) => index + 1,
-      // },
+     
 
       {
         Header: "Employee ID",
@@ -36,33 +33,19 @@ const MyTeam = () => {
         Header: 'Email',
         accessor: 'email',
       },
-      // {
-      //   Header: 'Designation',
-      //   accessor: 'designation',
-      // },
-      // {
-      //   Header: 'Actions',
-      //   accessor: 'actions',
-      //   Cell: ({ row }) => (
-      //     <div className="action-icons">
-      //       <FaEye onClick={() => handleView(row)} />
-      //       <FaEdit onClick={() => handleEdit(row)} />
-      //       <FaTrash onClick={() => handleDelete(row)} />
-      //     </div>
-      //   ),
-      // },
+     
     ],
     []
   );
 
-  // Fetch data on component mount
+ 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(`${baseURL}/employees/${userId}`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${authToken}`, // Add the auth token if needed
+            'Authorization': `Bearer ${authToken}`, 
             'Content-Type': 'application/json',
           },
         });
@@ -72,7 +55,7 @@ const MyTeam = () => {
         }
 
         const result = await response.json();
-        setData(result); // Set the fetched data
+        setData(result); 
       } catch (error) {
         console.error('Error fetching employee data:', error);
       }
@@ -81,21 +64,8 @@ const MyTeam = () => {
     fetchData();
   }, [authToken, userId]);
 
-  // Handle view, edit, and delete actions
-  const handleView = (row) => {
-    console.log('View Employee:', row.original);
-    // Add your logic for viewing the employee details
-  };
-
-  const handleEdit = (row) => {
-    console.log('Edit Employee:', row.original);
-    // Add your logic for editing the employee details
-  };
-
-  const handleDelete = (row) => {
-    console.log('Delete Employee:', row.original);
-    // Add your logic for deleting the employee
-  };
+  
+ 
 
   return (
     <div className="manager-myteamcontainer">

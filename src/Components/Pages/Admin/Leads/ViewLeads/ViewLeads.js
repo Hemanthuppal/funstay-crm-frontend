@@ -7,6 +7,8 @@ import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 
+      import { HiUserGroup } from "react-icons/hi"; // Import icon
+
 import './ViewLeads.css'
 
 const AdminViewLeads = () => {
@@ -44,12 +46,15 @@ const AdminViewLeads = () => {
       if (response.ok) {
         setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
         setMessage('The lead has been deleted successfully.');
+        setTimeout(() => setMessage(""), 3000);
       } else {
         setMessage('Failed to delete the lead. Please try again later.');
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error("Error:", error);
       setMessage('An unexpected error occurred while deleting the lead.');
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
@@ -74,12 +79,12 @@ const AdminViewLeads = () => {
           ? {
             ...row,
             primaryStatus: value,
-            secondaryStatus: "", // Reset secondary status when primary changes
+            secondaryStatus: "", 
           }
           : row
       )
     );
-    updateLeadStatus(rowId, value, ""); // Update without secondary status
+    updateLeadStatus(rowId, value, ""); 
   };
 
   const handleSecondaryStatusChange = (value, rowId) => {
@@ -101,16 +106,21 @@ const AdminViewLeads = () => {
       const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
 
       if (response.status === 200) {
-        // Assuming the response contains a message
-        setMessage(response.data.message || 'Status updated successfully.'); // Use the message from the response or a default message
+       
+        setMessage(response.data.message || 'Status updated successfully.'); 
+        setTimeout(() => setMessage(""), 3000);
         console.log('Status updated:', response.data);
       } else {
         console.error('Failed to update status:', response.data);
+        
         setMessage('Failed to update status. Please try again.');
+        setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error('Error updating status:', error);
+      
       setMessage('An error occurred while updating the status. Please try again.');
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
@@ -129,9 +139,9 @@ const AdminViewLeads = () => {
     fetchEnquiries();
   }, []);
 
-  const [managers, setManagers] = useState([]); // State to store fetched managers
-  const [loading, setLoading] = useState(true); // Loading state for API call
-  const [error, setError] = useState(null); // Error state for API call
+  const [managers, setManagers] = useState([]);
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null);
   const handleAddLead = () => {
     navigate('/a-add-leads');
   };
@@ -143,15 +153,15 @@ const AdminViewLeads = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch managers");
         }
-        const result = await response.json(); // Parse JSON directly from response
-        console.log("Fetched data:", result.data); // Log fetched data
-        console.log(JSON.stringify(result.data, null, 2)); // Log fetched data in pretty format
-        setManagers(result.data); // Update the managers state
-        setLoading(false); // Set loading to false after successful fetch
+        const result = await response.json(); 
+        console.log("Fetched data:", result.data); 
+        console.log(JSON.stringify(result.data, null, 2)); 
+        setManagers(result.data); 
+        setLoading(false); 
       } catch (err) {
-        console.error("Error fetching managers:", err.message); // Log the error
-        setError(err.message); // Update error state
-        setLoading(false); // Stop loading on error
+        console.error("Error fetching managers:", err.message); 
+        setError(err.message); 
+        setLoading(false); 
       }
     };
 
@@ -174,11 +184,12 @@ const AdminViewLeads = () => {
       const data = await response.json();
       if (response.ok) {
         setMessage(data.message);
-        // Update the data to display the assignee name directly
+        setTimeout(() => setMessage(""), 3000);
+        
         setData((prevData) =>
           prevData.map((lead) =>
             lead.leadid === leadid
-              ? { ...lead, assign_to_manager: assignee } // Assign the name, not ID
+              ? { ...lead, assign_to_manager: assignee } 
               : lead
           )
         );
@@ -200,20 +211,11 @@ const AdminViewLeads = () => {
  
   const columns = useMemo(
     () => [
-      // {
-      //   Header: "S.No",
-      //   accessor: (row, index) => index + 1,
-      // },
+      
       {
         Header: "Lead Id",
         accessor: "leadid",
-        Cell: ({ row }) => (
-          <div>
-
-            <div>{row.original.leadcode}</div>
-            
-          </div>
-        ),
+       
       },
       {
         Header: "Name",
@@ -229,7 +231,7 @@ const AdminViewLeads = () => {
           </div>
         ),
       },
-       // Phone Number Column
+      
        {
         Header: "Mobile",
         accessor: "phone_number",
@@ -239,23 +241,33 @@ const AdminViewLeads = () => {
           </div>
         ),
       },
-      // Email Column
+  
       {
         Header: "Email",
         accessor: "email",
         Cell: ({ row }) => (
-          <div  >
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "200px" 
+            }}
+            title={row.original.email} 
+          >
             {row.original.email}
           </div>
         ),
-      },
+      }
+,      
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
           const primaryStatus = row.original.primaryStatus;
+          const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
-
+      
           return (
             <div className="d-flex align-items-center">
               <select
@@ -265,7 +277,7 @@ const AdminViewLeads = () => {
                 }
                 className="form-select me-2"
               >
-                <option value="">Select Primary Status</option>
+                {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -273,14 +285,14 @@ const AdminViewLeads = () => {
                 ))}
               </select>
               <select
-                value={row.original.secondaryStatus}
+                value={secondaryStatus}
                 onChange={(e) =>
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select"
-                disabled={isSecondaryDisabled} // Disable if no primary status or no secondary options
+                disabled={isSecondaryDisabled}
               >
-                <option value="">Select Secondary Status</option>
+                {!secondaryStatus && <option value="">Select Secondary Status</option>}
                 {secondaryOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -291,6 +303,7 @@ const AdminViewLeads = () => {
           );
         },
       },
+      
       {
         Header: 'Source',
         accessor: 'sources',
@@ -302,45 +315,74 @@ const AdminViewLeads = () => {
        
       },
 
-      {
-        Header: 'Assign To',
-        Cell: ({ row }) => {
-          const isAssigned = row.original.assign_to_manager;
       
-          return isAssigned ? (
-            <button
-              className="btn btn-secondary"
-              disabled
-              style={{
-                maxWidth: '150px', // Adjust as needed
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-              title={isAssigned} // Tooltip to show full name
-            >
-              {isAssigned} {/* Display the name directly */}
-            </button>
-          ) : (
-            <select
-              onChange={(e) => {
-                const [managerid, assignee] = e.target.value.split('|');
-                handleAssignToChange(assignee, row.original.leadid, managerid);
-              }}
-              className="form-select"
-              disabled={isAssigned}
-              style={{ maxWidth: '150px' }} // Adjust as needed
-            >
-              <option value="">Select Assignee</option>
-              {managers.map((manager, index) => (
-                <option key={index} value={`${manager.id}|${manager.name}`}>
-                  {manager.name}
-                </option>
-              ))}
-            </select>
+      
+      {
+        Header: "Assign To",
+        Cell: ({ row }) => {
+          const assignedManagerId = row.original.managerid || "";
+          const assignedManagerName = row.original.assign_to_manager || "";
+      
+          const [selectedManager, setSelectedManager] = useState(
+            assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
+          );
+          const [showIcon, setShowIcon] = useState(false);
+      
+          useEffect(() => {
+            setSelectedManager(
+              assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
+            );
+            setShowIcon(false);
+          }, [assignedManagerId, assignedManagerName]);
+      
+          const handleChange = (e) => {
+            const newValue = e.target.value;
+            setSelectedManager(newValue);
+            setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
+          };
+      
+          const handleAssignClick = async () => {
+            if (selectedManager) {
+              const [managerid, assignee] = selectedManager.split("|");
+      
+              await handleAssignToChange(assignee, row.original.leadid, managerid);
+      
+              // ✅ Update row data manually to trigger re-render
+              row.original.managerid = managerid;
+              row.original.assign_to_manager = assignee;
+      
+              // ✅ Update state to reflect change instantly
+              setSelectedManager(`${managerid}|${assignee}`);
+              setShowIcon(false);
+            }
+          };
+      
+          return (
+            <div className="d-flex align-items-center">
+              <select
+                value={selectedManager}
+                onChange={handleChange}
+                className="form-select me-2"
+                style={{ maxWidth: "150px" }}
+              >
+                <option value="">Select Assignee</option>
+                {managers.map((manager, index) => (
+                  <option key={index} value={`${manager.id}|${manager.name}`}>
+                    {manager.name}
+                  </option>
+                ))}
+              </select>
+              {showIcon && (
+                <HiUserGroup
+                  style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
+                  onClick={handleAssignClick}
+                />
+              )}
+            </div>
           );
         },
       },
+      
 
       
 
@@ -369,20 +411,7 @@ const AdminViewLeads = () => {
           </div>
         ),
       }
-      // {
-      //   Header: 'Comments',
-      //   accessor: 'comments',
-      //   Cell: ({ row }) => (
-      //     <button
-      //       className="btn btn-info"
-      //       onClick={() => {
-      //         navigate(`/a-comments/${row.original.leadid}`);
-      //       }}
-      //     >
-      //       <FaComment />
-      //     </button>
-      //   ),
-      // },
+      
     ],
     [dropdownOptions, managers]
   );

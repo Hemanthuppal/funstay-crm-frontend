@@ -20,7 +20,7 @@ const LeadOppView = () => {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                console.log(data); // Log the data to see its structure
+                console.log(data); 
                 setLead(data);
             } catch (error) {
                 console.error('Error fetching lead details:', error);
@@ -31,16 +31,16 @@ const LeadOppView = () => {
     }, [leadid]);
 
     if (!lead) {
-        return <div>Loading...</div>; // Show a loading state while fetching data
+        return <div>Loading...</div>; 
     }
 
     const handleEdit = (leadId) => {
         navigate(`/a-edit-opportunity/${leadId}`, {
-            state: { leadid: leadId }, // Pass leadid to the edit page
+            state: { leadid: leadId }, 
         });
     };
 
-    // Sort comments by timestamp in descending order
+ 
     const sortedComments = lead.comments ? lead.comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
 
     return (
@@ -54,17 +54,10 @@ const LeadOppView = () => {
                         </Card.Header>
                         <Card.Body>
                             <Row>
-                                {/* Customer Details Section */}
+                               
                                 <Col md={6}>
                                     <h5>Customer Details</h5>
-                                    {/* <p><strong>Lead Type:</strong> {lead.lead.lead_type || 'N/A'}</p> */}
-                                    {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
-  <>
-    <p>
-      <strong>Opp Id:</strong> {`OPP${String(lead.travelOpportunities[0].id).padStart(4, '0')}`}
-    </p>
-  </>
-)}
+     <p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
 
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
                                     <p><strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}</p>
@@ -89,7 +82,7 @@ const LeadOppView = () => {
                                             <p><strong>Number of Children:</strong> {lead.travelOpportunities[0].children_count || 'N/A'}</p>
                                             <p><strong>Child Age:</strong> {lead.travelOpportunities[0].child_ages || 'N/A'}</p>
                                             <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
-                                            {/* <p><strong>Notes:</strong> {lead.travelOpportunities[0].notes || 'N/A'}</p> */}
+                                          
                                             <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
                                             <p><strong>Created Date:</strong>{lead.travelOpportunities[0].created_at? new Date(lead.travelOpportunities[0].created_at).toLocaleString() : 'N/A'}</p>
                                         </>
@@ -115,7 +108,7 @@ const LeadOppView = () => {
                                                         <strong>{new Date(comment.timestamp).toLocaleString()}:</strong>
                                                     </p>
                                                     <p><strong>{comment.name}</strong>{comment.text}</p>
-                                                    <hr /> {/* Optional: Add a horizontal line between comments */}
+                                                    <hr /> 
                                                 </div>
                                             ))
                                         ) : (

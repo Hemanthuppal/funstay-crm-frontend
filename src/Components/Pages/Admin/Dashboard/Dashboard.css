@@ -240,6 +240,49 @@
   color: white;
 }
 
+@media (min-width: 1024px)  and (max-width: 1366px){
+  .admin-dashboard-cards-container{
+    width: 110%;
+  }}
+
+
+
+@media (max-width: 1024px) {
+  .container{
+    max-width: 100%;
+  }
+  .Sales-day {
+    width: 14%; 
+    /* margin-left: -8px; */
+   }
+
+   .dashboard1.collapsed {
+    margin-left: 60px;
+    width:90%;
+  }
+
+  .dashboard1 {
+    flex: 1 1;
+    padding: 20px;
+    margin-top: 5%;
+    width: 70%;
+    margin-left: 220px;
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+
+.admin-dashboard-cards-container{
+  width: 110%;
+}
+
+.col-lg-7 {
+  width: 100%;
+}
+.col-lg-5 {
+  width: 100%;
+}
+}
+
 /* Responsive Adjustments */
 @media (max-width: 992px) {
   .admin-gradient-card {
@@ -261,9 +304,21 @@
 
   .admin-day {
     flex: 1 1 20%;
-    max-width: 20%;
+    /* max-width: 20%; */
   }
 }
+
+
+/* iPad Air & iPad Pro 11" */
+/* @media only screen and (max-width: 834px) {
+
+ 
+} */
+
+/* iPad Pro 12.9" */
+/* @media only screen and (max-width: 1024px) {
+  
+} */
 
 @media (max-width: 768px) {
   .admin-gradient-card {
@@ -316,5 +371,38 @@
     margin-left: 0;
     width: 100%;
     padding: 10px;
+  }
+
+
+  .dashboard1.collapsed {
+    margin-left: 34px;
+    width:93%;
+  }
+  .Sales-day {
+   max-width: 14%; 
+   margin-left: -8px;
+  }
+
+  .Sales-day-label{
+    margin-left: -8px;
+
+  }
+
+
+  .Sales-day-number{
+    margin-left: -8px;
+  }
+}
+
+
+
+@media (max-width: 768px) {
+  .Sales-day-selector {
+    justify-content: space-evenly; 
+    gap: 0.5rem; 
+  }
+
+  .Sales-day {
+    flex: 1 1 10%; 
   }
 }

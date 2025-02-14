@@ -58,13 +58,15 @@ const LeadOppView = () => {
                                 <Col md={6}>
                                     <h5>Customer Details</h5>
                                     {/* <p><strong>Lead Type:</strong> {lead.lead.lead_type || 'N/A'}</p> */}
-                                    {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                    {/* {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
   <>
     <p>
       <strong>Opp Id:</strong> {`OPP${String(lead.travelOpportunities[0].id).padStart(4, '0')}`}
     </p>
   </>
-)}
+)} */}
+
+<p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
                                     <p><strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}</p>
                                     <p><strong>Email ID:</strong> {lead.lead.email || 'N/A'}</p>

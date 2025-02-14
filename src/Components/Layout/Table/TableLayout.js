@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTable, usePagination, useGlobalFilter, useSortBy } from 'react-table';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaCalendarAlt, FaTimes } from "react-icons/fa";
+import './TableLayout.css'
 
 // Global Search Filter Component
 function GlobalFilter({ globalFilter, setGlobalFilter, handleDateFilter }) {
@@ -22,56 +23,49 @@ function GlobalFilter({ globalFilter, setGlobalFilter, handleDateFilter }) {
 
   return (
     <div className="dataTable_search mb-3 d-flex align-items-center gap-2">
-      <input
-        value={globalFilter || ''}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        className="form-control"
-        placeholder="Search..."
-        style={{ maxWidth: '200px' }} // Fixed width for search input
-      />
-      {showDateFilters || fromDate || toDate ? (
-        <button
-          className="btn btn-light"
-          onClick={clearDateFilter}
-        >
-          <FaTimes color="#ff5e62" size={20} />
+    <input
+      value={globalFilter || ''}
+      onChange={(e) => setGlobalFilter(e.target.value)}
+      className="form-control search-input"
+      placeholder="Search..."
+    />
+    {showDateFilters || fromDate || toDate ? (
+      <button className="btn btn-light clear-btn" onClick={clearDateFilter}>
+        <FaTimes color="#ff5e62" size={20} />
+      </button>
+    ) : (
+      <button className="btn btn-light calendar-btn" onClick={() => setShowDateFilters(!showDateFilters)}>
+        <FaCalendarAlt color="#ff5e62" size={20} />
+      </button>
+    )}
+    {showDateFilters && (
+      <div className="date-filters d-flex gap-2 align-items-center">
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => {
+            setFromDate(e.target.value);
+            if (toDate && e.target.value > toDate) {
+              setToDate(''); // Reset "To" date if it's earlier than the new "From" date
+            }
+          }}
+          className="form-control date-input"
+        />
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="form-control date-input"
+          min={fromDate}
+        />
+        <button onClick={applyDateFilter} className="btn btn-primary apply-btn">
+          OK
         </button>
-      ) : (
-        <button
-          className="btn btn-light"
-          onClick={() => setShowDateFilters(!showDateFilters)}
-        >
-          <FaCalendarAlt color="#ff5e62" size={20} />
-        </button>
-      )}
-      {showDateFilters && (
-        <div className="d-flex gap-2 align-items-center">
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => {
-              setFromDate(e.target.value);
-              if (toDate && e.target.value > toDate) {
-                setToDate(''); // Reset "To" date if it's earlier than the new "From" date
-              }
-            }}
-            className="form-control"
-            style={{ maxWidth: "150px" }}
-          />
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="form-control"
-            style={{ maxWidth: "150px" }}
-            min={fromDate} // Set the minimum date for "To" date based on "From" date
-          />
-          <button onClick={applyDateFilter} className="btn btn-primary" style={{color:'white',backgroundColor: '#ff5e62',borderColor: '#ff5e62'}}>
-            OK
-          </button>
-        </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
+  
+
   );
 }
 
@@ -130,10 +124,10 @@ export default function DataTable({ columns, data, initialSearchValue }) {
         {/* Page Size Selector */}
         <div>
           <select
-            className="form-select form-select-sm"
+            className="form-select form-select-sm filter-div"
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
-            style={{ maxWidth: '120px' }} // Optional: Adjust width
+           // Optional: Adjust width
           >
             {[5, 10, 20].map((size) => (
               <option key={size} value={size}>

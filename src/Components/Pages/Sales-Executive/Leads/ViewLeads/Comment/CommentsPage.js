@@ -8,9 +8,10 @@ import Navbar from '../../../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { useNavigate } from 'react-router-dom';
 import { baseURL } from '../../../../../Apiservices/Api';
 import { AuthContext } from '../../../../../AuthContext/AuthContext';
+import { adminMail } from '../../../../../Apiservices/Api';
 
 const CommentsPage = () => {
-  const { authToken, userRole, userId, userName, assignManager } = useContext(AuthContext);
+  const { authToken, userRole, userId, userName, assignManager,managerId } = useContext(AuthContext);
   const { leadid } = useParams(); // Gets the lead ID from the URL
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -40,13 +41,30 @@ const CommentsPage = () => {
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
-
+    const trimmedComment = newComment.trim();
+    const commentName = `${userName} (Sales)`;
+    
     const comment = {
-      name: `${userName} (Sales)`,
+      name: commentName,
       leadid: leadid,
       timestamp: new Date().toISOString(),
-      text: newComment.trim(),
+      text: trimmedComment,
+      notificationmessage: `${commentName} :${trimmedComment}  `,
+      // notificationmessage: `${commentName} :${trimmedComment}  ${leadid}`,
+      // userId, // Uncomment if needed
+      managerId: managerId,
+      email: `${adminMail}`
     };
+    
+    // const comment = {
+    //   name: `${userName} (Sales)`,
+    //   leadid: leadid,
+    //   timestamp: new Date().toISOString(),
+    //   text: newComment.trim(),
+    //   // userId,
+    //   managerId,
+    //   email:`${adminMail}`
+    // };
     console.log(JSON.stringify(comment, null, 2));
     try {
       const commenturl = `${baseURL}/comments/add`;
@@ -114,21 +132,37 @@ const CommentsPage = () => {
           </div>
 
           {/* Display Existing Comments */}
-          <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
-            {[...comments]
-              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort latest comments on top
-              .map((comment, index) => (
-                <div key={index} className="mb-3 d-flex justify-content-between align-items-start">
-                  <p>
-                    {/* Wrap the name in <strong> to bold it and style it with a specific color */}
-                    <strong >
-                      {comment.name}
-                    </strong>
-                    : {comment.text}
-                  </p>
-                </div>
-              ))}
-          </div>
+        {/* Display Existing Comments */}
+<div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
+  {[...comments]
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort latest comments on top
+    .map((comment, index) => (
+      <div key={index} className="mb-3">
+        
+         <p style={{ fontSize: "13px", color: "gray" }}>
+  {new Date(comment.timestamp).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  })}
+</p>
+
+      
+        <p>
+          {/* Wrap the name in <strong> to bold it */}
+          <strong>{comment.name}</strong>: {comment.text}
+        </p>
+        {/* Display formatted timestamp */}
+       
+      </div>
+    ))}
+</div>
+
 
           {/* Close Button */}
           <div className="mt-3">

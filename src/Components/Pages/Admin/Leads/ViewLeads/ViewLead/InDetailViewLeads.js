@@ -3,13 +3,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../../../Shared/Navbar/Navbar";
 import "./InDetailViewLeads.css";
-import axios from "axios"; // Import axios
+import axios from "axios"; 
 import {baseURL} from "../../../../../Apiservices/Api";
 
 const InDetailViewLeads = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { leadid } = location.state; // Get leadid from location state
+  const { leadid } = location.state;
   const [collapsed, setCollapsed] = useState(false);
   const [formData, setFormData] = useState({
     lead_type: "",
@@ -30,7 +30,7 @@ const InDetailViewLeads = () => {
     secondarysource: "",
     channel: "",
   });
-  const [error, setError] = useState(null); // State for error handling
+  const [error, setError] = useState(null); 
 
   useEffect(() => {
     const fetchLeadData = async () => {
@@ -40,6 +40,7 @@ const InDetailViewLeads = () => {
 
         setFormData((prev) => ({
           ...prev,
+          leadid: leadData.leadid || "",
           lead_type: leadData.lead_type || "",
           leadcode: leadData.leadcode || "",
           name: leadData.name || "",
@@ -81,17 +82,12 @@ const InDetailViewLeads = () => {
               {leadid ? (
                 <div className="row">
                   <div className="col-md-6">
-                    {/* <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Lead Type:
-                      </span>
-                      <span>{formData.lead_type}</span>
-                    </div> */}
+                   
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Lead ID:
                       </span>
-                      <span>{formData.leadcode}</span>
+                      <span>{formData.leadid}</span>
                     </div>
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
@@ -105,12 +101,7 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.email}</span>
                     </div>
-                    {/* <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Country Code:
-                      </span>
-                      <span>{formData.country_code}</span>
-                    </div> */}
+                   
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Phone Number:
@@ -137,30 +128,20 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.destination}</span>
                     </div>
+                
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Another Name:
-                      </span>
-                      <span>{formData.another_name}</span>
-                    </div>
-                    <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Another Email:
+                        Secondary Email:
                       </span>
                       <span>{formData.another_email}</span>
                     </div>
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Another Phone Number:
+                        Secondary Phone Number:
                       </span>
                       <span>{formData.another_phone_number}</span>
                     </div>
-                    {/* <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Corporate Id:
-                      </span>
-                      <span>{formData.corporate_id}</span>
-                    </div> */}
+                   
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Description:

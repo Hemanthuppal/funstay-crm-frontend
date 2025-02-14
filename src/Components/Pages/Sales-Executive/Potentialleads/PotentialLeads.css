@@ -1,3 +1,13 @@
+.potentialleads-table-container {
+  max-width: 1500px;
+  margin: auto;
+  padding: 20px;
+  margin-top: 10px;
+  border-radius: 10px;
+  background-color: rgba(163, 110, 41, 0.08);
+}
+
+
 
 
 .salesOpportunitycontainer {
@@ -98,3 +108,15 @@
     border-radius: 10px;
     background-color: rgba(163, 110, 41, 0.08);
   }
+
+
+  /* Fix table layout so columns do not resize */
+/* .potentialleads-table-container table {
+  table-layout: fixed;
+  width: 100%;
+} */
+.fixed-select {
+  width: 150px;     
+  max-width: 150px;
+  min-width: 150px;
+}

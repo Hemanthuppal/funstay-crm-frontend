@@ -225,4 +225,35 @@
   .admin-sidebar.collapsed .admin-nav-link .link_text {
       display: none;
   }
+  .admin-company-logo {
+    width: 121px;
+    margin-left: 5px;
+  }
+
+  .user-admin{
+    margin-left: 35px;
+    font-size: 20px;
+  }
+  
+}
+
+
+
+@media (max-width: 375px){
+
+
+  .admin-header-right{
+    margin-left: -10px;
+  }
+
+  .user-admin {
+    margin-left: 5px;
+    font-size: 20px;
+}
+
+
+.admin-nav-icon {
+  margin-left: 5px;
+  margin-right: -14px;
+}
 }

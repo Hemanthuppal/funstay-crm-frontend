@@ -1,19 +1,19 @@
-// CommentsPage.js
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
-import './CommentsPage.css'; // Optional: Create a CSS file for styling
+import './CommentsPage.css'; 
 import Navbar from '../../../../Shared/Navbar/Navbar';
 import {baseURL} from '../../../../Apiservices/Api';
 
 const CommentsPage = () => {
-  const { leadid } = useParams(); // Gets the lead ID from the URL
+  const { leadid } = useParams(); 
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 const [collapsed, setCollapsed] = useState(false);
   useEffect(() => {
-    // Fetch comments based on lead ID when the component mounts
+    
     const fetchComments = async () => {
       try {
         const response = await axios.get(`${baseURL}/comments/${leadid}`);
@@ -64,7 +64,7 @@ console.log(JSON.stringify(comment, null, 2));
     <div className="opp-comment-form-container">
     <h3 className='opp-comment-form-header'>Comments</h3>
 
-    {/* Input Field for New Comment */}
+
     <div className="mb-3 opp-modal-footer">
         <Form.Group>
             <Form.Label>Add a New Comment</Form.Label>
@@ -85,10 +85,9 @@ console.log(JSON.stringify(comment, null, 2));
         </Form.Group>
     </div>
 
-    {/* Display Existing Comments */}
     <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
         {[...comments]
-            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort latest comments on top
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) 
             .map((comment, index) => (
                 <div key={index} className="mb-3 d-flex justify-content-between align-items-start">
                     <div>
@@ -99,7 +98,7 @@ console.log(JSON.stringify(comment, null, 2));
             ))}
     </div>
 
-    {/* Close Button */}
+    
     <div className="mt-3">
         <Button className="opp-comment-btn opp-comment-close-btn" onClick={() => navigate(-1)}>
         Back

@@ -6,8 +6,23 @@ import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
 import { AuthContext } from '../../../../AuthContext/AuthContext';
+import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 
 const DynamicForm = () => {
+   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+    useEffect(() => {
+      // Get all country codes and their calling codes
+      const countries = getCountries();
+      const callingCodes = countries.map(
+        (country) => `+${getCountryCallingCode(country)}`
+      );
+      const uniqueCodes = [...new Set(callingCodes)]; // Remove duplicates
+  
+      // Sort numerically
+      uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+  
+      setCountryCodeOptions(uniqueCodes);
+    }, []);
   const {  userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
@@ -16,7 +31,7 @@ const DynamicForm = () => {
     phone_number: '',
     country_code: '+91', // Default country code
     primarySource: '',
-    secondarySource: '',
+    secondarysource: '',
     destination: '',
     another_name: '',
     another_email: '',
@@ -27,7 +42,7 @@ const DynamicForm = () => {
     assignedSalesName: userName,
     assign_to_manager: assignManager,
     managerid: managerId,
-
+    employee_id:null
   });
 
   console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
@@ -84,6 +99,7 @@ const DynamicForm = () => {
       console.log(JSON.stringify(formData));
       // Set success message
       setMessage("Lead added successfully!");
+      setTimeout(() => setMessage(""), 3000);
 
       // Reset form data
       setFormData({
@@ -92,7 +108,7 @@ const DynamicForm = () => {
         phone_number: '',
         country_code: '+91', // Reset to default country code
         primarySource: '',
-        secondarySource: '',
+        secondarysource: '',
         another_name: '',
         another_email: '',
         another_phone_number: '',
@@ -103,11 +119,13 @@ const DynamicForm = () => {
       console.error("Error adding lead:", error);
       // Set error message
       setMessage("Error: Failed to add lead. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
     }
   };
 
   const renderForm = () => {
     const subDropdownOptions = {
+      Referral: ["Grade 3", "Grade 2", "Grade 1"],
       Community: ["BNI", "Rotary", "Lions", "Association", "Others"],
       "Purchased Leads": ["Tripcrafter", "Others"],
       "Social Media": ["Linkedin", "Others"],
@@ -128,7 +146,7 @@ const DynamicForm = () => {
 
       // Clear the subdropdown selection when a new main dropdown is selected
       if (name === "primarySource") {
-        setFormData({ ...formData, [name]: value, secondarySource: "" });
+        setFormData({ ...formData, [name]: value, secondarysource: "" });
       }
     };
 
@@ -170,60 +188,64 @@ const DynamicForm = () => {
           </div>
         </div>
         <div className="addleads-input-group">
-          <label>Phone Number<span style={{ color: "red" }}> *</span></label>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {/* Country Code Input */}
-            <select
-              name="country_code"
-              value={formData.country_code}
-              onChange={handleChange}
-              style={{
-                width: "80px",
-                marginRight: "10px",
-                padding: "5px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-              }}
-            >
-              <option value="+1">+1 </option>
-              <option value="+91">+91 </option>
-              <option value="+44">+44 </option>
-              <option value="+61">+61 </option>
-              <option value="+81">+81 </option>
-              {/* Add more country codes as needed */}
-            </select>
+      <label>
+        Phone Number<span style={{ color: "red" }}> *</span>
+      </label>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        {/* Country Code Dropdown */}
+        <select
+          name="country_code"
+          value={formData.country_code}
+          onChange={handleChange}
+          style={{
+            width: "80px",
+            marginRight: "10px",
+            padding: "5px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+          }}
+        >
+          {countryCodeOptions.map((code) => (
+            <option key={code} value={code}>
+              {code}
+            </option>
+          ))}
+        </select>
 
-            {/* Phone Number Input */}
-            <input
-              type="text"
-              name="phone_number"
-              placeholder="Enter Phone Number"
-              value={formData.phone_number}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value)) {
-                  handleChange(e); // Update the value if it's a valid number
-                }
-              }}
-              onBlur={(e) => {
-                if (formData.phone_number.length !== 10) {
-                  setPhoneError("Please enter a valid number.");
-                } else {
-                  setPhoneError("");
-                }
-              }}
-              style={{
-                flex: 1,
-                padding: "5px",
-                border: "1px solid #ccc",
-                borderRadius: "4px",
-              }}
-              required
-            />
-          </div>
-          {/* Show error message below the input */}
-          {phoneError && <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>}
-        </div>
+        {/* Phone Number Input */}
+        <input
+          type="text"
+          name="phone_number"
+          placeholder="Enter Phone Number"
+          value={formData.phone_number}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (/^\d*$/.test(value)) {
+              handleChange(e);
+            }
+          }}
+          onBlur={() => {
+            if (formData.phone_number.length !== 10) {
+              setPhoneError("Please enter a valid number.");
+            } else {
+              setPhoneError("");
+            }
+          }}
+          style={{
+            flex: 1,
+            padding: "5px",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+          }}
+          required
+        />
+      </div>
+
+      {/* Error Message */}
+      {phoneError && (
+        <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>
+      )}
+    </div>
         <div className="addleads-input-group">
           <label>Primary Source</label>
           <select
@@ -250,8 +272,8 @@ const DynamicForm = () => {
           <div className="addleads-input-group">
             <label>{formData.primarySource} SubSource</label>
             <select
-              name="secondarySource"
-              value={formData.secondarySource || ""}
+              name="secondarysource"
+              value={formData.secondarysource || ""}
               onChange={handleChange}
             >
               <option value="">Select SubSource</option>
@@ -263,7 +285,7 @@ const DynamicForm = () => {
             </select>
           </div>
         )}
-        <div className="addleads-input-group">
+        {/* <div className="addleads-input-group">
           <label>Another Name</label>
           <input
             type="text"
@@ -272,9 +294,9 @@ const DynamicForm = () => {
             value={formData.another_name}
             onChange={handleChange}
           />
-        </div>
+        </div> */}
         <div className="addleads-input-group">
-          <label>Another Email</label>
+          <label>Secondary Email</label>
           <input
             type="email"
             name="another_email"
@@ -284,7 +306,7 @@ const DynamicForm = () => {
           />
         </div>
         <div className="addleads-input-group">
-          <label>Another Phone Number</label>
+          <label>Secondary Phone Number</label>
           <input
             type="text"
             name="another_phone_number"

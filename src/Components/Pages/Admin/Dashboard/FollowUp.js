@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../../../AuthContext/AuthContext";
 import { baseURL } from "../../../Apiservices/Api";
-
+import './Dashboard.css'
 function FollowUp() {
   const navigate = useNavigate();
   const today = new Date();
@@ -43,33 +43,38 @@ function FollowUp() {
 
     fetchLeads();
   }, []);
-
   useEffect(() => {
     const leadsLookup = leads.reduce((acc, lead) => {
       acc[lead.leadid] = lead;
       return acc;
     }, {});
-
+  
     const dynamicSchedule = travelOpportunity
       .filter((opportunity) => {
         const reminderDate = new Date(opportunity.reminder_setting);
         const reminderDay = weekdays[reminderDate.getDay()];
-        return reminderDay === selectedDay;
+        const reminderYear = reminderDate.getFullYear();
+        const currentYear = today.getFullYear();
+  
+        return reminderDay === selectedDay && reminderYear === currentYear;
       })
       .map((opportunity) => {
         const lead = leadsLookup[opportunity.leadid];
         console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
+  
         const leadName = lead ? lead.name : "Unknown Lead";
-
+        const reminderDate = new Date(opportunity.reminder_setting);
+        const time = reminderDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+  
         return {
-          time: "9:00 - 10:00 AM",
-          title: opportunity.notes || "Untitled Task",
+          time: time,
+          title: opportunity.notes || "N/A",
           color: "Sales-badge-orange",
           lead: leadName,
-          leadid: opportunity.leadid, // Store lead ID for navigation
+          leadid: opportunity.leadid,
         };
       });
-
+  
     setScheduleData([
       {
         day: selectedDay,
@@ -77,6 +82,7 @@ function FollowUp() {
       },
     ]);
   }, [selectedDay, travelOpportunity, leads]);
+  
 
   const getWeekDays = () => {
     const days = [];
@@ -101,7 +107,7 @@ function FollowUp() {
         <div className="Sales-schedule-header d-flex justify-content-between align-items-center">
           <h5>Follow-up Schedule</h5>
         </div>
-        <div className="Sales-day-selector mt-3 d-flex justify-content-between">
+        <div className="Sales-day-selector mt-3 d-flex ">
           {daysOfWeek.map(({ day, date }) => (
             <div
               key={day}
@@ -129,9 +135,9 @@ function FollowUp() {
                 <div className="Sales-schedule-details flex-grow-1 ms-3">
                   <strong>{item.time}</strong>
                   <p className="mb-1">{item.title}</p>
-                  <small>
+                  {/* <small>
                     Lead by <span className="Sales-schedule-lead">{item.lead}</span>
-                  </small>
+                  </small> */}
                 </div>
                 <button
                   className="btn btn-outline-primary Sales-view-details-btn"

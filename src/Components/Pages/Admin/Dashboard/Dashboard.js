@@ -10,7 +10,7 @@ import { baseURL } from "../../../Apiservices/Api";
 
 const Dashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate(); 
   const [counts, setCounts] = useState({
     leadsToday: 0,
     confirmedToday: 0,
@@ -60,8 +60,8 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  // if (loading) return <div className="loading-spinner">Loading dashboard...</div>;
-  // if (error) return <div className="error-message">{error}</div>;
+  if (loading) return <div className="loading-spinner">Loading dashboard...</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="dashboardContainer1">
@@ -69,7 +69,7 @@ const Dashboard = () => {
       <div className={`dashboard1 ${collapsed ? 'collapsed' : ''}`}>
         <div className="container">
           <div className="row admin-dashboard-cards-container justify-content-center mt-4">
-            <div className="col-lg-7 col-md-7">
+            <div className="col-lg-7 col-md-12">
               <div className="row">
                 {[
                   {
@@ -90,21 +90,16 @@ const Dashboard = () => {
                     subtitle: `In-Progress Yesterday: ${counts.inProgressYesterday}`,
                     navigateTo: "/a-view-lead"
                   },
-                  // {
-                  //   title: "Quotation Generated Today",
-                  //   value: "02",
-                  //   subtitle: "Leads Rejected Yesterday: 00",
-                  //   navigateTo: "#" // Keep static if no backend data
-                  // },
+                
                 ].map((card, index) => (
                   <div 
                     className="col-lg-6 col-md-6 col-sm-6 mb-3" 
                     key={index}
-                    onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} // Navigate only if not static
+                    onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} 
                     style={{ cursor: card.navigateTo !== "#" ? "pointer" : "default" }}
                   >
                     <div className="card admin-gradient-card">
-                      <h5>{card.title}</h5>
+                      <h5 className="pt-3">{card.title}</h5>
                       <h2>{card.value}</h2>
                       <p>{card.subtitle}</p>
                     </div>
@@ -149,7 +144,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="col-lg-5 col-md-12 mt-4">
+            <div className="col-lg-5 col-md-12 mt-2">
               <FollowUp schedule={[]} />
             </div>
           </div>

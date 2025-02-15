@@ -79,10 +79,11 @@ const ProfileForm = () => {
       });
   
       const result = await response.json();
+      console.log("Response JSON:", JSON.stringify(result, null, 2)); 
       if (response.ok) {
-        window.location.reload();
+        // window.location.reload();
         setMessage("Profile updated successfully!");
-     
+    
         setTimeout(() => setMessage(""), 1000);
       
         setIsEditing(false);
@@ -94,6 +95,7 @@ const ProfileForm = () => {
           imageUrl: result.image || prevData.imageUrl, 
         }));
       } else {
+       
         setMessage(result.message || "Error updating profile");
         setTimeout(() => setMessage(""), 3000);
       }

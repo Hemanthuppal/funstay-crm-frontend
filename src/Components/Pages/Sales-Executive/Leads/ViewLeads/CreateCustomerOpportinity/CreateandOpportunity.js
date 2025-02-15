@@ -127,7 +127,7 @@ const CreateCustomerOpportunity = () => {
     setError(null);
 
     if (!formData.destination || !startDate || !endDate ) {
-      setError("All required fields must be filled in.");
+      setMessage("All required fields must be filled in.");
       setLoading(false);
       return;
     }

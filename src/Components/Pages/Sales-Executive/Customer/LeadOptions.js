@@ -106,7 +106,7 @@ const LeadOppView = () => {
                                                                                         </Row>
                                                                                         <Row>
                                                                                                 <Col md={6}>
-                                                                                                        <p><strong><FaPhone /> </strong> {customer.country_code }&nbsp;{customer.phone_number || "N/A"}</p>
+                                                                                                        <p><strong><FaPhone /> </strong> {customer.country_code  || "+91" }&nbsp;{customer.phone_number || "N/A"}</p>
                                                                                                 </Col>
                                                                                                 <Col md={6}>
                                                                                                         <p><strong><FaEnvelope /></strong> {customer.email || "N/A"}</p>

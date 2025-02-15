@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect ,useContext,useRef} from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css"; 
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes } from "react-icons/fa";
+import { FaEdit, FaEye, FaComment, FaTrash } from "react-icons/fa";
 import {  Row, Col, } from "react-bootstrap";
-import DataTable from "../../../Layout/Table/TableLayoutOpp"; 
+import DataTable from "../../../Layout/Table/TableLayout"; 
 import {baseURL} from "../../../Apiservices/Api";
 import './PotentialLeads.css';
 import axios from 'axios';
@@ -17,25 +17,37 @@ const Potentialleads = () => {
   const [collapsed, setCollapsed] = useState(false);
   // const [data, setData] = useState([]);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-   const [filterStatus, setFilterStatus] = useState("");
-   const [filterDestination, setFilterDestination] = useState("");
-   const [filterOppStatus1, setFilterOppStatus1] = useState("");
-   const [filterOppStatus2, setFilterOppStatus2] = useState("");
-   
-   // Date filter states for input and applied values
-   const [filterStartDate, setFilterStartDate] = useState("");
-   const [filterEndDate, setFilterEndDate] = useState("");
-   const [appliedFilterStartDate, setAppliedFilterStartDate] = useState("");
-   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState("");
-   const [showDateRange, setShowDateRange] = useState(false);
+  // const fetchLeads = async () => {
+  //   try {
+  //     const response = await axios.get(`${baseURL}/api/allleads`);
+  //     if (response.status === 200) {
+  //       const leads = response.data; // Extract data from the response
+  //       const filteredLeads = leads.filter(
+  //         (enquiry) =>
+  //            enquiry.managerid == userId && enquiry.status == "opportunity"
+  //       );
+  //       setData(filteredLeads); // Set the filtered data
+  //     } else {
+  //       console.error("Error fetching leads:", response.statusText);
+  //       alert("Failed to fetch leads.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching leads:", error);
+  //     alert("Failed to fetch leads.");
+  //   }
+  // };
+  
+  // useEffect(() => {
+  //   fetchLeads();
+  // }, [userId]);
+  
 
 
   const [leadIds, setLeadIds] = useState([]);
   const [data, setData] = useState([]);
   const fetchLeads = async () => {
     try {
-      const response = await axios.get(`${baseURL}/api/fetch-data`);
+      const response = await axios.get(`${baseURL}/api/allleads`);
       if (response.status === 200) {
         const leads = response.data; // Extract data from the response
         const filteredLeads = leads.filter(
@@ -53,22 +65,22 @@ const Potentialleads = () => {
     }
   };
 
- 
+   // Log lead IDs when data changes
     useEffect(() => {
       if (data.length > 0) {
         const ids = data.map(lead => lead.leadid);
         setLeadIds(ids);
         console.log("Lead IDs:", ids);
       }
-    }, [data]); 
+    }, [data]); // <-- This effect runs when data updates
   
   useEffect(() => {
     fetchLeads();
   }, [userId]);
 
-  const [customerIdMap, setCustomerIdMap] = useState({});
+  const [customerIdMap, setCustomerIdMap] = useState({}); // New state for mapping
 
- 
+  const opportunityIdRef = useRef(null);
   
 
   const fetchCustomerData = async (leadid) => {
@@ -88,6 +100,7 @@ const Potentialleads = () => {
     }
   };
 
+  // Fetch opportunity data
   const fetchOpportunityData = async () => {
     try {
       const response = await axios.get(`${baseURL}/travel-opportunity`);
@@ -106,15 +119,15 @@ const Potentialleads = () => {
   };
 
   useEffect(() => {
-   
-    const leadIds = data.map(item => item.leadid); 
+    // Assuming you have a way to get the lead IDs
+    const leadIds = data.map(item => item.leadid); // Replace with your actual lead IDs
 
     // Fetch data for each lead ID
     leadIds.forEach(leadid => {
       fetchCustomerData(leadid);
     });
 
-   
+    // Fetch opportunity data
     fetchOpportunityData();
   }, [data]);
 
@@ -284,95 +297,12 @@ const Potentialleads = () => {
     });
   };
 
-    const uniqueDestinations = useMemo(() => {
-      const destinations = formattedData
-        .map((item) => item.travel_destination)
-        .filter((dest) => dest && dest.trim() !== "");
-      return Array.from(new Set(destinations));
-    }, [formattedData]);
-  
-  
-     const staticOppStatus2Options = useMemo(() => {
-        if (filterOppStatus1) {
-          return dropdownOptions.secondary[filterOppStatus1] || [];
-        }
-        const allSecondary = Object.values(dropdownOptions.secondary).flat();
-        return Array.from(new Set(allSecondary));
-      }, [filterOppStatus1, dropdownOptions]);
-  
-    // Use appliedFilterStartDate and appliedFilterEndDate for filtering by date.
-    const filteredData = useMemo(() => {
-      return formattedData.filter((item) => {
-        const matchesFreeText =
-          !searchTerm ||
-          Object.values(item).some(
-            (val) =>
-              val &&
-              val
-                .toString()
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase())
-          );
-  
-        const matchesStatus =
-          !filterStatus ||
-          (item.status &&
-            item.status.toLowerCase() == filterStatus.toLowerCase());
-        const matchesDestination =
-          !filterDestination ||
-          (item.travel_destination &&
-            item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
-        const matchesOppStatus1 =
-          !filterOppStatus1 ||
-          (item.opportunity_status1 &&
-            item.opportunity_status1.toLowerCase() == filterOppStatus1.toLowerCase());
-        const matchesOppStatus2 =
-          !filterOppStatus2 ||
-          (item.opportunity_status2 &&
-            item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
-        
-        const matchesDateRange = (() => {
-          if (appliedFilterStartDate && appliedFilterEndDate) {
-            const start = new Date(appliedFilterStartDate);
-            const end = new Date(appliedFilterEndDate);
-            const createdAt = new Date(item.created_at);
-            return createdAt >= start && createdAt <= end;
-          } else if (appliedFilterStartDate) {
-            const start = new Date(appliedFilterStartDate);
-            const createdAt = new Date(item.created_at);
-            return createdAt >= start;
-          } else if (appliedFilterEndDate) {
-            const end = new Date(appliedFilterEndDate);
-            const createdAt = new Date(item.created_at);
-            return createdAt <= end;
-          }
-          return true;
-        })();
-  
-        return (
-          matchesFreeText &&
-          matchesStatus &&
-          matchesDestination &&
-          matchesOppStatus1 &&
-          matchesOppStatus2 &&
-          matchesDateRange
-        );
-      });
-    }, [
-      searchTerm,
-      filterStatus,
-      filterDestination,
-      filterOppStatus1,
-      filterOppStatus2,
-      appliedFilterStartDate,
-      appliedFilterEndDate,
-      formattedData,
-    ]);
-  
-
   const columns = useMemo(
     () => [
-     
+      // {
+      //   Header: "S.No",
+      //   accessor: (row, index) => index + 1,
+      // },
       {
         Header: "Opp Id",
         accessor: "leadid", // Direct access to pre-formatted value
@@ -388,7 +318,8 @@ const Potentialleads = () => {
         Cell: ({ row }) => (
           <div style={{ cursor: "pointer" }} onClick={() => navigateToLead(row.original.leadid)}>
             <div style={{ color: "blue", textDecoration: "underline" }}>{row.original.name}</div>
-           
+            {/* <div>{row.original.phone_number}</div>
+            <div>{row.original.email}</div> */}
           </div>
         ),
       },
@@ -411,7 +342,7 @@ const Potentialleads = () => {
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              maxWidth: "200px" 
+              maxWidth: "200px" // Adjust width as needed
             }}
             title={row.original.email} // Show full email on hover
           >
@@ -512,131 +443,24 @@ const Potentialleads = () => {
  
   return (
     <div className="salesOpportunitycontainer">
-    <Navbar onToggleSidebar={setCollapsed} />
-    <div className={`salesOpportunity ${collapsed ? "collapsed" : ""}`}>
-      <div className="potentialleads-table-container">
-        <Row className="mb-3">
-          <Col className="d-flex justify-content-between align-items-center fixed">
-            <h3>Opportunity Details</h3>
-            {message && <div className="alert alert-info">{message}</div>}
-          </Col>
-        </Row>
-        <div>
-          {/* Free text search and calendar toggle */}
-          <Row className="mb-3 align-items-center">
-  <Col md={6} className="d-flex align-items-center gap-2">
-    {/* Free text search input */}
-    <input
-      type="text"
-      className="form-control"
-      placeholder="Free Text Search..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
-    
-    {/* Calendar/X toggle */}
-    {showDateRange ? (
-      <FaTimes
-        onClick={() => setShowDateRange(false)}
-        style={{ cursor: "pointer", fontSize: "1.5rem" }}
-        title="Hide Date Range"
-      />
-    ) : (
-      <FaCalendarAlt
-        onClick={() => setShowDateRange(true)}
-        style={{ cursor: "pointer", fontSize: "1.5rem" }}
-        title="Show Date Range"
-      />
-    )}
-
-    {/* Date range inputs */}
-    {showDateRange && (
-      <div className="d-flex align-items-center gap-2">
-        <input
-          type="date"
-          className="form-control"
-          value={filterStartDate}
-          onChange={(e) => setFilterStartDate(e.target.value)}
-        />
-        <span>to</span>
-        <input
-          type="date"
-          className="form-control"
-          value={filterEndDate}
-          onChange={(e) => setFilterEndDate(e.target.value)}
-        />
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            setAppliedFilterStartDate(filterStartDate);
-            setAppliedFilterEndDate(filterEndDate);
-          }}
-        >
-          OK
-        </button>
-      </div>
-    )}
-  </Col>
-</Row>
-
-          {/* Other filters */}
+      <Navbar onToggleSidebar={setCollapsed} />
+      <div className={`salesOpportunity ${collapsed ? "collapsed" : ""}`}>
+        <div className="potentialleads-table-container">
           <Row className="mb-3">
-            <Col md={3}>
-              <select
-                className="form-select"
-                value={filterDestination}
-                onChange={(e) => setFilterDestination(e.target.value)}
-              >
-                <option value="">All Destinations</option>
-                {uniqueDestinations.map((dest) => (
-                  <option key={dest} value={dest}>
-                    {dest}
-                  </option>
-                ))}
-              </select>
-            </Col>
-            <Col md={3}>
-            <select
-                className="form-select"
-                value={filterOppStatus1}
-                onChange={(e) => {
-                  setFilterOppStatus1(e.target.value);
-                  // Reset secondary filter when primary changes
-                  setFilterOppStatus2("");
-                }}
-              >
-                <option value="">All Opportunity Status1</option>
-                {dropdownOptions.primary.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </Col>
-            <Col md={3}>
-            <select
-                className="form-select"
-                value={filterOppStatus2}
-                onChange={(e) => setFilterOppStatus2(e.target.value)}
-              >
-                <option value="">All Opportunity Status2</option>
-                {staticOppStatus2Options.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+            <Col className="d-flex justify-content-between align-items-center">
+              <h3>Opportunity Details</h3>
+              {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
+
             </Col>
           </Row>
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <DataTable columns={columns} data={formattedData} />
+          )}
         </div>
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <DataTable columns={columns} data={filteredData} />
-        )}
       </div>
     </div>
-  </div>
   );
 };
 

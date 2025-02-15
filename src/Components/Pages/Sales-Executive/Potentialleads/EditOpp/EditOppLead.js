@@ -466,17 +466,7 @@ const EditOppLead = () => {
                   </Col>
                 )}
 
-                {/* <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Another Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="another_name"
-                      value={formData.another_name}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col> */}
+               
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Secondary Email</Form.Label>
@@ -499,70 +489,7 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-                {/* <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Corporate ID</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="corporate_id"
-                      value={formData.corporate_id}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col> */}
-                {/* <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Primary Status</Form.Label>
-                    <Form.Select
-                      name="primaryStatus"
-                      value={formData.primaryStatus}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Status</option>
-                      {leadDropdownOptions.primary.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Secondary Status</Form.Label>
-                    <Form.Select
-                      name="secondaryStatus"
-                      value={formData.secondaryStatus}
-                      onChange={handleChange}
-                      disabled={
-                        !formData.primaryStatus ||
-                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus) 
-                      } 
-                    >
-                      <option value="">Select Status</option>
-                      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
-                        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
-                          <option key={status} value={status}>
-                            {status}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="" disabled>No options available</option>
-                      )}
-                    </Form.Select>
-                  </Form.Group>
-                </Col> */}
-                <Col md={12}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                    />
-                  </Form.Group>
-                </Col>
+               
               </Row>
               <hr />
               <h5>Opportunity Details</h5>

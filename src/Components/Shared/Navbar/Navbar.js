@@ -264,7 +264,8 @@ const Navbar = ({ onToggleSidebar }) => {
               <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-customers") ||                   
                     location.pathname.startsWith("/a-customer-details") ||
-                    location.pathname.startsWith("/a-customerdetails")
+                    location.pathname.startsWith("/a-customerdetails") ||
+                    location.pathname.startsWith("/a-editcustomerdetails") 
                     ? "active"
                     : ""
                   }`}
@@ -277,8 +278,8 @@ const Navbar = ({ onToggleSidebar }) => {
               <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||                   
                     location.pathname.startsWith("/addemployee") ||
-                    location.pathname.startsWith("/team-members") ||
-                    location.pathname.startsWith("/a-editcustomerdetails") 
+                    location.pathname.startsWith("/team-members") 
+                   
                     ? "active"
                     : ""
                   }`}

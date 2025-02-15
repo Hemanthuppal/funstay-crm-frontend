@@ -168,9 +168,11 @@ const AddEmployeeModal = () => {
                   required
                 >
                   <option value="">Select Role</option>
+                  {/* <option value="admin">Admin
+                  </option> */}
                   <option value="manager">Manager- Sales & Operations
                   </option>
-                  <option value="employee">Employee- Sales & Operations
+                  <option value="employee">Associate- Sales & Operations
                   </option>
                 </select>
               </div>

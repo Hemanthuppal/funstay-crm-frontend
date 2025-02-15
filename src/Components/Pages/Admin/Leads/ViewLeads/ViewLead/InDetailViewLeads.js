@@ -106,7 +106,7 @@ const InDetailViewLeads = () => {
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Phone Number:
                       </span>
-                      <span>{formData.country_code}{formData.phone_number}</span>
+                      <span>{formData.country_code}&nbsp;{formData.phone_number}</span>
                     </div>
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>

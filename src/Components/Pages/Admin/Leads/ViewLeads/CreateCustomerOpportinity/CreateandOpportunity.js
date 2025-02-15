@@ -116,7 +116,7 @@ const CreateCustomerOpportunity = () => {
     setError(null);
 
     if (!formData.destination || !startDate || !endDate ) {
-      setError("All required fields must be filled in.");
+      setMessage("All required fields must be filled in.");
       setLoading(false);
       return;
     }
@@ -222,7 +222,7 @@ const CreateCustomerOpportunity = () => {
           </h2>
           {message && <div className="alert alert-info">{message}</div>}
 
-       
+          {error && <div className="error-message">{error}</div>}
           <div className="createcustomer-tabs">
             <button
               className={`createcustomer-tab-button ${activeTab === "customer" ? "active" : ""}`}
@@ -440,7 +440,7 @@ const CreateCustomerOpportunity = () => {
                   name="notes"
                   value={formData.notes}  
                   onChange={handleChange}
-                  required
+                  
                 />
               </div>
               <div className="createcustomer-input-group">
@@ -452,7 +452,7 @@ const CreateCustomerOpportunity = () => {
     max={startDate ? new Date(startDate).toISOString().slice(0, 16) : ""}
     value={formData.reminder_setting}
     onChange={handleChange}
-    required
+    
   />
 </div>
             </div>
@@ -470,7 +470,7 @@ const CreateCustomerOpportunity = () => {
               {loading ? "Saving..." : "Save"}
             </button>
           </div>
-          {error && <div className="error-message">{error}</div>}
+         
         </div>
       </div>
     </div>

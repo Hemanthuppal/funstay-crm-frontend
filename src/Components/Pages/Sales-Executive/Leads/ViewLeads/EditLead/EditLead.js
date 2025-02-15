@@ -123,7 +123,8 @@ const EditOppLead = () => {
     };
     console.log(JSON.stringify(leadData, null, 2));
     try {
-      await axios.put(`${baseURL}/api/leads/${leadid}`, leadData);
+      // await axios.put(`${baseURL}/api/leads/${leadid}`, leadData);
+      await axios.put(`${baseURL}/api/update-lead-customer/${leadid}`, leadData);
       setMessage('Updated Successfully');
       setTimeout(() => setMessage(""), 3000);
       // navigate('/view-lead'); 

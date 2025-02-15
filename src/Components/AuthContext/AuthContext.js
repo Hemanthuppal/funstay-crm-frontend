@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import {jwtDecode} from 'jwt-decode';
 
 export const AuthContext = createContext();
 
@@ -50,18 +51,30 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('assignManager');
     localStorage.removeItem('managerId');
+
+    window.location.href = '/'; // Redirect to login
   };
 
   useEffect(() => {
-    setAuthToken(localStorage.getItem('authToken'));
-    setUserId(localStorage.getItem('userId'));
-    setUserName(localStorage.getItem('userName'));
-    setUserMobile(localStorage.getItem('userMobile'));
-    setUserEmail(localStorage.getItem('userEmail'));
-    setUserRole(localStorage.getItem('userRole'));
-    setAssignManager(localStorage.getItem('assignManager'));
-    setManagerId(localStorage.getItem('managerId'));
-  }, []);
+    if (authToken) {
+      try {
+        const decodedToken = jwtDecode(authToken);
+        const currentTime = Date.now() / 1000; // Convert to seconds
+
+        if (decodedToken.exp < currentTime) {
+          logout();
+        } else {
+          const timeout = (decodedToken.exp - currentTime) * 1000;
+          setTimeout(() => {
+            logout();
+          }, timeout);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        logout();
+      }
+    }
+  }, [authToken]);
 
   return (
     <AuthContext.Provider value={{ authToken, userId, userName, userMobile, userEmail, userRole, assignManager, managerId, login, logout }}>

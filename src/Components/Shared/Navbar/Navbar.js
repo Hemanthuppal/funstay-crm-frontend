@@ -155,10 +155,15 @@ const Navbar = ({ onToggleSidebar }) => {
                                   onClick={() => handleNotificationClick(notification)}
                                   style={{ padding: "8px", cursor: "pointer" }}
                                 >
-                                  <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
+                                  {/* <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
                                     {notification.message}
-                                    {/* Admin assigned you an Lead */}
-                                  </div>
+                                    
+                                  </div> */}
+                                  <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
+  {notification.message.length > 40 
+    ? `${notification.message.slice(0, 40)}...` 
+    : notification.message}
+</div>
                                   <div style={{ fontSize: "0.8em", color: "#888" }}>
                                     {new Date(notification.createdAt).toLocaleString()}
                                   </div>

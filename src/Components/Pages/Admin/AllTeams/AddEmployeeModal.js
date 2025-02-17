@@ -3,8 +3,12 @@ import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Navbar/Navbar";
 import "./AddEmployeeModal.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+
+
 
 const AddEmployeeModal = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState(""); 
@@ -145,18 +149,26 @@ const AddEmployeeModal = () => {
                 />
               </div>
               <div className="addemployee-input-group">
-                <label>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Enter Password"
-                  value={newEmployee.password}
-                  onChange={(e) =>
-                    setNewEmployee({ ...newEmployee, password: e.target.value })
-                  }
-                  required
-                />
-              </div>
+  <label>Password</label>
+  <div className="password-input-container">
+    <input
+      type={showPassword ? "text" : "password"} 
+      name="password"
+      placeholder="Enter Password"
+      value={newEmployee.password}
+      onChange={(e) =>
+        setNewEmployee({ ...newEmployee, password: e.target.value })
+      }
+      required
+    />
+    <span
+      className="password-eye-icon"
+      onClick={() => setShowPassword(!showPassword)}
+    >
+      {showPassword ? <FaEyeSlash /> : <FaEye />}
+    </span>
+  </div>
+</div>
               <div className="addemployee-input-group">
                 <label>Role</label>
                 <select

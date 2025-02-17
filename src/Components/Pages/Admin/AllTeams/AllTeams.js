@@ -76,6 +76,10 @@ const AdminCustomer = () => {
             style={{ color: "#ff9966", cursor: "pointer" }}
             onClick={() => navigate('/team-members', { state: { teamMembers: row.original.teamMembers } })}
           />
+          <FaEdit
+                          style={{ color: "#ff9966", cursor: "pointer" }}
+                          onClick={() => navigate(`/editemployee/${row.original.id}`)}
+                        />
           <FaTrash
             style={{ color: "#ff9966", cursor: "pointer" }}
             onClick={() => handleDeleteEmployee(row.original.id)}

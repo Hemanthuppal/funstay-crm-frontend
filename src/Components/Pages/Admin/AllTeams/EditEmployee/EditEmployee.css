@@ -1,4 +1,4 @@
-.addemployee-form-container {
+.editemployee-form-container {
     width: 100%;
     margin: 20px auto;
     background: white;
@@ -7,7 +7,7 @@
     padding: 2%;
 }
 
-.addemployee-form-header {
+.editemployee-form-header {
     background: #f7941e;
     color: white;
     padding: 15px 20px;
@@ -17,37 +17,37 @@
     align-items: center;
 }
 
-.addemployee-form-header h2 {
+.editemployee-form-header h2 {
     font-size: 18px;
 }
 
-.addemployee-form-grid {
+.editemployee-form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two columns by default */
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
-.addemployee-input-group {
+.editemployee-input-group {
     display: flex;
     flex-direction: column;
 }
 
-.addemployee-input-group label {
+.editemployee-input-group label {
     margin-bottom: 5px;
     font-size: 14px;
     font-weight: bold;
 }
 
-.addemployee-input-group input,
-.addemployee-input-group textarea,
-.addemployee-input-group select {
+.editemployee-input-group input,
+.editemployee-input-group textarea,
+.editemployee-input-group select {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
 }
 
-.addemployee-form-footer {
+.editemployee-form-footer {
     padding: 15px 20px;
     text-align: right;
     border-top: 1px solid #ddd;
@@ -56,54 +56,52 @@
     gap: 10px;
 }
 
-.addemployee-form-footer .btn {
+.editemployee-form-footer .btn {
     padding: 8px 30px;
     border-radius: 4px;
     cursor: pointer;
 }
 
-.addemployee-form-footer .btn-primary {
+.editemployee-form-footer .btn-primary {
     background: #f7941e;
     color: white;
 }
 
-.addemployee-form-footer .btn-secondary {
+.editemployee-form-footer .btn-secondary {
     background: #6c757d;
     color: white;
 }
 
-.addemployee-form-footer .btn-primary:hover {
+.editemployee-form-footer .btn-primary:hover {
     background: #d6791b;
 }
 
 /* Responsive Design */
 @media (max-width: 600px) {
-    .addemployee-form-grid {
-        grid-template-columns: 1fr; /* Single column on mobile */
+    .editemployee-form-grid {
+        grid-template-columns: 1fr;
     }
 }
 
-.addemployee-input-group.full-width {
+.editemployee-input-group.full-width {
     grid-column: 1 / -1;
 }
-
 
 .password-input-container {
     position: relative;
     display: flex;
     align-items: center;
-  }
-  
-  .password-input-container input {
+}
+
+.password-input-container input {
     width: 100%;
     padding-right: 35px;
-  }
-  
-  .password-eye-icon {
+}
+
+.password-eye-icon {
     position: absolute;
     right: 10px;
     cursor: pointer;
     font-size: 18px;
     color: #f7941e; 
-  }
-  
+}

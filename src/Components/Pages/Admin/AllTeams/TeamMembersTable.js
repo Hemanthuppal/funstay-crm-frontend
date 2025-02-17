@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DataTable from './../../../Layout/Table/TableLayout';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../../../Shared/Navbar/Navbar';
-import { FaTrash } from "react-icons/fa";
+import { FaTrash ,FaEdit} from "react-icons/fa";
 import { baseURL } from '../../../Apiservices/Api';
 import axios from 'axios';
 
@@ -49,6 +49,10 @@ const TeamMembers = () => {
       Header: "Actions",
       Cell: ({ row }) => (
         <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+            <FaEdit
+                  style={{ color: "#ff9966", cursor: "pointer" }}
+                  onClick={() => navigate(`/editemployee/${row.original.id}`)}
+                />
           <FaTrash
             style={{ color: "#ff9966", cursor: "pointer" }}
             onClick={() => handleDeleteEmployee(row.original.id)}

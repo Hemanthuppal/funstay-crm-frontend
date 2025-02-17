@@ -73,7 +73,8 @@ import M_Profile from "./Components/Pages/Manager/Profile/Profile";
 import Addonboarding from "./Components/Pages/Admin/Onboarding/AddEmployeeModal";
 import Viewonboarding from "./Components/Pages/Admin/Onboarding/AllTeams";
 import ViewonboardingId from "./Components/Pages/Admin/Onboarding/TeamMembersTable";
-import Mobile from "./Mobile"
+import Mobile from "./Mobile";
+import EditEmployee from "./Components/Pages/Admin/AllTeams/EditEmployee/EditEmployee";
 
 
 function App() {
@@ -195,7 +196,7 @@ function App() {
                 <Route path="/a-viewonboarding/:id" element={<ViewonboardingId />} />
 
 
-
+                <Route path="/editemployee/:id" element={<EditEmployee />} />
                 <Route path="/mobile" element={<Mobile />} />
                 </Route>
             </Routes>

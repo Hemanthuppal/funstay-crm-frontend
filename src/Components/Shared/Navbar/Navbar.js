@@ -278,7 +278,8 @@ const Navbar = ({ onToggleSidebar }) => {
               <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||                   
                     location.pathname.startsWith("/addemployee") ||
-                    location.pathname.startsWith("/team-members") 
+                    location.pathname.startsWith("/team-members") ||
+                    location.pathname.startsWith("/editemployee") 
                    
                     ? "active"
                     : ""

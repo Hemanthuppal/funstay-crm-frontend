@@ -45,11 +45,11 @@ const Potentialleads = () => {
         setData(filteredLeads); // Set the filtered data
       } else {
         console.error("Error fetching leads:", response.statusText);
-        alert("Failed to fetch leads.");
+       
       }
     } catch (error) {
       console.error("Error fetching leads:", error);
-      alert("Failed to fetch leads.");
+    
     }
   };
 

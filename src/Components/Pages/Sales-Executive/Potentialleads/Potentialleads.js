@@ -178,7 +178,7 @@ const Potentialleads = () => {
       }
     } catch (error) {
       console.error("Error fetching leads:", error);
-      alert("Failed to fetch leads.");
+     
     }
   };
 

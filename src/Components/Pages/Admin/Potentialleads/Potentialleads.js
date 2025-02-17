@@ -53,11 +53,11 @@ const AdminDashboard = () => {
         console.log('Fetched Leads:', filteredLeads);
       } else {
         console.error('Error fetching leads:', response.statusText);
-        alert('Failed to fetch leads.');
+      
       }
     } catch (error) {
       console.error('Error fetching leads:', error);
-      alert('Failed to fetch leads.');
+     
     } finally {
       setLoading(false); 
     }

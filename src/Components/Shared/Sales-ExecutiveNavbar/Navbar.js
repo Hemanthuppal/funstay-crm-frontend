@@ -126,7 +126,7 @@ const Sales = ({ onToggleSidebar }) => {
             </div> &nbsp;&nbsp;
             <img src='https://primary0101211.s3.ap-south-1.amazonaws.com/v3/assets/images/Logo.png' alt="Logo" className="sales-company-logo" />
           </div>
-          <h2 className="text-center user-sales" style={{ color: 'white' }}> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase() : ""} - Sales Executive</h2>
+          <h2 className="text-center user-sales" style={{ color: 'white' }}> {userName ? userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase() : ""} - Associate</h2>
 
           <div className="sales-header-right">
             {/* Add Leads Button */}

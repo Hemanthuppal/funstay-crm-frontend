@@ -33,6 +33,14 @@ const MyTeam = () => {
         Header: 'Email',
         accessor: 'email',
       },
+    
+        {
+          Header: "Designation",
+          accessor: "role",
+          Cell: ({ value }) => (value === "employee" ? "Associate - Sales & Operations" : value),
+        },
+     
+      
      
     ],
     []

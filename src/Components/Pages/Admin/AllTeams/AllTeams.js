@@ -55,7 +55,14 @@ const AdminCustomer = () => {
     { Header: "Name", accessor: "name" },
     { Header: "Mobile No", accessor: "mobile" },
     { Header: "Email", accessor: "email" },
-    { Header: "Designation", accessor: "role" },
+ 
+      {
+        Header: "Designation",
+        accessor: "role",
+        Cell: ({ value }) => (value === "manager" ? "Manager - Sales & Operations" : value),
+      },
+   
+    
     {
       Header: "No. of Team Members",
       accessor: "teamMembers",

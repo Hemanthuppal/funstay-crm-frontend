@@ -44,7 +44,11 @@ const TeamMembers = () => {
     { Header: "Name", accessor: "name" },
     { Header: "Mobile", accessor: "mobile" },
     { Header: "Email", accessor: "email" },
-    { Header: "Designation", accessor: "role" },
+    {
+      Header: "Designation",
+      accessor: "role",
+      Cell: ({ value }) => (value === "employee" ? "Associate - Sales & Operations" : value),
+    },
     {
       Header: "Actions",
       Cell: ({ row }) => (

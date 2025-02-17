@@ -80,7 +80,7 @@ const MyTeamSales = () => {
             name: managerData.manager?.name || "N/A",
             mobile: managerData.manager?.mobile || "N/A",
             email: managerData.manager?.email || "N/A",
-            designation: "Manager",
+            designation: "Manager - Sales & Operations",
           },
           ...(managerData.assignedEmployees
             ? managerData.assignedEmployees.map((emp) => ({
@@ -88,7 +88,7 @@ const MyTeamSales = () => {
                 name: emp?.name || "N/A",
                 mobile: emp?.mobile || "N/A",
                 email: emp?.email || "N/A",
-                designation: "Sales Executive",
+                designation: "Associate - Sales & Operations",
               }))
             : []),
         ]

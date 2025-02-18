@@ -237,7 +237,7 @@ const Sales = ({ onToggleSidebar }) => {
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
               </li>
-               <li
+               {/* <li
                 className={`sales-nav-item ${location.pathname.startsWith ("/s-allleads")||
                     location.pathname.startsWith( "/s-view-lead")
                    ? "active" : ""
@@ -251,7 +251,7 @@ const Sales = ({ onToggleSidebar }) => {
                   <FaHome className="sales-nav-icon" />
                   {!collapsed && <span className="link_text">All Leads</span>}
                 </Link>
-              </li>
+              </li> */}
               <li
                 className={`sales-nav-item ${location.pathname.startsWith("/View-lead") ||
                     location.pathname.startsWith("/edit-lead") ||

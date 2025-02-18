@@ -233,6 +233,18 @@ const Manager = ({ onToggleSidebar }) => {
                   {!collapsed && <span className="link_text">Dashboard</span>}
                 </Link>
               </li>
+              <li className={`manager-nav-item ${location.pathname.startsWith("/m-allleads")||
+              location.pathname.startsWith("/m-views-lead")
+               ? "active"
+                : ""
+                }`}>
+                <Link className="nav-link" to="/m-allleads" onClick={handleNavItemClick}>
+                  <FaUsers className="manager-nav-icon" />
+                  {!collapsed && <span className="link_text">All Leads</span>}
+                </Link>
+              </li>
+
+             
 
               <li
                 className={`manager-nav-item ${location.pathname.startsWith("/m-view-leads") ||
@@ -247,7 +259,7 @@ const Manager = ({ onToggleSidebar }) => {
               >
                 <Link className="nav-link" to="/m-view-leads" onClick={handleNavItemClick}>
                   <FaClipboardList className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">All Leads</span>}
+                  {!collapsed && <span className="link_text">My Leads</span>}
                 </Link>
               </li>
 

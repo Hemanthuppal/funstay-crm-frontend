@@ -75,6 +75,7 @@ import Viewonboarding from "./Components/Pages/Admin/Onboarding/AllTeams";
 import ViewonboardingId from "./Components/Pages/Admin/Onboarding/TeamMembersTable";
 import Mobile from "./Mobile";
 import EditEmployee from "./Components/Pages/Admin/AllTeams/EditEmployee/EditEmployee";
+import M_Allleads from "./Components/Pages/Manager/Allleads/Alllead"
 
 
 function App() {
@@ -198,6 +199,12 @@ function App() {
 
                 <Route path="/editemployee/:id" element={<EditEmployee />} />
                 <Route path="/mobile" element={<Mobile />} />
+
+
+
+
+                <Route path="/m-allleads" element={<M_Allleads />} />
+                <Route path="/m-views-lead/:leadid" element={<M_InDetailViewLeads />} />
                 </Route>
             </Routes>
 

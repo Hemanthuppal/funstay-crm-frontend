@@ -4,7 +4,7 @@ import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
 import "../Potentialleads/OppDetails/LeadDetails.css";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
-import { FaPhone, FaEnvelope } from "react-icons/fa"; // Import FontAwesome icons
+import { FaPhone, FaEnvelope,FaCopy } from "react-icons/fa"; // Import FontAwesome icons
 import { Form, Dropdown, Button } from "react-bootstrap"; // Import Bootstrap components
 import { baseURL } from "../../../Apiservices/Api";
 
@@ -20,7 +20,16 @@ const LeadOppView = () => {
         const location = useLocation();
         const navigate = useNavigate();
         const customerId = location.state?.id || null; // Ensure customerId is valid
+        const [message,setMessage] = useState('');
         console.log("customerId=", customerId);
+        const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text).then(() => {
+                        setMessage("Copied to clipboard!");
+                        setTimeout(() => setMessage(""), 1000);
+                }).catch(err => {
+                  console.error('Failed to copy: ', err);
+                });
+              };
 
         const fetchCustomerDetails = async (id) => {
                 try {
@@ -87,6 +96,7 @@ const LeadOppView = () => {
                                                 </Card.Header>
                                                 <Card.Body>
                                                         <Row>
+                                                        {message && <div className="alert alert-info">{message}</div>} 
                                                                 {/* Customer Details Section */}
                                                                 <Col md={5}>
                                                                         <h5>Customer Details</h5>
@@ -105,12 +115,28 @@ const LeadOppView = () => {
                                                                                                 </Col>
                                                                                         </Row>
                                                                                         <Row>
-                                                                                                <Col md={6}>
-                                                                                                        <p><strong><FaPhone /> </strong> {customer.country_code  || "+91" }&nbsp;{customer.phone_number || "N/A"}</p>
-                                                                                                </Col>
-                                                                                                <Col md={6}>
-                                                                                                        <p><strong><FaEnvelope /></strong> {customer.email || "N/A"}</p>
-                                                                                                </Col>
+                                                                                        <Col md={6}>
+  <p>
+    <strong><FaPhone /> Phone:</strong> {customer.country_code || "+91"}&nbsp;{customer.phone_number || "N/A"}
+    <FaCopy
+      style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+      onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
+      title="Copy Phone Number"
+    />
+  </p>
+</Col>
+<Col md={6}>
+        <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
+          <p style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexGrow: 1 }}>
+            <strong><FaEnvelope /> Email:</strong> {customer.email || "N/A"}
+          </p>
+          <FaCopy
+            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(customer.email || "")}
+            title="Copy Email"
+          />
+        </div>
+      </Col>
                                                                                         </Row>
                                                                                 </>
                                                                         ) : (

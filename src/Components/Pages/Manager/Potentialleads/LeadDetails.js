@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/ManagerNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
+import { FaCopy } from "react-icons/fa";
 
 const LeadOppView = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -11,6 +12,17 @@ const LeadOppView = () => {
     const location = useLocation();
     const { leadid } = location.state;
     const navigate = useNavigate();
+    const [message,setMessage] = useState('');
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text).then(() => {
+          setMessage("Copied to clipboard!");
+          setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+
+
+      };
 
     useEffect(() => {
         const fetchLeadDetails = async () => {
@@ -53,6 +65,7 @@ const LeadOppView = () => {
                             <h2>Customer and Opportunity Details</h2>
                         </Card.Header>
                         <Card.Body>
+                        {message && <div className="alert alert-info">{message}</div>}
                             <Row>
                                 {/* Customer Details Section */}
                                 <Col md={6}>
@@ -66,8 +79,22 @@ const LeadOppView = () => {
   </>
 )} */}
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
-                                    <p><strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}</p>
-                                    <p><strong>Email ID:</strong> {lead.lead.email || 'N/A'}</p>
+                                    <p>
+  <strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
+  <FaCopy
+    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+    onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
+    title="Copy Phone Number"
+  />
+</p>
+<p>
+  <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
+  <FaCopy
+    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+    onClick={() => copyToClipboard(lead.lead.email)}
+    title="Copy Email"
+  />
+</p>
                                     <p><strong>Primary Source:</strong> {lead.lead.primarySource || 'N/A'}</p>
                                     <p><strong>Secondary Source:</strong> {lead.lead.secondarysource || 'N/A'}</p>
                                     <p><strong>Primary Status:</strong> {lead.lead.opportunity_status1 || 'N/A'}</p>

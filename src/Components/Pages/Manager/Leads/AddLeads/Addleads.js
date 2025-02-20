@@ -10,6 +10,7 @@ import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 const DynamicForm = () => {
   const { authToken, userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+  const [loading,setLoading] = useState(false);
 
 useEffect(() => {
  
@@ -100,6 +101,7 @@ useEffect(() => {
 
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     setMessage(""); 
 
@@ -155,7 +157,10 @@ useEffect(() => {
      
       setMessage("Error: Failed to add lead. Please try again.");
       setTimeout(() => setMessage(""), 3000);
-    }
+  
+  } finally {
+    setLoading(false);
+  }
   };
 
 
@@ -268,6 +273,7 @@ useEffect(() => {
         border: "1px solid #ccc",
         borderRadius: "4px",
       }}
+      maxLength={10}
       required
     />
   </div>
@@ -347,6 +353,7 @@ useEffect(() => {
             placeholder="Enter Another Phone Number"
             value={formData.another_phone_number}
             onChange={handleChange}
+            maxLength={10}
           />
         </div>
         <div className="addleads-input-group">
@@ -387,8 +394,8 @@ useEffect(() => {
               <button className="btn btn-secondary" onClick={() => navigate(-1)}>
                 Back
               </button>
-              <button className="btn btn-primary" type="submit">
-                Submit
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </form>

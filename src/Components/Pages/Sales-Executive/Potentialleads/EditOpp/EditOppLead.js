@@ -295,8 +295,38 @@ const EditOppLead = () => {
     }
   };
 
+  // const [dropdownOptions] = useState({
+  //   primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
+  //   secondary: {
+  //     "In Progress": [
+  //       "Understood Requirement",
+  //       "Sent first quote",
+  //       "Sent amended quote",
+  //       "Negotiation Process",
+  //       "Verbally Confirmed-Awaiting token amount",
+  //     ],
+  //     Confirmed: ["Upcoming Trip", "Ongoing Trip", "Trip Completed"],
+  //     Lost: [
+  //       "Plan Cancelled",
+  //       "Plan Postponed",
+  //       "High Quote",
+  //       "Low Budget",
+  //       "No response",
+  //       "Options not available",
+  //       "just checking price",
+  //       "Booked from other source",
+  //       "Delay in quote",
+  //       "Concern about reliability/trust",
+  //       "Did not like payment terms",
+  //       "Did not like cancellation policy",
+  //       "Booked different option from us",
+  //     ],
+  //     Duplicate: ["Duplicate"],
+  //     Cancelled: ["Force Majeure", "Medical Urgency", "Personal Reason"],
+  //   },
+  // });
   const [dropdownOptions] = useState({
-    primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
+    primary: ["In Progress", "Confirmed", "Lost", "Duplicate"],
     secondary: {
       "In Progress": [
         "Understood Requirement",
@@ -322,7 +352,7 @@ const EditOppLead = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-      Cancelled: ["Force Majeure", "Medical Urgency", "Personal Reason"],
+      
     },
   });
 

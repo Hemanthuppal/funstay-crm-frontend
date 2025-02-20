@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import DataTable from './../../../Layout/Table/TableLayout'; 
 import Navbar from "../../../Shared/Navbar/Navbar";
-import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash,FaCopy } from "react-icons/fa";
 import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../../AuthContext/AuthContext";
@@ -13,6 +13,16 @@ const AdminCustomer = () => {
   const navigate = useNavigate();
   const { authToken, userId } = useContext(AuthContext);
 const [message, setMessage] = useState(null);
+const copyToClipboard = (text) => {
+  navigator.clipboard.writeText(text).then(() => {
+    setMessage("Copied to clipboard!");
+    setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+
+
+};
   
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -102,14 +112,53 @@ const [message, setMessage] = useState(null);
           </div>
         ),
       },
-      {
-        Header: "Mobile No",
-        accessor: "phone_number", 
-      },
-      {
-        Header: "Email",
-        accessor: "email", 
-      },
+     {
+                  Header: "Mobile",
+                  accessor: "phone_number",
+                  Cell: ({ row }) => (
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {row.original.phone_number}
+                      <FaCopy
+                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                        onClick={() => copyToClipboard(row.original.phone_number)}
+                        title="Copy Phone Number"
+                      />
+                    </div>
+                  ),
+                },
+                 {
+                               Header: "Email",
+                               accessor: "email",
+                               Cell: ({ row }) => (
+                                 <div
+                                   style={{
+                                     display: "flex",
+                                     alignItems: "center",
+                                     justifyContent: "space-between", // Push copy button to the right
+                                     width: "100%",
+                                     maxWidth: "200px", // Adjust width as needed
+                                   }}
+                                 >
+                                   <div
+                                     style={{
+                                       whiteSpace: "nowrap",
+                                       overflow: "hidden",
+                                       textOverflow: "ellipsis",
+                                       maxWidth: "150px",
+                                     }}
+                                     title={row.original.email} // Show full email on hover
+                                   >
+                                     {row.original.email}
+                                   </div>
+                                   <FaCopy
+                                     style={{ cursor: "pointer", color: "#ff9966" }}
+                                     onClick={() => copyToClipboard(row.original.email)}
+                                     title="Copy Email"
+                                   />
+                                 </div>
+                               ),
+                             },
+     
  
 
       {

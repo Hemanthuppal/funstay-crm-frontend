@@ -293,7 +293,7 @@ const EditOppLead = () => {
   };
 
   const [dropdownOptions] = useState({
-    primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
+    primary: ["In Progress", "Confirmed", "Lost", "Duplicate"],
     secondary: {
       "In Progress": [
         "Understood Requirement",
@@ -319,7 +319,7 @@ const EditOppLead = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-      Cancelled: ["Force Majeure", "Medical Urgency", "Personal Reason"],
+     
     },
   });
 

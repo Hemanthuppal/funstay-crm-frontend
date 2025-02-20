@@ -11,6 +11,7 @@ import { AuthContext } from "../../../../AuthContext/AuthContext";
 const DynamicForm = () => {
   const { authToken, userId, userName } = useContext(AuthContext);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+  
   useEffect(() => {
     
     const countries = getCountries();
@@ -103,6 +104,7 @@ const DynamicForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     setMessage("");
 
@@ -150,6 +152,8 @@ const DynamicForm = () => {
       console.error("Error adding lead:", error);
       setMessage("Error: Failed to add lead. Please try again.");
       setTimeout(() => setMessage(""), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -262,6 +266,7 @@ const DynamicForm = () => {
                 border: "1px solid #ccc",
                 borderRadius: "4px",
               }}
+              maxLength={10}
               required
             />
           </div>
@@ -339,6 +344,7 @@ const DynamicForm = () => {
             placeholder="Enter Another Phone Number"
             value={formData.another_phone_number}
             onChange={handleChange}
+            maxLength={10}
           />
         </div>
         <div className="addleads-input-group">
@@ -379,8 +385,8 @@ const DynamicForm = () => {
               <button className="btn btn-secondary" onClick={() => navigate(-1)}>
                 Back
               </button>
-              <button className="btn btn-primary" type="submit">
-                Submit
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </form>

@@ -53,7 +53,7 @@ const DynamicForm = () => {
   const [phoneError, setPhoneError] = useState(""); // State for phone number error
   const [emailError, setEmailError] = useState("");
   const [error, setError] = useState(null);
-
+const [loading,setLoading] = useState(false);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,6 +78,7 @@ const DynamicForm = () => {
   console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     setMessage(""); // Clear previous messages
 
@@ -120,6 +121,8 @@ const DynamicForm = () => {
       // Set error message
       setMessage("Error: Failed to add lead. Please try again.");
       setTimeout(() => setMessage(""), 3000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -237,6 +240,7 @@ const DynamicForm = () => {
             border: "1px solid #ccc",
             borderRadius: "4px",
           }}
+          maxLength={10}
           required
         />
       </div>
@@ -313,6 +317,7 @@ const DynamicForm = () => {
             placeholder="Enter Another Phone Number"
             value={formData.another_phone_number}
             onChange={handleChange}
+            maxLength={10}
           />
         </div>
         <div className="addleads-input-group">
@@ -353,8 +358,8 @@ const DynamicForm = () => {
               <button className="btn btn-secondary" onClick={() => navigate(-1)}>
                 Back
               </button>
-              <button className="btn btn-primary" type="submit">
-                Submit
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </form>

@@ -5,6 +5,7 @@ import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
 import "./InDetailViewLeads.css";
 import axios from "axios"; 
 import {baseURL} from "../../../../../Apiservices/Api";
+import { FaCopy } from "react-icons/fa";
 
 const InDetailViewLeads = () => {
   const navigate = useNavigate();
@@ -31,7 +32,15 @@ const InDetailViewLeads = () => {
     channel: "",
   });
   const [error, setError] = useState(null); 
-
+  const [message,setMessage] = useState('');
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setMessage("Copied to clipboard!");
+      setTimeout(() => setMessage(""), 1000); // Optional: Show a message
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  };
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
@@ -78,7 +87,7 @@ const InDetailViewLeads = () => {
           <div className="card mt-4">
             <div className="card-body">
               <h2 className="lead-details-header">Lead Details</h2>
-              {error && <p className="text-danger">{error}</p>}
+              {message && <div className="alert alert-info">{message}</div>}
               {leadid ? (
                 <div className="row">
                   <div className="col-md-6">
@@ -96,18 +105,28 @@ const InDetailViewLeads = () => {
                       <span>{formData.name}</span>
                     </div>
                     <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Email:
-                      </span>
-                      <span>{formData.email}</span>
-                    </div>
-                  
-                    <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Phone Number:
-                      </span>
-                      <span>{formData.country_code}{formData.phone_number}</span>
-                    </div>
+  <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+    Email:
+  </span>
+  <span>{formData.email}</span>
+  <FaCopy
+    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+    onClick={() => copyToClipboard(formData.email)}
+    title="Copy Email"
+  />
+</div>
+
+<div className="mb-3 d-flex flex-wrap">
+  <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+    Phone Number:
+  </span>
+  <span>{formData.country_code}{formData.phone_number}</span>
+  <FaCopy
+    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+    onClick={() => copyToClipboard(`${formData.country_code}${formData.phone_number}`)}
+    title="Copy Phone Number"
+  />
+</div>
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Primary Source:

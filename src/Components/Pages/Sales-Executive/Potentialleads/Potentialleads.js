@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaCalendarAlt, FaTimes } from "react-icons/fa";
+import { FaEdit, FaEye, FaComment, FaCalendarAlt, FaTimes,FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -19,8 +19,41 @@ const Potentialleads = () => {
   const [loading, setLoading] = useState(false);
   const [isPrimaryChanged, setIsPrimaryChanged] = useState(false);
   const [isSecondaryChanged, setIsSecondaryChanged] = useState(false);
+  // const [dropdownOptions] = useState({
+  //   primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
+  //   secondary: {
+  //     "In Progress": [
+  //       "Understood Requirement",
+  //       "Sent first quote",
+  //       "Sent amended quote",
+  //       "Negotiation Process",
+  //       "Verbally Confirmed-Awaiting token amount",
+  //     ],
+  //     Confirmed: ["Upcoming Trip", "Ongoing Trip", "Trip Completed"],
+  //     Lost: [
+  //       "Plan Cancelled",
+  //       "Plan Postponed",
+  //       "High Quote",
+  //       "Low Budget",
+  //       "No response",
+  //       "Options not available",
+  //       "just checking price",
+  //       "Booked from other source",
+  //       "Delay in quote",
+  //       "Concern about reliability/trust",
+  //       "Did not like payment terms",
+  //       "Did not like cancellation policy",
+  //       "Booked different option from us",
+  //     ],
+  //     Duplicate: ["Duplicate"],
+  //     Cancelled: ["Force Majeure", "Medical Urgency", "Personal Reason"],
+  //   },
+  // });
+
+
+
   const [dropdownOptions] = useState({
-    primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
+    primary: ["In Progress", "Confirmed", "Lost", "Duplicate"],
     secondary: {
       "In Progress": [
         "Understood Requirement",
@@ -46,11 +79,9 @@ const Potentialleads = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-      Cancelled: ["Force Majeure", "Medical Urgency", "Personal Reason"],
+      
     },
   });
-
-
   
   
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,25 +160,13 @@ const Potentialleads = () => {
     }
   };
 
-  const handleDelete = async (leadid) => {
-    try {
-      const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
-        setMessage("Opportunity has been deleted successfully.");
-        setTimeout(() => setMessage(""), 1000);
-      } else {
-        console.error("Error deleting record");
-        setMessage("Failed to delete the opportunity. Please try again.");
-        setTimeout(() => setMessage(""), 1000);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage("An error occurred while deleting the opportunity.");
-      setTimeout(() => setMessage(""), 1000);
-    }
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setMessage("Copied to clipboard!"); // Optional: Show a message
+      setTimeout(() => setMessage(""), 1000); // Clear message after 3 seconds
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
   };
 
   const navigateToLead = (leadId) => {
@@ -351,10 +370,10 @@ const Potentialleads = () => {
         Header: "Opp Id",
         accessor: "leadid",
       },
-      {
-        Header: "Customer Id",
-        accessor: "customerid",
-      },
+      // {
+      //   Header: "Customer Id",
+      //   accessor: "customerid",
+      // },
       {
         Header: "Name",
         accessor: "name",
@@ -372,36 +391,51 @@ const Potentialleads = () => {
         ),
       },
       {
-        Header: "Mobile",
-        accessor: "phone_number",
-        Cell: ({ row }) => (
-          <div
-            style={{ cursor: "pointer" }}
-            onClick={() => navigateToLead(row.original.leadid)}
-          >
-            {row.original.phone_number}
-          </div>
-        ),
-      },
-      {
-        Header: "Email",
-        accessor: "email",
-        Cell: ({ row }) => (
-          <div
-            style={{
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              maxWidth: "200px",
-            }}
-            title={row.original.email}
-            onClick={() => navigateToLead(row.original.leadid)}
-          >
-            {row.original.email}
-          </div>
-        ),
-      },
+             Header: "Mobile",
+             accessor: "phone_number",
+             Cell: ({ row }) => (
+               <div style={{ display: "flex", alignItems: "center" }}>
+                 {row.original.phone_number}
+                 <FaCopy
+                   style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                   onClick={() => copyToClipboard(row.original.phone_number)}
+                   title="Copy Phone Number"
+                 />
+               </div>
+             ),
+           },
+            {
+                          Header: "Email",
+                          accessor: "email",
+                          Cell: ({ row }) => (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between", // Push copy button to the right
+                                width: "100%",
+                                maxWidth: "200px", // Adjust width as needed
+                              }}
+                            >
+                              <div
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  maxWidth: "150px",
+                                }}
+                                title={row.original.email} // Show full email on hover
+                              >
+                                {row.original.email}
+                              </div>
+                              <FaCopy
+                                style={{ cursor: "pointer", color: "#ff9966" }}
+                                onClick={() => copyToClipboard(row.original.email)}
+                                title="Copy Email"
+                              />
+                            </div>
+                          ),
+                        },
       {
         Header: "Opportunity Status",
         accessor: "opportunityStatus",
@@ -561,7 +595,7 @@ const Potentialleads = () => {
                 value={filterDestination}
                 onChange={(e) => setFilterDestination(e.target.value)}
               >
-                <option value="">All Destinations</option>
+                <option value="">Destinations</option>
                 {uniqueDestinations.map((dest) => (
                   <option key={dest} value={dest}>
                     {dest}
@@ -579,7 +613,7 @@ const Potentialleads = () => {
                   setFilterOppStatus2("");
                 }}
               >
-                <option value="">All Opportunity Status1</option>
+                <option value="">Primary Status</option>
                 {dropdownOptions.primary.map((status) => (
                   <option key={status} value={status}>
                     {status}
@@ -593,7 +627,7 @@ const Potentialleads = () => {
                 value={filterOppStatus2}
                 onChange={(e) => setFilterOppStatus2(e.target.value)}
               >
-                <option value="">All Opportunity Status2</option>
+                <option value="">Secondary Status</option>
                 {staticOppStatus2Options.map((status) => (
                   <option key={status} value={status}>
                     {status}

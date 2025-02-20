@@ -22,7 +22,7 @@ const ViewLeads = () => {
   const generateWhatsAppLink = (phoneNumber) => {
     return `https://wa.me/${phoneNumber}`;
   };
-  
+
   const handleEdit = (leadId) => {
     navigate(`/edit-lead/${leadId}`, {
       state: { leadid: leadId },
@@ -40,7 +40,7 @@ const ViewLeads = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!"); // Optional: Show a message
-      setTimeout(() => setMessage(""), 1000); // Clear message after 3 seconds
+      setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
@@ -200,52 +200,55 @@ console.log(JSON.stringify(body, null, 2));
         ),
       },
       // Phone Number Column
+     {
+  Header: "Mobile",
+  accessor: "phone_number",
+  Cell: ({ row }) => {
+    const phoneNumber = row.original.phone_number;
+
+    return (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <a
+          href={generateWhatsAppLink(phoneNumber)} // Generate WhatsApp link
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "blue", textDecoration: "underline", marginRight: "8px" }} // Add margin for spacing
+        >
+          {phoneNumber}
+        </a>
+        <FaCopy
+          style={{ cursor: "pointer", color: "#ff9966" }}
+          onClick={() => copyToClipboard(phoneNumber)} // Copy phone number
+          title="Copy Phone Number"
+        />
+      </div>
+    );
+  },
+},
       {
-        Header: "Mobile",
-        accessor: "phone_number",
+        Header: "Email",
+        accessor: "email",
         Cell: ({ row }) => (
           <div style={{ display: "flex", alignItems: "center" }}>
-            {row.original.phone_number}
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "150px" // Adjust width as needed
+              }}
+              title={row.original.email} // Show full email on hover
+            >
+              {row.original.email}
+            </div>
             <FaCopy
               style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-              onClick={() => copyToClipboard(row.original.phone_number)}
-              title="Copy Phone Number"
+              onClick={() => copyToClipboard(row.original.email)}
+              title="Copy Email"
             />
           </div>
         ),
       },
-       {
-                     Header: "Email",
-                     accessor: "email",
-                     Cell: ({ row }) => (
-                       <div
-                         style={{
-                           display: "flex",
-                           alignItems: "center",
-                           justifyContent: "space-between", // Push copy button to the right
-                           width: "100%",
-                           maxWidth: "200px", // Adjust width as needed
-                         }}
-                       >
-                         <div
-                           style={{
-                             whiteSpace: "nowrap",
-                             overflow: "hidden",
-                             textOverflow: "ellipsis",
-                             maxWidth: "150px",
-                           }}
-                           title={row.original.email} // Show full email on hover
-                         >
-                           {row.original.email}
-                         </div>
-                         <FaCopy
-                           style={{ cursor: "pointer", color: "#ff9966" }}
-                           onClick={() => copyToClipboard(row.original.email)}
-                           title="Copy Email"
-                         />
-                       </div>
-                     ),
-                   },
       
       {
         Header: "Lead Status",

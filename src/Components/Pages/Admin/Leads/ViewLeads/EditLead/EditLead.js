@@ -41,6 +41,7 @@ const EditOppLead = () => {
     corporate_id: '',
     primaryStatus: '',
     secondaryStatus: '',
+    origincity: '',
     destination: '',
     primarySource: '',
     secondarysource: '',
@@ -82,6 +83,7 @@ const EditOppLead = () => {
           corporate_id: leadData.corporate_id || '',
           primaryStatus: leadData.primaryStatus || '',
           secondaryStatus: leadData.secondaryStatus || '',
+          origincity: leadData.origincity || '',
           destination: leadData.destination || '',
           primarySource: leadData.primarySource || '',
           secondarysource: leadData.secondarysource || '',
@@ -114,6 +116,7 @@ const EditOppLead = () => {
       another_name: formData.another_name,
       another_email: formData.another_email,
       another_phone_number: formData.another_phone_number,
+      origincity: formData.origincity,
       destination: formData.destination,
       corporate_id: formData.corporate_id,
       primaryStatus: formData.primaryStatus,
@@ -278,6 +281,17 @@ const EditOppLead = () => {
                     </Form.Group>
                   </Col>
                 )}
+                 <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Origin City</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="origincity"
+                      value={formData.origincity}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>

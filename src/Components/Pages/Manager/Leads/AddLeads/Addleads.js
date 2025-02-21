@@ -31,6 +31,7 @@ useEffect(() => {
     country_code: '+91',
     primarySource: '',
     secondarysource: '',
+    origincity: '',
     destination: '',
     another_name: '',
     another_email: '',
@@ -144,6 +145,7 @@ useEffect(() => {
         another_name: '',
         another_email: '',
         another_phone_number: '',
+        origincity: '',
         destination: '',
         description: '',
         assignedSalesId: "",
@@ -354,6 +356,16 @@ useEffect(() => {
             value={formData.another_phone_number}
             onChange={handleChange}
             maxLength={10}
+          />
+        </div>
+        <div className="addleads-input-group">
+          <label>Origin City</label>
+          <input
+            type="text"
+            name="origincity"
+            placeholder="Enter Origin City"
+            value={formData.origincity}
+            onChange={handleChange}
           />
         </div>
         <div className="addleads-input-group">

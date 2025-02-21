@@ -20,6 +20,7 @@ const InDetailViewLeads = () => {
     country_code: "",
     phone_number: "",
     sources: "",
+    origincity: "",
     destination: "",
     description: "",
     another_name: "",
@@ -56,6 +57,7 @@ const InDetailViewLeads = () => {
           email: leadData.email || "",
           country_code: leadData.country_code || "",
           phone_number: leadData.phone_number || "",
+          origincity: leadData.origincity || "",
           destination: leadData.destination || "",
           description: leadData.description || "",
           another_name: leadData.another_name || "",
@@ -143,6 +145,12 @@ const InDetailViewLeads = () => {
                         Secondary Source:
                       </span>
                       <span>{formData.secondarysource}</span>
+                    </div>
+                    <div className="mb-3 d-flex flex-wrap">
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Origin City:
+                      </span>
+                      <span>{formData.origincity}</span>
                     </div>
                   </div>
                   <div className="col-md-6">

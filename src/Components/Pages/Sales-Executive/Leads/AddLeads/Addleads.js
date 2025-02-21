@@ -32,6 +32,7 @@ const DynamicForm = () => {
     country_code: '+91', // Default country code
     primarySource: '',
     secondarysource: '',
+    origincity: '',
     destination: '',
     another_name: '',
     another_email: '',
@@ -113,6 +114,7 @@ const [loading,setLoading] = useState(false);
         another_name: '',
         another_email: '',
         another_phone_number: '',
+        origincity: '',
         destination: '',
         description: '',
       });
@@ -318,6 +320,16 @@ const [loading,setLoading] = useState(false);
             value={formData.another_phone_number}
             onChange={handleChange}
             maxLength={10}
+          />
+        </div>
+        <div className="addleads-input-group">
+          <label>Origin City</label>
+          <input
+            type="text"
+            name="origincity"
+            placeholder="Enter Origin City"
+            value={formData.origincity}
+            onChange={handleChange}
           />
         </div>
         <div className="addleads-input-group">

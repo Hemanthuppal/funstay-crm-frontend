@@ -3,14 +3,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
 import "./InDetailViewLeads.css";
-import axios from "axios"; 
-import {baseURL} from "../../../../../Apiservices/Api";
+import axios from "axios";
+import { baseURL } from "../../../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
 
 const InDetailViewLeads = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { leadid } = location.state; 
+  const { leadid } = location.state;
   const [collapsed, setCollapsed] = useState(false);
   const [formData, setFormData] = useState({
     lead_type: "",
@@ -19,6 +19,7 @@ const InDetailViewLeads = () => {
     country_code: "",
     phone_number: "",
     sources: "",
+    origincity: "",
     destination: "",
     description: "",
     another_name: "",
@@ -30,9 +31,10 @@ const InDetailViewLeads = () => {
     primarySource: "",
     secondarysource: "",
     channel: "",
+    created_at: "",
   });
-  const [error, setError] = useState(null); 
-  const [message,setMessage] = useState('');
+  const [error, setError] = useState(null);
+  const [message, setMessage] = useState('');
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
@@ -56,6 +58,7 @@ const InDetailViewLeads = () => {
           email: leadData.email || "",
           country_code: leadData.country_code || "",
           phone_number: leadData.phone_number || "",
+          origincity: leadData.origincity || "",
           destination: leadData.destination || "",
           description: leadData.description || "",
           another_name: leadData.another_name || "",
@@ -67,6 +70,7 @@ const InDetailViewLeads = () => {
           primarySource: leadData.primarySource || "",
           secondarysource: leadData.secondarysource || "",
           channel: leadData.channel || "",
+          created_at: leadData.created_at || "",
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
@@ -91,7 +95,7 @@ const InDetailViewLeads = () => {
               {leadid ? (
                 <div className="row">
                   <div className="col-md-6">
-                  
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Lead ID:
@@ -105,28 +109,28 @@ const InDetailViewLeads = () => {
                       <span>{formData.name}</span>
                     </div>
                     <div className="mb-3 d-flex flex-wrap">
-  <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-    Email:
-  </span>
-  <span>{formData.email}</span>
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(formData.email)}
-    title="Copy Email"
-  />
-</div>
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Email:
+                      </span>
+                      <span>{formData.email}</span>
+                      <FaCopy
+                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                        onClick={() => copyToClipboard(formData.email)}
+                        title="Copy Email"
+                      />
+                    </div>
 
-<div className="mb-3 d-flex flex-wrap">
-  <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-    Phone Number:
-  </span>
-  <span>{formData.country_code}{formData.phone_number}</span>
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(`${formData.country_code}${formData.phone_number}`)}
-    title="Copy Phone Number"
-  />
-</div>
+                    <div className="mb-3 d-flex flex-wrap">
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Phone Number:
+                      </span>
+                      <span>{formData.country_code}{formData.phone_number}</span>
+                      <FaCopy
+                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                        onClick={() => copyToClipboard(`${formData.country_code}${formData.phone_number}`)}
+                        title="Copy Phone Number"
+                      />
+                    </div>
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Primary Source:
@@ -139,6 +143,12 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.secondarysource}</span>
                     </div>
+                    <div className="mb-3 d-flex flex-wrap">
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Origin City:
+                      </span>
+                      <span>{formData.origincity}</span>
+                    </div>
                   </div>
                   <div className="col-md-6">
                     <div className="mb-3 d-flex flex-wrap">
@@ -147,7 +157,7 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.destination}</span>
                     </div>
-                   
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Secondary Email:
@@ -160,7 +170,7 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.another_phone_number}</span>
                     </div>
-                    
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Description:
@@ -185,6 +195,13 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.channel}</span>
                     </div>
+                    <div className="mb-3 d-flex flex-wrap">
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Created Date:
+                      </span>
+                      <span>{new Date(formData.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</span>
+                    </div>
+
                   </div>
                 </div>
               ) : (

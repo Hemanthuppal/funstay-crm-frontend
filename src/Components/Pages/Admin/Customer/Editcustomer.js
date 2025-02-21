@@ -239,7 +239,7 @@ const EditLeadOppView = () => {
                             <Form onSubmit={handleCustomerSubmit}>
                                 {message && <div className="alert alert-info">{message}</div>}
                                 <Row>
-                                    <Col md={5}>
+                                    <Col md={6}>
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <h5>Customer Details</h5>
                                             {!editCustomerMode ? (
@@ -564,7 +564,7 @@ const EditLeadOppView = () => {
                                             <p>No travel opportunities available.</p>
                                         )}
                                     </Col>
-                                    <Col md={3}>
+                                    {/* <Col md={3}>
                                         <h5>Additional Details</h5>
                                         <Form.Group>
                                             <Form.Label>Status</Form.Label>
@@ -586,15 +586,15 @@ const EditLeadOppView = () => {
                                             <Form.Label>Reminder Date</Form.Label>
                                             <Form.Control type="date" value="2025-02-05" disabled />
                                         </Form.Group>
-                                    </Col>
+                                    </Col> */}
                                     {travelOpportunity.length > 0 && activeKey !== null ? (
-                                        <Col md={4}>
+                                        <Col md={6}>
                                             <h5>Customer Interaction Log</h5>
                                             <Form.Group>
                                                 <Form.Label>Notes</Form.Label>
                                                 <Form.Control
                                                     as="textarea"
-                                                    rows={3}
+                                                    rows={10}
                                                     name="notes"
                                                     value={travelOpportunity[activeKey]?.notes || ""}
                                                     onChange={(e) => handleOpportunityChange(activeKey, e)}
@@ -603,6 +603,7 @@ const EditLeadOppView = () => {
                                             </Form.Group>
                                             <Form.Group>
                                                 <Form.Label>Comments</Form.Label>
+                                                <div className="s-Opp-Commentsection">
                                                 {travelOpportunity[activeKey]?.comments?.length > 0 ? (
                                                     travelOpportunity[activeKey].comments.map((comment, index) => (
                                                         <div key={index} className="comment" style={{ marginBottom: "10px" }}>
@@ -625,6 +626,7 @@ const EditLeadOppView = () => {
                                                 ) : (
                                                     <p>No comments available</p>
                                                 )}
+                                                </div>
                                             </Form.Group>
                                         </Col>
                                     ) : null}

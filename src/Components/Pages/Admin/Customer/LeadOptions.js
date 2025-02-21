@@ -4,7 +4,7 @@ import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
 import "../Potentialleads/LeadDetails.css";
 import Navbar from "../../../Shared/Navbar/Navbar";
-import { FaPhone, FaEnvelope ,FaCopy} from "react-icons/fa";
+import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
 
 import { baseURL } from "../../../Apiservices/Api";
 
@@ -21,16 +21,16 @@ const LeadOppView = () => {
         const navigate = useNavigate();
         const customerId = location.state?.id || null;
         console.log("customerId=", customerId);
-        const [message,setMessage] = useState('');
+        const [message, setMessage] = useState('');
 
         const copyToClipboard = (text) => {
                 navigator.clipboard.writeText(text).then(() => {
                         setMessage("Copied to clipboard!");
                         setTimeout(() => setMessage(""), 1000); // Optional: Show a message
                 }).catch(err => {
-                  console.error('Failed to copy: ', err);
+                        console.error('Failed to copy: ', err);
                 });
-              };
+        };
 
         const fetchCustomerDetails = async (id) => {
                 try {
@@ -98,10 +98,10 @@ const LeadOppView = () => {
                                                         <h2> Customer Details</h2>
                                                 </Card.Header>
                                                 <Card.Body>
-                                                {message && <div className="alert alert-info">{message}</div>} 
+                                                        {message && <div className="alert alert-info">{message}</div>}
                                                         <Row>
                                                                 {/* Customer Details Section */}
-                                                                <Col md={5}>
+                                                                <Col md={6}>
                                                                         <h5>Customer Details</h5>
                                                                         {loading ? (
                                                                                 <p>Loading customer details...</p>
@@ -118,28 +118,28 @@ const LeadOppView = () => {
                                                                                                 </Col>
                                                                                         </Row>
                                                                                         <Row>
-                                                                                        <Col md={6}>
-        <p>
-          <strong><FaPhone /> Phone:</strong> {customer.country_code || "+91"}&nbsp;{customer.phone_number || "N/A"}
-          <FaCopy
-            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-            onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
-            title="Copy Phone Number"
-          />
-        </p>
-      </Col>
-      <Col md={6}>
-        <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
-          <p style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexGrow: 1 }}>
-            <strong><FaEnvelope /> Email:</strong> {customer.email || "N/A"}
-          </p>
-          <FaCopy
-            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-            onClick={() => copyToClipboard(customer.email || "")}
-            title="Copy Email"
-          />
-        </div>
-      </Col>
+                                                                                                <Col md={6}>
+                                                                                                        <p>
+                                                                                                                <strong><FaPhone /> Phone:</strong> {customer.country_code || "+91"}&nbsp;{customer.phone_number || "N/A"}
+                                                                                                                <FaCopy
+                                                                                                                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                                                                                                        onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
+                                                                                                                        title="Copy Phone Number"
+                                                                                                                />
+                                                                                                        </p>
+                                                                                                </Col>
+                                                                                                <Col md={6}>
+                                                                                                        <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
+                                                                                                                <p style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexGrow: 1 }}>
+                                                                                                                        <strong><FaEnvelope /> Email:</strong> {customer.email || "N/A"}
+                                                                                                                </p>
+                                                                                                                <FaCopy
+                                                                                                                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                                                                                                        onClick={() => copyToClipboard(customer.email || "")}
+                                                                                                                        title="Copy Email"
+                                                                                                                />
+                                                                                                        </div>
+                                                                                                </Col>
                                                                                         </Row>
                                                                                 </>
                                                                         ) : (
@@ -204,16 +204,16 @@ const LeadOppView = () => {
                                                                 </Col>
 
 
-                                                                <Col md={3}>
+                                                                {/* <Col md={3}>
                                                                         <h5>Additional Details</h5>
                                                                         <p><strong>Status:</strong> Confirmed</p>
                                                                         <p><strong>Recent Quote:</strong> Qu0003</p>
                                                                         <p><strong>Amount Paid:</strong> 10000</p>
                                                                         <p><strong>Amount Due:</strong> 5000</p>
                                                                         <p><strong>Reminder date:</strong> 05/02/2025</p>
-                                                                </Col>
+                                                                </Col> */}
                                                                 {travelOpportunity.length > 0 && activeKey !== null ? (
-                                                                        <Col md={4}>
+                                                                        <Col md={6}>
                                                                                 <h5>Customer Interaction Log</h5>
                                                                                 <p><strong>Notes:</strong></p>
                                                                                 <div className="s-Opp-Commentsection">

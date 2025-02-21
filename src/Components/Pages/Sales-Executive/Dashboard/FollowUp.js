@@ -188,7 +188,9 @@ function FollowUp() {
                 </div>
                 <div className="Sales-schedule-details flex-grow-1 ms-3">
                   <strong>{item.time}</strong>
-                  <p className="mb-1">{item.title}</p>
+                  <p className="mb-1">
+  {item.title.length > 70 ? `${item.title.substring(0, 70)}...` : item.title}
+</p>
                   {/* <small>
                     Lead by <span className="Sales-schedule-lead">{item.lead}</span>
                   </small> */}

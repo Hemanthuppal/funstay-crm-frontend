@@ -97,7 +97,7 @@ const LeadOppView = () => {
                         {message && <div className="alert alert-info">{message}</div>} 
                             <Row>
 
-                                <Col md={5}>
+                                <Col md={6}>
                                     <h5>Customer Details</h5>
                                     {loading ? (
                                         <p>Loading customer details...</p>
@@ -196,17 +196,17 @@ const LeadOppView = () => {
                                     )}
                                 </Col>
 
-                                <Col md={3}>
+                                {/* <Col md={3}>
                                     <h5>Additional Details</h5>
                                     <p><strong>Status:</strong> Confirmed</p>
                                     <p><strong>Recent Quote:</strong> Qu0003</p>
                                     <p><strong>Amount Paid:</strong> 10000</p>
                                     <p><strong>Amount Due:</strong> 5000</p>
                                     <p><strong>Reminder date:</strong> 05/02/2025</p>
-                                </Col>
+                                </Col> */}
 
                                 {travelOpportunity.length > 0 && activeKey !== null ? (
-                                    <Col md={4}>
+                                    <Col md={6}>
                                         <h5>Customer Interaction Log</h5>
                                         <p><strong>Notes:</strong></p>
                                         <div className="s-Opp-Commentsection">

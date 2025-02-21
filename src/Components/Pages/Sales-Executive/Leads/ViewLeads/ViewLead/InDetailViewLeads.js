@@ -32,6 +32,7 @@ const InDetailViewLeads = () => {
     primarySource: "",
     secondarysource: "",
     channel: "",
+    created_at: "",
   });
   const [error, setError] = useState(null); // State for error handling
   const copyToClipboard = (text) => {
@@ -69,6 +70,7 @@ const InDetailViewLeads = () => {
           primarySource: leadData.primarySource || "",
           secondarysource: leadData.secondarysource || "",
           channel: leadData.channel || "",
+          created_at: leadData.created_at || "",
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
@@ -207,6 +209,12 @@ const InDetailViewLeads = () => {
                         channel:
                       </span>
                       <span>{formData.channel}</span>
+                    </div>
+                    <div className="mb-3 d-flex flex-wrap">
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Created Date:
+                      </span>
+                      <span>{new Date(formData.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</span>
                     </div>
                   </div>
                 </div>

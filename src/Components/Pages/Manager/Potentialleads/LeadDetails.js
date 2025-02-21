@@ -107,8 +107,23 @@ const LeadOppView = () => {
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
-                                            <p><strong>Start Date:</strong> {lead.travelOpportunities[0].start_date ? new Date(lead.travelOpportunities[0].start_date).toLocaleDateString() : 'N/A'}</p>
-                                            <p><strong>End Date:</strong> {lead.travelOpportunities[0].end_date ? new Date(lead.travelOpportunities[0].end_date).toLocaleDateString() : 'N/A'}</p>
+                                            <p>
+                                                <strong>Start Date:</strong>{" "}
+                                                {lead.travelOpportunities[0].start_date
+                                                    ? new Date(lead.travelOpportunities[0].start_date).toLocaleDateString("en-IN", {
+                                                        timeZone: "Asia/Kolkata"
+                                                    })
+                                                    : "N/A"}
+                                            </p>
+
+                                            <p>
+                                                <strong>End Date:</strong>{" "}
+                                                {lead.travelOpportunities[0].end_date
+                                                    ? new Date(lead.travelOpportunities[0].end_date).toLocaleDateString("en-IN", {
+                                                        timeZone: "Asia/Kolkata"
+                                                    })
+                                                    : "N/A"}
+                                            </p>
                                             <p><strong>Duration:</strong> {lead.travelOpportunities[0].duration || 'N/A'}</p>
                                             <p><strong>Number of Adults:</strong> {lead.travelOpportunities[0].adults_count || 'N/A'}</p>
                                             <p><strong>Number of Children:</strong> {lead.travelOpportunities[0].children_count || 'N/A'}</p>
@@ -116,7 +131,14 @@ const LeadOppView = () => {
                                             <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
                                             {/* <p><strong>Notes:</strong> {lead.travelOpportunities[0].notes || 'N/A'}</p> */}
                                             <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
-                                            <p><strong>Created Date:</strong>{lead.travelOpportunities[0].created_at? new Date(lead.travelOpportunities[0].created_at).toLocaleString() : 'N/A'}</p>
+                                            <p>
+                                                <strong>Created Date:</strong>{" "}
+                                                {lead.travelOpportunities[0].created_at
+                                                    ? new Date(lead.travelOpportunities[0].created_at).toLocaleString("en-IN", {
+                                                        timeZone: "Asia/Kolkata"
+                                                    })
+                                                    : "N/A"}
+                                            </p>
                                         </>
                                     )}
                                 </Col>

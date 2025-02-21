@@ -12,17 +12,17 @@ const LeadOppView = () => {
     const location = useLocation();
     const { leadid } = location.state;
     const navigate = useNavigate();
-    const [message,setMessage] = useState('');
+    const [message, setMessage] = useState('');
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
-          setMessage("Copied to clipboard!");
-          setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
+            setMessage("Copied to clipboard!");
+            setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
         }).catch(err => {
-          console.error('Failed to copy: ', err);
+            console.error('Failed to copy: ', err);
         });
 
 
-      };
+    };
 
     useEffect(() => {
         const fetchLeadDetails = async () => {
@@ -32,7 +32,7 @@ const LeadOppView = () => {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                console.log(data); 
+                console.log(data);
                 setLead(data);
             } catch (error) {
                 console.error('Error fetching lead details:', error);
@@ -43,16 +43,16 @@ const LeadOppView = () => {
     }, [leadid]);
 
     if (!lead) {
-        return <div>Loading...</div>; 
+        return <div>Loading...</div>;
     }
 
     const handleEdit = (leadId) => {
         navigate(`/a-edit-opportunity/${leadId}`, {
-            state: { leadid: leadId }, 
+            state: { leadid: leadId },
         });
     };
 
- 
+
     const sortedComments = lead.comments ? lead.comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
 
     return (
@@ -65,53 +65,77 @@ const LeadOppView = () => {
                             <h2> Customer and Opportunity Details</h2>
                         </Card.Header>
                         <Card.Body>
-                        {message && <div className="alert alert-info">{message}</div>} 
+                            {message && <div className="alert alert-info">{message}</div>}
                             <Row>
-                               
+
                                 <Col md={6}>
                                     <h5>Customer Details</h5>
-     <p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
+                                    <p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
 
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
                                     <p>
-  <strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
-    title="Copy Phone Number"
-  />
-</p>
-<p>
-  <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(lead.lead.email)}
-    title="Copy Email"
-  />
-</p>
+                                        <strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
+                                        <FaCopy
+                                            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                            onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
+                                            title="Copy Phone Number"
+                                        />
+                                    </p>
+                                    <p>
+                                        <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
+                                        <FaCopy
+                                            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                            onClick={() => copyToClipboard(lead.lead.email)}
+                                            title="Copy Email"
+                                        />
+                                    </p>
                                     <p><strong>Primary Source:</strong> {lead.lead.primarySource || 'N/A'}</p>
                                     <p><strong>Secondary Source:</strong> {lead.lead.secondarysource || 'N/A'}</p>
-                                    
+
                                     <p><strong>Primary Status:</strong> {lead.lead.opportunity_status1 || 'N/A'}</p>
                                     <p><strong>Secondary Status:</strong> {lead.lead.opportunity_status2 || 'N/A'}</p>
                                     <p><strong>Travel Type:</strong> {lead.lead.travel_type || 'N/A'}</p>
                                     <p><strong>Channel:</strong> {lead.lead.channel || 'N/A'}</p>
                                     <hr />
-                                    
+
                                     <h5>Opportunity Details</h5>
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
-                                            <p><strong>Start Date:</strong> {lead.travelOpportunities[0].start_date ? new Date(lead.travelOpportunities[0].start_date).toLocaleDateString() : 'N/A'}</p>
-                                            <p><strong>End Date:</strong> {lead.travelOpportunities[0].end_date ? new Date(lead.travelOpportunities[0].end_date).toLocaleDateString() : 'N/A'}</p>
+                                            <p>
+                                                <strong>Start Date:</strong>{" "}
+                                                {lead.travelOpportunities[0].start_date
+                                                    ? new Date(lead.travelOpportunities[0].start_date).toLocaleDateString("en-IN", {
+                                                        timeZone: "Asia/Kolkata"
+                                                    })
+                                                    : "N/A"}
+                                            </p>
+
+                                            <p>
+                                                <strong>End Date:</strong>{" "}
+                                                {lead.travelOpportunities[0].end_date
+                                                    ? new Date(lead.travelOpportunities[0].end_date).toLocaleDateString("en-IN", {
+                                                        timeZone: "Asia/Kolkata"
+                                                    })
+                                                    : "N/A"}
+                                            </p>
+
                                             <p><strong>Duration:</strong> {lead.travelOpportunities[0].duration || 'N/A'}</p>
                                             <p><strong>Number of Adults:</strong> {lead.travelOpportunities[0].adults_count || 'N/A'}</p>
                                             <p><strong>Number of Children:</strong> {lead.travelOpportunities[0].children_count || 'N/A'}</p>
                                             <p><strong>Child Age:</strong> {lead.travelOpportunities[0].child_ages || 'N/A'}</p>
                                             <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
-                                          
+
                                             <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
-                                            <p><strong>Created Date:</strong>{lead.travelOpportunities[0].created_at? new Date(lead.travelOpportunities[0].created_at).toLocaleString() : 'N/A'}</p>
+                                            <p>
+                                                <strong>Created Date:</strong>{" "}
+                                                {lead.travelOpportunities[0].created_at
+                                                    ? new Date(lead.travelOpportunities[0].created_at).toLocaleString("en-IN", {
+                                                        timeZone: "Asia/Kolkata"
+                                                    })
+                                                    : "N/A"}
+                                            </p>
+
                                         </>
                                     )}
                                 </Col>
@@ -120,12 +144,12 @@ const LeadOppView = () => {
                                     <h5>Additional Details</h5>
                                     <p><strong>Notes:</strong></p>
                                     <div className="s-Opp-Commentsection">
-                                    {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
-                                         <>
-                                         <p> {lead.travelOpportunities[0].notes || 'N/A'}</p>
-                                         </>
+                                        {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                            <>
+                                                <p> {lead.travelOpportunities[0].notes || 'N/A'}</p>
+                                            </>
                                         )}
-                                        </div>
+                                    </div>
                                     <p><strong>Comments:</strong></p>
                                     <div className="s-Opp-Commentsection">
                                         {sortedComments.length > 0 ? (
@@ -135,7 +159,7 @@ const LeadOppView = () => {
                                                         <strong>{new Date(comment.timestamp).toLocaleString()}:</strong>
                                                     </p>
                                                     <p><strong>{comment.name}</strong>{comment.text}</p>
-                                                    <hr /> 
+                                                    <hr />
                                                 </div>
                                             ))
                                         ) : (

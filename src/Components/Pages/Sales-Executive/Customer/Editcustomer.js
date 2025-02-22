@@ -427,193 +427,210 @@ const EditLeadOppView = () => {
                                                 onSelect={(key) => setActiveKey(key)}
                                             >
                                                 {travelOpportunity.map((trip, index) => (
-                                                    <Accordion.Item eventKey={index.toString()} key={index}>
-                                                        <Accordion.Header>
-                                                            <div className="d-flex justify-content-between align-items-center w-100">
-                                                                <span>
-                                                                    InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
-                                                                </span>
-                                                                {!editOpportunityMode[index] ? (
-                                                                    <Button
-                                                                        variant="primary"
-                                                                        size="sm"
-                                                                        onClick={(e) => handleEditOpportunity(index, e)}
-                                                                    >
-                                                                        Edit
-                                                                    </Button>
-                                                                ) : (
-                                                                    <>
-                                                                        <Button
-                                                                            variant="warning"
-                                                                            size="sm"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                handleOpportunitySubmit(index);
-                                                                            }}
-                                                                            style={{ marginRight: "5px" }}
-                                                                        >
-                                                                            Update
-                                                                        </Button>
-                                                                        <Button
-                                                                            variant="success"
-                                                                            size="sm"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                handleUpdateAndCloseOpp(index);
-                                                                            }}
-                                                                            style={{ marginRight: "5px" }}
-                                                                        >
-                                                                            Update & Close
-                                                                        </Button>
-                                                                        <Button
-                                                                            variant="secondary"
-                                                                            size="sm"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                handleCancelOpportunity(index);
-                                                                            }}
-                                                                        >
-                                                                            Cancel
-                                                                        </Button>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </Accordion.Header>
-                                                        <Accordion.Body>
-                                                            <Row>
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Destination</Form.Label>
-                                                                        <Form.Control
-                                                                            type="text"
-                                                                            name="destination"
-                                                                            value={trip.destination || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Start Date</Form.Label>
-                                                                        <Form.Control
-                                                                            type="date"
-                                                                            name="start_date"
-                                                                            value={trip.start_date || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                            min={new Date().toISOString().split("T")[0]} // Disable past dates
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>End Date</Form.Label>
-                                                                        <Form.Control
-                                                                            type="date"
-                                                                            name="end_date"
-                                                                            value={trip.end_date || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                            min={trip.start_date} // Dynamically set min to start_date
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Duration(Nights)</Form.Label>
-                                                                        <Form.Control
-                                                                            type="text"
-                                                                            name="duration"
-                                                                            value={trip.duration || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                            min="1"
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Adults</Form.Label>
-                                                                        <Form.Control
-                                                                            type="number"
-                                                                            name="adults_count"
-                                                                            value={trip.adults_count || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                                <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Children</Form.Label>
-                                                                        <Form.Control
-                                                                            type="number"
-                                                                            name="children_count"
-                                                                            value={trip.children_count || ""}
-                                                                            onChange={(e) => handleChildrenCountChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                            min="0"
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                {/* Dynamic Child Age Dropdowns */}
-                                                                {Array.from({ length: trip.children_count }).map((_, childIndex) => (
-                                                                    <Col md={6} key={childIndex}>
-                                                                        <Form.Group>
-                                                                            <Form.Label>Child Age {childIndex + 1}</Form.Label>
-                                                                            <Form.Select
-                                                                                value={trip.child_ages[childIndex] || ''}
-                                                                                onChange={(e) => handleChildAgeChange(index, childIndex, e.target.value)}
-                                                                                disabled={!editOpportunityMode[index]}
-                                                                            >
-                                                                                <option value="">Select Age</option>
-                                                                                {Array.from({ length: 12 }, (_, i) => (
-                                                                                    <option key={i + 1} value={i + 1}>
-                                                                                        {i + 1}
-                                                                                    </option>
-                                                                                ))}
-                                                                            </Form.Select>
-                                                                        </Form.Group>
-                                                                    </Col>
-                                                                ))}                                                          <Col md={6}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Approx Budget</Form.Label>
-                                                                        <Form.Control
-                                                                            type="text"
-                                                                            name="approx_budget"
-                                                                            value={trip.approx_budget || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                <Col md={12}>
-                                                                    <Form.Group>
-                                                                        <Form.Label>Reminder Setting</Form.Label>
-                                                                        <Form.Control
-                                                                            type="datetime-local" // Change to datetime-local for date and time
-                                                                            name="reminder_setting"
-                                                                            value={trip.reminder_setting || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                            min={new Date().toISOString().slice(0, 16)} // Disable past dates
-                                                                            max={trip.start_date ? new Date(trip.start_date).toISOString().slice(0, 16) : ""} // Disable dates after start date
-                                                                        />
-                                                                    </Form.Group>
-                                                                </Col>
-                                                            </Row>
-                                                        </Accordion.Body>
-                                                    </Accordion.Item>
+                                                     <Accordion.Item eventKey={index.toString()} key={index}>
+                                                                                                           <Accordion.Header>
+                                                                                                               <div className="d-flex justify-content-between align-items-center w-100">
+                                                                                                                   <span>
+                                                                                                                       InProgress to {trip.destination} on{" "}
+                                                                                                                       {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                                                                                   </span>
+                                                                                                                   {!editOpportunityMode[index] ? (
+                                                                                                                       <Button
+                                                                                                                           variant="primary"
+                                                                                                                           size="sm"
+                                                                                                                           onClick={(e) => handleEditOpportunity(index, e)}
+                                                                                                                       >
+                                                                                                                           Edit
+                                                                                                                       </Button>
+                                                                                                                   ) : (
+                                                                                                                       <>
+                                                                                                                           <Button
+                                                                                                                               variant="warning"
+                                                                                                                               size="sm"
+                                                                                                                               onClick={(e) => {
+                                                                                                                                   e.stopPropagation();
+                                                                                                                                   handleOpportunitySubmit(index);
+                                                                                                                               }}
+                                                                                                                               style={{ marginRight: "5px" }}
+                                                                                                                           >
+                                                                                                                               Update
+                                                                                                                           </Button>
+                                                                                                                           <Button
+                                                                                                                               variant="success"
+                                                                                                                               size="sm"
+                                                                                                                               onClick={(e) => {
+                                                                                                                                   e.stopPropagation();
+                                                                                                                                   handleUpdateAndCloseOpp(index);
+                                                                                                                               }}
+                                                                                                                               style={{ marginRight: "5px" }}
+                                                                                                                           >
+                                                                                                                               Update & Close
+                                                                                                                           </Button>
+                                                                                                                           <Button
+                                                                                                                               variant="secondary"
+                                                                                                                               size="sm"
+                                                                                                                               onClick={(e) => {
+                                                                                                                                   e.stopPropagation();
+                                                                                                                                   handleCancelOpportunity(index);
+                                                                                                                               }}
+                                                                                                                           >
+                                                                                                                               Cancel
+                                                                                                                           </Button>
+                                                                                                                       </>
+                                                                                                                   )}
+                                                                                                               </div>
+                                                   
+                                                                                                           </Accordion.Header>
+                                                                                                           <Accordion.Body>
+                                                                                                               <Row>
+                                                                                                               <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Origin City</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="text"
+                                                                                                                               name="origincity"
+                                                                                                                               value={trip.origincity || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                   <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Destination</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="text"
+                                                                                                                               name="destination"
+                                                                                                                               value={trip.destination || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                  
+                                                                                                               </Row>
+                                                                                                               <Row>
+                                                                                                               <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Start Date</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="date"
+                                                                                                                               name="start_date"
+                                                                                                                               value={trip.start_date || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                               min={new Date().toISOString().split("T")[0]}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                   <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>End Date</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="date"
+                                                                                                                               name="end_date"
+                                                                                                                               value={trip.end_date || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                               min={trip.start_date}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                   
+                                                                                                                  
+                                                                                                               </Row>
+                                                                                                               <Row>
+                                                                                                               <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Duration(Nights)</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="text"
+                                                                                                                               name="duration"
+                                                                                                                               value={trip.duration || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                               min="1"
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                   <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Adults</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="number"
+                                                                                                                               name="adults_count"
+                                                                                                                               value={trip.adults_count || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                  
+                                                                                                               </Row>
+                                                                                                               <Row>
+                                                                                                               <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Children</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="number"
+                                                                                                                               name="children_count"
+                                                                                                                               value={trip.children_count || ""}
+                                                                                                                               onChange={(e) => handleChildrenCountChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                               min="0"
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                   {Array.from({ length: trip.children_count }).map((_, childIndex) => (
+                                                                                                                       <Col md={6} key={childIndex}>
+                                                                                                                           <Form.Group>
+                                                                                                                               <Form.Label>Child Age {childIndex + 1}</Form.Label>
+                                                                                                                               <Form.Select
+                                                                                                                                   value={trip.child_ages[childIndex] || ''}
+                                                                                                                                   onChange={(e) => handleChildAgeChange(index, childIndex, e.target.value)}
+                                                                                                                                   disabled={!editOpportunityMode[index]}
+                                                                                                                               >
+                                                                                                                                   <option value="">Select Age</option>
+                                                                                                                                   {Array.from({ length: 12 }, (_, i) => (
+                                                                                                                                       <option key={i + 1} value={i + 1}>
+                                                                                                                                           {i + 1}
+                                                                                                                                       </option>
+                                                                                                                                   ))}
+                                                                                                                               </Form.Select>
+                                                                                                                           </Form.Group>
+                                                                                                                       </Col>
+                                                                                                                   ))}                                                        
+                                                                                                               </Row>
+                                                                                                               <Row>
+                                                                                                               <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Approx Budget</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="text"
+                                                                                                                               name="approx_budget"
+                                                                                                                               value={trip.approx_budget || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                                   <Col md={6}>
+                                                                                                                       <Form.Group>
+                                                                                                                           <Form.Label>Reminder Setting</Form.Label>
+                                                                                                                           <Form.Control
+                                                                                                                               type="datetime-local"
+                                                                                                                               name="reminder_setting"
+                                                                                                                               value={trip.reminder_setting || ""}
+                                                                                                                               onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                               disabled={!editOpportunityMode[index]}
+                                                                                                                               min={new Date().toISOString().slice(0, 16)}
+                                                                                                                               max={trip.start_date ? new Date(trip.start_date).toISOString().slice(0, 16) : ""}
+                                                                                                                           />
+                                                                                                                       </Form.Group>
+                                                                                                                   </Col>
+                                                                                                               </Row>
+                                                                                                           </Accordion.Body>
+                                                                                                       </Accordion.Item>
                                                 ))}
                                             </Accordion>
                                         ) : (

@@ -46,6 +46,7 @@ const EditOppLead = () => {
     corporate_id: '',
     primaryStatus: '',
     secondaryStatus: '',
+    origincity: '',
     destination: '',
     start_date: '',
     end_date: '',
@@ -107,6 +108,7 @@ const EditOppLead = () => {
         const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().slice(0, 16) : '';
         setFormData((prev) => ({
           ...prev,
+          origincity: opportunityData.origincity || '',
           destination: opportunityData.destination || '',
           start_date: formattedStartDate,
           end_date: formattedEndDate,
@@ -260,6 +262,7 @@ const EditOppLead = () => {
     };
 
     const opportunityData = {
+      origincity: formData.origincity,
       destination: formData.destination,
       start_date: formData.start_date,
       end_date: formData.end_date,
@@ -489,6 +492,17 @@ const EditOppLead = () => {
               <hr />
               <h5>Opportunity Details</h5>
               <Row>
+              <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Origin City</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="origincity"
+                      value={formData.origincity}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>

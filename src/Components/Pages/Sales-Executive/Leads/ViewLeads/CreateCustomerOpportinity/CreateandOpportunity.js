@@ -38,6 +38,7 @@ const CreateCustomerOpportunity = () => {
     customer_status: "", // Add customer_status to the state
   });
   const [formData, setFormData] = useState({
+    origincity: '',
     destination: "",
     adults_count: "",
     children_count: "",
@@ -126,7 +127,7 @@ const CreateCustomerOpportunity = () => {
     setLoading(true);
     setError(null);
 
-    if (!formData.destination || !startDate || !endDate ) {
+    if (!formData.origincity ||!formData.destination || !startDate || !endDate ) {
       setMessage("All required fields must be filled in.");
       setLoading(false);
       return;
@@ -135,6 +136,7 @@ const CreateCustomerOpportunity = () => {
     const opportunityData = {
       leadid: leadid,
       customerid: customerData.id, // Ensure customerData.id is available
+      origincity: formData.origincity,
       destination: formData.destination,
       start_date: startDate,
       end_date: endDate,
@@ -178,7 +180,8 @@ const CreateCustomerOpportunity = () => {
        
           setFormData((prev) => ({ ...prev, destination: response.data.destination,
             notes: response.data.description || "", 
-            description: response.data.description || ""
+            description: response.data.description || "",
+            origincity: response.data.origincity || "",
           }));
        
       } catch (err) {
@@ -345,6 +348,16 @@ const CreateCustomerOpportunity = () => {
 
           <div className={`createcustomer-tab-content ${activeTab === "opportunity" ? "active" : ""}`}>
             <div className="createcustomer-form-grid">
+            <div className="createcustomer-input-group">
+                <label>Origin City<span style={{ color: "red" }}> *</span></label>
+                <input
+                  type="text"
+                  name="origincity"
+                  value={formData.origincity}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
               <div className="createcustomer-input-group">
                 <label>Destination<span style={{ color: "red" }}> *</span></label>
                 <input

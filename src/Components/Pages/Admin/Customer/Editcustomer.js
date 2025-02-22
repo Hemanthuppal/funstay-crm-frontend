@@ -471,6 +471,18 @@ const EditLeadOppView = () => {
                                                         </Accordion.Header>
                                                         <Accordion.Body>
                                                             <Row>
+                                                            <Col md={6}>
+                                                                    <Form.Group>
+                                                                        <Form.Label>Origin City</Form.Label>
+                                                                        <Form.Control
+                                                                            type="text"
+                                                                            name="origincity"
+                                                                            value={trip.origincity || ""}
+                                                                            onChange={(e) => handleOpportunityChange(index, e)}
+                                                                            disabled={!editOpportunityMode[index]}
+                                                                        />
+                                                                    </Form.Group>
+                                                                </Col>
                                                                 <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Destination</Form.Label>
@@ -483,7 +495,10 @@ const EditLeadOppView = () => {
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
-                                                                <Col md={6}>
+                                                               
+                                                            </Row>
+                                                            <Row>
+                                                            <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Start Date</Form.Label>
                                                                         <Form.Control
@@ -496,8 +511,6 @@ const EditLeadOppView = () => {
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
-                                                            </Row>
-                                                            <Row>
                                                                 <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>End Date</Form.Label>
@@ -512,7 +525,10 @@ const EditLeadOppView = () => {
                                                                     </Form.Group>
                                                                 </Col>
 
-                                                                <Col md={6}>
+                                                               
+                                                            </Row>
+                                                            <Row>
+                                                            <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Duration(Nights)</Form.Label>
                                                                         <Form.Control
@@ -525,8 +541,6 @@ const EditLeadOppView = () => {
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
-                                                            </Row>
-                                                            <Row>
                                                                 <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Adults</Form.Label>
@@ -539,7 +553,10 @@ const EditLeadOppView = () => {
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
-                                                                <Col md={6}>
+                                                               
+                                                            </Row>
+                                                            <Row>
+                                                            <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Children</Form.Label>
                                                                         <Form.Control
@@ -552,9 +569,6 @@ const EditLeadOppView = () => {
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
-                                                            </Row>
-                                                            <Row>
-
                                                                 {Array.from({ length: trip.children_count }).map((_, childIndex) => (
                                                                     <Col md={6} key={childIndex}>
                                                                         <Form.Group>
@@ -573,7 +587,10 @@ const EditLeadOppView = () => {
                                                                             </Form.Select>
                                                                         </Form.Group>
                                                                     </Col>
-                                                                ))}                                                          <Col md={6}>
+                                                                ))}                                                        
+                                                            </Row>
+                                                            <Row>
+                                                            <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Approx Budget</Form.Label>
                                                                         <Form.Control
@@ -585,9 +602,7 @@ const EditLeadOppView = () => {
                                                                         />
                                                                     </Form.Group>
                                                                 </Col>
-                                                            </Row>
-                                                            <Row>
-                                                                <Col md={12}>
+                                                                <Col md={6}>
                                                                     <Form.Group>
                                                                         <Form.Label>Reminder Setting</Form.Label>
                                                                         <Form.Control

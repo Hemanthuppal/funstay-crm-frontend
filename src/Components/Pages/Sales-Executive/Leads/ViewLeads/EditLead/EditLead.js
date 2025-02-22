@@ -49,6 +49,7 @@ const EditOppLead = () => {
   const [error, setError] = useState(null);
   const subDropdownOptions = {
     Referral: ["Grade 3", "Grade 2", "Grade 1"],
+    Corporate: ["BIW", "Others"],
     Community: ["BNI", "Rotary", "Lions", "Association", "Others"],
     "Purchased Leads": ["Tripcrafter", "Others"],
     "Social Media": ["Linkedin", "Others"],
@@ -153,13 +154,13 @@ const EditOppLead = () => {
   };
 
   const [leadDropdownOptions] = useState({
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
-      Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   });
 
@@ -276,6 +277,7 @@ const EditOppLead = () => {
                     >
                       <option value="">Select Source</option>
                       <option value="Referral">Referral/Repeat</option>
+                      <option value="Corporate">Corporate</option>
                       <option value="Partner Promotion">Partner Promotion</option>
                       <option value="Media Coverage">Media Coverage</option>
                       <option value="Blog">Blog</option>

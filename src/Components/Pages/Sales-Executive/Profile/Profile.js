@@ -54,22 +54,20 @@ const ProfileForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("email", formData.email);
-    data.append("mobile", formData.mobile);
-    data.append("role", formData.role);
-    data.append("dob", formData.dob);
-    data.append("qualification", formData.qualification);
-    data.append("address", formData.address);
-    if (formData.image) {
-      data.append("image", formData.image);
-    }
-  
+  const handleSubmit = async (navigateAfterUpdate = false) => {
     try {
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("email", formData.email);
+      data.append("mobile", formData.mobile);
+      data.append("role", formData.role);
+      data.append("dob", formData.dob);
+      data.append("qualification", formData.qualification);
+      data.append("address", formData.address);
+      if (formData.image) {
+        data.append("image", formData.image);
+      }
+  
       const response = await fetch(`${baseURL}/employee/update/${userId}`, {
         method: "PUT",
         headers: {
@@ -80,17 +78,23 @@ const ProfileForm = () => {
   
       const result = await response.json();
       if (response.ok) {
-        window.location.reload();
         setMessage("Profile updated successfully!");
         setTimeout(() => setMessage(""), 3000);
         setIsEditing(false);
-  
-        // **Update the UI immediately**
+        
+        // Update UI immediately
         setFormData((prevData) => ({
           ...prevData,
-          ...result, // Assuming the API returns updated user data
-          imageUrl: result.image || prevData.imageUrl, // Update image if changed
+          ...result,
+          imageUrl: result.image || prevData.imageUrl,
         }));
+  
+        // Navigate if Update & Close was clicked
+        if (navigateAfterUpdate) {
+          navigate("/s-dashboard"); // Change to your target page
+        } else {
+          window.location.reload();
+        }
       } else {
         setMessage(result.message || "Error updating profile");
         setTimeout(() => setMessage(""), 3000);
@@ -103,6 +107,7 @@ const ProfileForm = () => {
   };
   
 
+
   return (
     <div className="SaleCustomercontainer">
       <Navbar onToggleSidebar={setCollapsed} />
@@ -110,7 +115,7 @@ const ProfileForm = () => {
         <div className="profile-form-container">
           <div className="profile-form-header">
             <h2>Profile Details</h2>
-          
+
           </div>
           {message && <div className="alert alert-info mt-2">{message}</div>}
           <form onSubmit={handleSubmit} className="profile-form-body p-3">
@@ -165,7 +170,7 @@ const ProfileForm = () => {
             </div>
 
             <div className="profile-form-grid">
-            <div className="profile-input-group">
+              <div className="profile-input-group">
                 <label htmlFor="role">Role</label>
                 <input
                   type="text"
@@ -220,27 +225,23 @@ const ProfileForm = () => {
 
               {isEditing ? (
                 <>
-                  <button
-                    type="button"
-                    className="profile-btn profile-btn-secondary"
-                    onClick={() => setIsEditing(false)}
-                  >
+                  <button type="button" className="profile-btn profile-btn-secondary" onClick={() => setIsEditing(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="profile-btn profile-btn-primary">
+                  <button type="submit" className="profile-btn profile-btn-primary" onClick={() => handleSubmit(true)}>
                     Update
+                  </button>
+                  <button type="button" className="profile-btn profile-btn-primary" onClick={() => handleSubmit(true)}>
+                    Update & Close
                   </button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  className="profile-btn profile-btn-primary"
-                  onClick={() => setIsEditing(true)}
-                >
+                <button type="button" className="profile-btn profile-btn-primary" onClick={() => setIsEditing(true)}>
                   Edit
                 </button>
               )}
             </div>
+
           </form>
         </div>
       </div>

@@ -54,9 +54,9 @@ const ProfileForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, navigateToProfile = false) => {
     e.preventDefault();
-  
+
     const data = new FormData();
     data.append("name", formData.name);
     data.append("email", formData.email);
@@ -68,7 +68,7 @@ const ProfileForm = () => {
     if (formData.image) {
       data.append("image", formData.image);
     }
-  
+
     try {
       const response = await fetch(`${baseURL}/employee/update/${userId}`, {
         method: "PUT",
@@ -77,20 +77,25 @@ const ProfileForm = () => {
         },
         body: data,
       });
-  
+
       const result = await response.json();
       if (response.ok) {
-        window.location.reload();
         setMessage("Profile updated successfully!");
         setTimeout(() => setMessage(""), 3000);
         setIsEditing(false);
-  
-        // **Update the UI immediately**
+
+        // Update UI with new data
         setFormData((prevData) => ({
           ...prevData,
-          ...result, // Assuming the API returns updated user data
-          imageUrl: result.image || prevData.imageUrl, // Update image if changed
+          ...result,
+          imageUrl: result.image || prevData.imageUrl,
         }));
+
+        // If "Update & Close" was clicked, navigate to another page
+        if (navigateToProfile) {
+          setTimeout(() => navigate("/m-dashboard"), 1000);
+        }
+
       } else {
         setMessage(result.message || "Error updating profile");
         setTimeout(() => setMessage(""), 3000);
@@ -101,7 +106,8 @@ const ProfileForm = () => {
       setTimeout(() => setMessage(""), 3000);
     }
   };
-  
+
+
 
   return (
     <div className="SaleCustomercontainer">
@@ -110,7 +116,7 @@ const ProfileForm = () => {
         <div className="profile-form-container">
           <div className="profile-form-header">
             <h2>Profile Details</h2>
-          
+
           </div>
           {message && <div className="alert alert-info mt-2">{message}</div>}
           <form onSubmit={handleSubmit} className="profile-form-body p-3">
@@ -214,33 +220,35 @@ const ProfileForm = () => {
             </div>
 
             <div className="profile-form-footer">
+              {/* Back Button */}
               <button type="button" className="profile-btn profile-btn-secondary" onClick={() => navigate(-1)}>
                 Back
               </button>
 
               {isEditing ? (
                 <>
-                  <button
-                    type="button"
-                    className="profile-btn profile-btn-secondary"
-                    onClick={() => setIsEditing(false)}
-                  >
+                  {/* Cancel Button */}
+                  <button type="button" className="profile-btn profile-btn-secondary" onClick={() => setIsEditing(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="profile-btn profile-btn-primary">
+
+                  {/* Update Button */}
+                  <button type="submit" className="profile-btn profile-btn-primary" onClick={(e) => handleSubmit(e, false)}>
                     Update
+                  </button>
+
+                  {/* Update & Close Button */}
+                  <button type="submit" className="btn btn-success" onClick={(e) => handleSubmit(e, true)}>
+                    Update & Close
                   </button>
                 </>
               ) : (
-                <button
-                  type="button"
-                  className="profile-btn profile-btn-primary"
-                  onClick={() => setIsEditing(true)}
-                >
+                <button type="button" className="profile-btn profile-btn-primary" onClick={() => setIsEditing(true)}>
                   Edit
                 </button>
               )}
             </div>
+
           </form>
         </div>
       </div>

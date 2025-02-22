@@ -4,21 +4,19 @@ import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
 
-import {baseURL} from "../../../../../Apiservices/Api";
+import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
-
-
 
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
   const { leadid } = useParams();
-  const [activeTab, setActiveTab] = useState("customer"); 
+  const [activeTab, setActiveTab] = useState("customer");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [duration, setDuration] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
- 
+
 
   useEffect(() => {
     const countries = getCountries();
@@ -56,7 +54,7 @@ const CreateCustomerOpportunity = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [childrenAges, setChildrenAges] = useState([]);
   const [message, setMessage] = useState("");
-  const [leadData, setLeadData] = useState(null); 
+  const [leadData, setLeadData] = useState(null);
 
   const handleTabClick = (tabName) => setActiveTab(tabName);
 
@@ -68,7 +66,7 @@ const CreateCustomerOpportunity = () => {
       const endDateObj = new Date(end);
       const diffTime = endDateObj - startDateObj;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setDuration(diffDays >= 0 ? diffDays : 0); 
+      setDuration(diffDays >= 0 ? diffDays : 0);
     } else {
       setDuration("");
     }
@@ -95,7 +93,7 @@ const CreateCustomerOpportunity = () => {
     setChildrenAges(updatedAges);
   };
 
-  const handleSubmitCustomer = async () => {
+  const handleSubmitCustomer = async (navigateToPage = false) => {
     setLoading(true);
     setError(null);
     console.log("customerData", JSON.stringify(customerData, null, 2));
@@ -105,7 +103,12 @@ const CreateCustomerOpportunity = () => {
       if (response.status === 200) {
         setMessage("Customer data submitted successfully!");
         setTimeout(() => setMessage(""), 3000);
-        setActiveTab("opportunity"); 
+
+        if (navigateToPage) {
+          navigate("/m-view-leads");
+        } else {
+          setActiveTab("opportunity");
+        }
       }
     } catch (err) {
       console.error("Error updating customer and lead data:", err);
@@ -117,11 +120,12 @@ const CreateCustomerOpportunity = () => {
     }
   };
 
-  const handleSubmitOpportunity = async () => {
+
+  const handleSubmitOpportunity = async (navigateToPage = false) => {
     setLoading(true);
     setError(null);
 
-    if (!formData.origincity ||!formData.destination || !startDate || !endDate ) {
+    if (!formData.origincity || !formData.destination || !startDate || !endDate) {
       setMessage("All required fields must be filled in.");
       setLoading(false);
       return;
@@ -129,7 +133,7 @@ const CreateCustomerOpportunity = () => {
 
     const opportunityData = {
       leadid: leadid,
-      customerid: customerData.id, 
+      customerid: customerData.id,
       origincity: formData.origincity,
       destination: formData.destination,
       start_date: startDate,
@@ -150,7 +154,12 @@ const CreateCustomerOpportunity = () => {
       if (response.status === 201) {
         setMessage("Opportunity created successfully!");
         setTimeout(() => setMessage(""), 3000);
-        navigate("/m-potential-leads");
+
+        if (navigateToPage) {
+          navigate("/m-view-leads");
+        } else {
+          navigate("/m-view-leads");
+        }
       }
     } catch (err) {
       console.error("Error creating opportunity:", err);
@@ -162,6 +171,7 @@ const CreateCustomerOpportunity = () => {
     }
   };
 
+
   useEffect(() => {
     const fetchLeadData = async () => {
       setLoading(true);
@@ -170,14 +180,15 @@ const CreateCustomerOpportunity = () => {
         console.log("Fetched lead data:", JSON.stringify(response.data, null, 2));
         setLeadData(response.data);
 
-        
-       
-          setFormData((prev) => ({ ...prev, destination: response.data.destination,
-            notes: response.data.description || "", 
-            description: response.data.description || "",
-            origincity: response.data.origincity || "",
-          }));
-       
+
+
+        setFormData((prev) => ({
+          ...prev, destination: response.data.destination,
+          notes: response.data.description || "",
+          description: response.data.description || "",
+          origincity: response.data.origincity || "",
+        }));
+
       } catch (err) {
         console.error("Error fetching lead data:", err);
         setError("Error fetching lead data.");
@@ -204,7 +215,7 @@ const CreateCustomerOpportunity = () => {
           special_requirement: response.data.special_requirement || "",
         }));
 
-       
+
         if (response.data.customer_status === "existing") {
           setActiveTab("opportunity");
         }
@@ -216,7 +227,7 @@ const CreateCustomerOpportunity = () => {
       }
     };
 
-    fetchLeadData(); 
+    fetchLeadData();
     fetchCustomerData();
   }, [leadid]);
 
@@ -245,7 +256,7 @@ const CreateCustomerOpportunity = () => {
             </button>
           </div>
 
-         
+
           <div className={`createcustomer-tab-content ${activeTab === "customer" ? "active" : ""}`}>
             <div className="createcustomer-form-grid">
               <div className="createcustomer-input-group">
@@ -253,55 +264,55 @@ const CreateCustomerOpportunity = () => {
                 <input type="text" name="name" value={customerData.name} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
-  <label>
-    Mobile
-  </label>
-  <div style={{ display: "flex", alignItems: "center" }}>
-  
-    <select
-      name="country_code"
-      value={customerData.country_code || "+91"} 
-      onChange={handleChange}
-      style={{
-        width: "80px",
-        marginRight: "10px",
-        padding: "5px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      }}
-    >
-      {countryCodeOptions.map((code) => (
-        <option key={code} value={code}>
-          {code}
-        </option>
-      ))}
-    </select>
+                <label>
+                  Mobile
+                </label>
+                <div style={{ display: "flex", alignItems: "center" }}>
 
-  
-    <input
-      type="text"
-      name="phone_number"
-      placeholder="Enter Mobile Number"
-      value={customerData.phone_number || ""} 
-      onChange={(e) => {
-        const value = e.target.value;
-        if (/^\d*$/.test(value)) {
-          handleChange(e);
-        }
-      }}
-    
-      style={{
-        flex: 1,
-        padding: "5px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      }}
-      required
-    />
-  </div>
+                  <select
+                    name="country_code"
+                    value={customerData.country_code || "+91"}
+                    onChange={handleChange}
+                    style={{
+                      width: "80px",
+                      marginRight: "10px",
+                      padding: "5px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {countryCodeOptions.map((code) => (
+                      <option key={code} value={code}>
+                        {code}
+                      </option>
+                    ))}
+                  </select>
 
- 
-</div>
+
+                  <input
+                    type="text"
+                    name="phone_number"
+                    placeholder="Enter Mobile Number"
+                    value={customerData.phone_number || ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        handleChange(e);
+                      }
+                    }}
+
+                    style={{
+                      flex: 1,
+                      padding: "5px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                    required
+                  />
+                </div>
+
+
+              </div>
 
               <div className="createcustomer-input-group">
                 <label>Email ID</label>
@@ -311,7 +322,7 @@ const CreateCustomerOpportunity = () => {
                 <label>Type of Travel</label>
                 <input type="text" name="travel_type" value={customerData.travel_type} onChange={handleChange} />
               </div>
-             
+
               <div className="createcustomer-input-group">
                 <label>Preferred Contact Method</label>
                 <select
@@ -338,7 +349,7 @@ const CreateCustomerOpportunity = () => {
 
           <div className={`createcustomer-tab-content ${activeTab === "opportunity" ? "active" : ""}`}>
             <div className="createcustomer-form-grid">
-            <div className="createcustomer-input-group">
+              <div className="createcustomer-input-group">
                 <label>Origin City<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
@@ -386,24 +397,24 @@ const CreateCustomerOpportunity = () => {
                   required
                 />
               </div>
-              
+
               <div className="createcustomer-input-group">
-              <label>Duration (Nights)</label>
-  <input
-    type="number"
-    value={duration ? parseInt(duration) : ""}
-    onChange={(e) => {
-      const newDuration = parseInt(e.target.value) || 0;
-      setDuration(newDuration);
-      if (startDate) {
-        const newEndDate = new Date(startDate);
-        newEndDate.setDate(newEndDate.getDate() + newDuration);
-        setEndDate(newEndDate.toISOString().split("T")[0]);
-      }
-    }}
-    required
-  />
-</div>
+                <label>Duration (Nights)</label>
+                <input
+                  type="number"
+                  value={duration ? parseInt(duration) : ""}
+                  onChange={(e) => {
+                    const newDuration = parseInt(e.target.value) || 0;
+                    setDuration(newDuration);
+                    if (startDate) {
+                      const newEndDate = new Date(startDate);
+                      newEndDate.setDate(newEndDate.getDate() + newDuration);
+                      setEndDate(newEndDate.toISOString().split("T")[0]);
+                    }
+                  }}
+                  required
+                />
+              </div>
 
               <div className="createcustomer-input-group">
                 <label>No of Adults</label>
@@ -455,38 +466,51 @@ const CreateCustomerOpportunity = () => {
                 <label>Notes</label>
                 <textarea
                   name="notes"
-                  value={formData.notes} 
+                  value={formData.notes}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div className="createcustomer-input-group">
-  <label>Reminder Setting</label>
-  <input
-    type="datetime-local" 
-    name="reminder_setting"
-    min={new Date().toISOString().slice(0, 16)} 
-    max={startDate ? new Date(startDate).toISOString().slice(0, 16) : ""} 
-    value={formData.reminder_setting}
-    onChange={handleChange}
-    required
-  />
-</div>
+                <label>Reminder Setting</label>
+                <input
+                  type="datetime-local"
+                  name="reminder_setting"
+                  min={new Date().toISOString().slice(0, 16)}
+                  max={startDate ? new Date(startDate).toISOString().slice(0, 16) : ""}
+                  value={formData.reminder_setting}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
           </div>
 
           <div className="createcustomer-form-footer">
+            {/* Back Button */}
             <button className="createcustomer-btn createcustomer-close-btn" onClick={() => navigate(-1)}>
               Back
             </button>
+
+            {/* Save Button */}
             <button
               className="createcustomer-btn createcustomer-submit-btn"
-              onClick={activeTab === "customer" ? handleSubmitCustomer : handleSubmitOpportunity}
+              onClick={activeTab === "customer" ? () => handleSubmitCustomer(false) : () => handleSubmitOpportunity(false)}
               disabled={loading}
             >
               {loading ? "Saving..." : "Save"}
             </button>
+
+            {/* Save & Close Button */}
+            <button
+              className="btn btn-success"
+              onClick={activeTab === "customer" ? () => handleSubmitCustomer(true) : () => handleSubmitOpportunity(true)}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save & Close"}
+            </button>
           </div>
+
           {error && <div className="error-message">{error}</div>}
         </div>
       </div>

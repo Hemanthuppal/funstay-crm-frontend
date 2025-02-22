@@ -106,6 +106,7 @@ const LeadOppView = () => {
                                     <h5>Opportunity Details</h5>
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
+                                        <p><strong>Origin City:</strong> {lead.travelOpportunities[0].origincity || 'N/A'}</p>
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
                                             <p>
                                                 <strong>Start Date:</strong>{" "}

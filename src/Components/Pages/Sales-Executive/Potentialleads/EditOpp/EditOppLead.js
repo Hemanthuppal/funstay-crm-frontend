@@ -15,7 +15,7 @@ const EditOppLead = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
-  
+
 
   useEffect(() => {
     // Get all country codes and their calling codes
@@ -44,6 +44,7 @@ const EditOppLead = () => {
     corporate_id: '',
     primaryStatus: '',
     secondaryStatus: '',
+    origincity: '',
     destination: '',
     start_date: '',
     end_date: '',
@@ -102,9 +103,10 @@ const EditOppLead = () => {
         const opportunityData = response.data;
         const formattedStartDate = opportunityData.start_date ? new Date(opportunityData.start_date).toISOString().split('T')[0] : '';
         const formattedEndDate = opportunityData.end_date ? new Date(opportunityData.end_date).toISOString().split('T')[0] : '';
-        const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().slice(0, 16) : ''; 
+        const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().slice(0, 16) : '';
         setFormData((prev) => ({
           ...prev,
+          origincity: opportunityData.origincity || '',
           destination: opportunityData.destination || '',
           start_date: formattedStartDate,
           end_date: formattedEndDate,
@@ -136,15 +138,15 @@ const EditOppLead = () => {
     },
   });
 
- 
- 
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "start_date") {
       const newStartDate = new Date(value);
       const today = new Date();
-  
+
       // Check if the selected start date is in the future
       if (newStartDate <= today) {
         setError("Start date must be a future date.");
@@ -152,7 +154,7 @@ const EditOppLead = () => {
       } else {
         setError(null); // Clear error if valid
       }
-  
+
       // Set the end date to the same as start date by default
       setFormData((prev) => ({
         ...prev,
@@ -163,7 +165,7 @@ const EditOppLead = () => {
     } else if (name === "end_date") {
       const newEndDate = new Date(value);
       const startDate = new Date(formData.start_date);
-  
+
       // Ensure end date is after start date
       if (newEndDate < startDate) {
         setError("End date must be after start date.");
@@ -171,7 +173,7 @@ const EditOppLead = () => {
       } else {
         setError(null); // Clear error if valid
       }
-  
+
       setFormData((prev) => ({
         ...prev,
         end_date: value,
@@ -180,7 +182,7 @@ const EditOppLead = () => {
     } else if (name === "reminder_setting") {
       const reminderDate = new Date(value);
       const startDate = new Date(formData.start_date);
-  
+
       // Ensure reminder setting is before start date
       if (reminderDate > startDate) {
         setError("Reminder setting must be before the start date.");
@@ -188,7 +190,7 @@ const EditOppLead = () => {
       } else {
         setError(null); // Clear error if valid
       }
-  
+
       setFormData((prev) => ({
         ...prev,
         reminder_setting: value,
@@ -196,18 +198,18 @@ const EditOppLead = () => {
     } else {
       setFormData({ ...formData, [name]: value });
     }
-  
+
     // Handle primary and opportunity status changes
     if (name === "primaryStatus") {
       setFormData({ ...formData, [name]: value, secondaryStatus: "" });
     }
-  
+
     if (name === "opportunity_status1") {
       setFormData({ ...formData, [name]: value, opportunity_status2: "" });
     }
   };
- 
- 
+
+
   const handleChildrenCountChange = (e) => {
     const { value } = e.target;
     const count = parseInt(value, 10);
@@ -269,6 +271,7 @@ const EditOppLead = () => {
     };
 
     const opportunityData = {
+      origincity: formData.origincity,
       destination: formData.destination,
       start_date: formData.start_date,
       end_date: formData.end_date,
@@ -296,19 +299,19 @@ const EditOppLead = () => {
   };
 
   const [loading, setLoading] = useState(false);
-          const handleSubmitAndClose = async (e) => {
-            e.preventDefault(); // Prevent default form submission
-            setLoading(true);
-        
-            try {
-              await handleSubmit(e); // Call the original handleSubmit function
-              navigate("/potential-leads"); // Redirect to leads list page after saving
-            } catch (error) {
-              console.error("Error submitting form:", error);
-            } finally {
-              setLoading(false);
-            }
-          };
+  const handleSubmitAndClose = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true);
+
+    try {
+      await handleSubmit(e); // Call the original handleSubmit function
+      navigate("/potential-leads"); // Redirect to leads list page after saving
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // const [dropdownOptions] = useState({
   //   primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
@@ -367,7 +370,7 @@ const EditOppLead = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-      
+
     },
   });
 
@@ -406,57 +409,57 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>
-      Phone Number
-    </Form.Label>
-    <div style={{ display: "flex", alignItems: "center" }}>
-      {/* Country Code Dropdown */}
-      <Form.Select
-        name="country_code"
-        value={formData.country_code || "+91"} // Default value
-        onChange={handleChange}
-        style={{
-          width: "80px",
-          marginRight: "10px",
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      >
-        {countryCodeOptions.map((code) => (
-          <option key={code} value={code}>
-            {code}
-          </option>
-        ))}
-      </Form.Select>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Phone Number
+                    </Form.Label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {/* Country Code Dropdown */}
+                      <Form.Select
+                        name="country_code"
+                        value={formData.country_code || "+91"} // Default value
+                        onChange={handleChange}
+                        style={{
+                          width: "80px",
+                          marginRight: "10px",
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {countryCodeOptions.map((code) => (
+                          <option key={code} value={code}>
+                            {code}
+                          </option>
+                        ))}
+                      </Form.Select>
 
-      {/* Phone Number Input */}
-      <Form.Control
-        type="text"
-        name="phone_number"
-        placeholder="Enter Phone Number"
-        value={formData.phone_number || ""} // Prevents undefined errors
-        onChange={(e) => {
-          const value = e.target.value;
-          if (/^\d*$/.test(value)) {
-            handleChange(e);
-          }
-        }}
-       
-        style={{
-          flex: 1,
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-        required
-      />
-    </div>
+                      {/* Phone Number Input */}
+                      <Form.Control
+                        type="text"
+                        name="phone_number"
+                        placeholder="Enter Phone Number"
+                        value={formData.phone_number || ""} // Prevents undefined errors
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleChange(e);
+                          }
+                        }}
 
-    
-  </Form.Group>
-</Col>
+                        style={{
+                          flex: 1,
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                        required
+                      />
+                    </div>
+
+
+                  </Form.Group>
+                </Col>
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
@@ -511,7 +514,7 @@ const EditOppLead = () => {
                   </Col>
                 )}
 
-               
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Secondary Email</Form.Label>
@@ -534,11 +537,22 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-               
+
               </Row>
               <hr />
               <h5>Opportunity Details</h5>
               <Row>
+              <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Origin City</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="origincity"
+                      value={formData.origincity}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>
@@ -587,24 +601,24 @@ const EditOppLead = () => {
                 </Col> */}
 
 
-<Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Duration (Nights)</Form.Label>
-    <Form.Control
-      type="number"
-      name="duration"
-      value={formData.duration}
-      onChange={(e) => {
-        const newDuration = parseInt(e.target.value) || 0;
-        setFormData((prev) => ({
-          ...prev,
-          duration: newDuration,
-          end_date: new Date(new Date(formData.start_date).getTime() + newDuration * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Update end date based on duration
-        }));
-      }}
-    />
-  </Form.Group>
-</Col>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Duration (Nights)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="duration"
+                      value={formData.duration}
+                      onChange={(e) => {
+                        const newDuration = parseInt(e.target.value) || 0;
+                        setFormData((prev) => ({
+                          ...prev,
+                          duration: newDuration,
+                          end_date: new Date(new Date(formData.start_date).getTime() + newDuration * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Update end date based on duration
+                        }));
+                      }}
+                    />
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>No of Adults</Form.Label>

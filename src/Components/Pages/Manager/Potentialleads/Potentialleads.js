@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
-import "bootstrap/dist/css/bootstrap.min.css"; 
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes,FaCopy } from "react-icons/fa";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
-import DataTable from "../../../Layout/Table/TableLayoutOpp"; 
+import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
 import './PotentialLeads.css';
 import axios from 'axios';
@@ -109,7 +109,7 @@ const Potentialleads = () => {
           ? { ...row, opportunity_status1: value, opportunity_status2: "" }
           : row
       );
-      handleUpdateStatus(rowId, value, ""); 
+      handleUpdateStatus(rowId, value, "");
       return updatedData;
     });
   };
@@ -119,7 +119,7 @@ const Potentialleads = () => {
       const updatedData = prevData.map((row) =>
         row.leadid == rowId ? { ...row, opportunity_status2: value } : row
       );
-      const primaryStatus = updatedData.find((row ) => row.leadid == rowId).opportunity_status1;
+      const primaryStatus = updatedData.find((row) => row.leadid == rowId).opportunity_status1;
       handleUpdateStatus(rowId, primaryStatus, value);
       return updatedData;
     });
@@ -167,34 +167,34 @@ const Potentialleads = () => {
     navigate(`/m-edit-opportunity/${rowId}`, { state: { leadid: rowId } });
   };
 
-   const handleDelete = async (leadid) => {
-       try {
-         const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
-           method: 'DELETE',
-         });
-     
-         if (response.ok) {
-           setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
-           setMessage('Opportunity has been deleted successfully.');
-           setTimeout(() => {
-             setMessage('');
-           }, 1000);
-         } else {
-           console.error('Error deleting record');
-           setMessage('Failed to delete the opportunity. Please try again.');
-           setTimeout(() => {
-             setMessage('');
-           }, 1000);
-         }
-       } catch (error) {
-         console.error('Error:', error);
-         setMessage('An error occurred while deleting the opportunity.');
-         setTimeout(() => {
-           setMessage('');
-         }, 1000);
-       }
-     };
- 
+  const handleDelete = async (leadid) => {
+    try {
+      const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
+        setMessage('Opportunity has been deleted successfully.');
+        setTimeout(() => {
+          setMessage('');
+        }, 1000);
+      } else {
+        console.error('Error deleting record');
+        setMessage('Failed to delete the opportunity. Please try again.');
+        setTimeout(() => {
+          setMessage('');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setMessage('An error occurred while deleting the opportunity.');
+      setTimeout(() => {
+        setMessage('');
+      }, 1000);
+    }
+  };
+
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -230,51 +230,59 @@ const Potentialleads = () => {
       ),
     },
     {
-           Header: "Mobile",
-           accessor: "phone_number",
-           Cell: ({ row }) => (
-             <div style={{ display: "flex", alignItems: "center" }}>
-               {row.original.phone_number}
-               <FaCopy
-                 style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                 onClick={() => copyToClipboard(row.original.phone_number)}
-                 title="Copy Phone Number"
-               />
-             </div>
-           ),
-         },
-          {
-                        Header: "Email",
-                        accessor: "email",
-                        Cell: ({ row }) => (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "space-between", // Push copy button to the right
-                              width: "100%",
-                              maxWidth: "200px", // Adjust width as needed
-                            }}
-                          >
-                            <div
-                              style={{
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                maxWidth: "150px",
-                              }}
-                              title={row.original.email} // Show full email on hover
-                            >
-                              {row.original.email}
-                            </div>
-                            <FaCopy
-                              style={{ cursor: "pointer", color: "#ff9966" }}
-                              onClick={() => copyToClipboard(row.original.email)}
-                              title="Copy Email"
-                            />
-                          </div>
-                        ),
-                      },
+      Header: "Mobile",
+      accessor: "phone_number",
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <a
+            href={`https://wa.me/${row.original.phone_number}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+            title="Chat on WhatsApp"
+          >
+            {row.original.phone_number}
+          </a>
+          <FaCopy
+            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(row.original.phone_number)}
+            title="Copy Phone Number"
+          />
+        </div>
+      ),
+    },
+    {
+      Header: "Email",
+      accessor: "email",
+      Cell: ({ row }) => (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", // Push copy button to the right
+            width: "100%",
+            maxWidth: "200px", // Adjust width as needed
+          }}
+        >
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "150px",
+            }}
+            title={row.original.email} // Show full email on hover
+          >
+            {row.original.email}
+          </div>
+          <FaCopy
+            style={{ cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(row.original.email)}
+            title="Copy Email"
+          />
+        </div>
+      ),
+    },
     {
       Header: "Opportunity Status",
       accessor: "opportunityStatus",
@@ -325,10 +333,10 @@ const Potentialleads = () => {
   const uniqueDestinations = useMemo(() => {
     // Normalize the destinations by trimming spaces and converting to lowercase
     const normalizedDestinations = data.map(item => item.travel_destination.trim().toLowerCase());
-    
+
     // Use a Set to get unique values, then convert back to the original format
     const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-    
+
     // Map back to the original format (if needed)
     return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
   }, [data]);
@@ -348,14 +356,14 @@ const Potentialleads = () => {
             <Col md={6} className="d-flex align-items-center gap-2">
               <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               {showDateRange ? (
-                 <FaTimes
-                onClick={() => {
-                  setShowDateRange(false);
-                  setFilterStartDate(""); 
-                  setFilterEndDate(""); 
-                  setAppliedFilterStartDate(""); 
-                  setAppliedFilterEndDate(""); 
-                }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
+                <FaTimes
+                  onClick={() => {
+                    setShowDateRange(false);
+                    setFilterStartDate("");
+                    setFilterEndDate("");
+                    setAppliedFilterStartDate("");
+                    setAppliedFilterEndDate("");
+                  }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
               ) : (
                 <FaCalendarAlt onClick={() => setShowDateRange(true)} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
               )}
@@ -394,7 +402,7 @@ const Potentialleads = () => {
                 ))}
               </select>
             </Col>
-            <Col md ={3}>
+            <Col md={3}>
               <select className="form-select" value={filterAssignee} onChange={(e) => setFilterAssignee(e.target.value)}>
                 <option value="">Associates</option>
                 {employees.map((employee) => (

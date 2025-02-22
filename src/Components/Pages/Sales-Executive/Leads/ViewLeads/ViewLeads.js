@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayout";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment ,FaCopy} from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaCopy } from "react-icons/fa";
 import { Button, Row, Col } from "react-bootstrap";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./ViewLeads.css";
 import axios from 'axios';
-import {baseURL} from "../../../../Apiservices/Api";
+import { baseURL } from "../../../../Apiservices/Api";
 import { io } from 'socket.io-client';
 import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { webhookUrl } from "../../../../Apiservices/Api";
@@ -18,18 +18,18 @@ const ViewLeads = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
-  
+
   const generateWhatsAppLink = (phoneNumber) => {
     return `https://wa.me/${phoneNumber}`;
   };
-  
+
   const handleEdit = (leadId) => {
     navigate(`/edit-lead/${leadId}`, {
       state: { leadid: leadId },
     });
   };
 
-  const handleAddUser  = (lead) => {
+  const handleAddUser = (lead) => {
     navigate(`/create-customer-opportunity/${lead.leadid}`);
   };
 
@@ -47,13 +47,13 @@ const ViewLeads = () => {
   };
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
-      Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   };
 
@@ -62,10 +62,10 @@ const ViewLeads = () => {
       prevData.map((row) =>
         row.leadid === rowId
           ? {
-              ...row,
-              primaryStatus: value,
-              secondaryStatus: "", // Reset secondary status when primary changes
-            }
+            ...row,
+            primaryStatus: value,
+            secondaryStatus: "", // Reset secondary status when primary changes
+          }
           : row
       )
     );
@@ -87,10 +87,10 @@ const ViewLeads = () => {
       primaryStatus: primaryStatus,
       secondaryStatus: secondaryStatus,
     };
-console.log(JSON.stringify(body, null, 2));
+    console.log(JSON.stringify(body, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
-      
+
       if (response.status === 200) {
         setMessage(response.data.message); // Use the message from the response
         setTimeout(() => setMessage(""), 3000);
@@ -141,10 +141,10 @@ console.log(JSON.stringify(body, null, 2));
   useEffect(() => {
     const fetchEnquiries = async () => {
       // console.log("userid=",userId) 
-      if (!userId)
-      {  
+      if (!userId) {
         // console.log("not exist userid=",userId) 
-         return; }
+        return;
+      }
 
       try {
         const response = await fetch(`${webhookUrl}/api/enquiries`, {
@@ -166,10 +166,10 @@ console.log(JSON.stringify(body, null, 2));
     };
 
     fetchEnquiries();
-  }, [userId, authToken]); 
+  }, [userId, authToken]);
 
-  
-  
+
+
 
   const handleViewLeads = (lead) => {
     navigate(`/view-lead/${lead.leadid}`, {
@@ -179,11 +179,11 @@ console.log(JSON.stringify(body, null, 2));
 
   const columns = useMemo(
     () => [
-      
+
       {
         Header: "Lead Id",
         accessor: "leadid",
-       
+
       },
       {
         Header: "Name",
@@ -205,7 +205,15 @@ console.log(JSON.stringify(body, null, 2));
         accessor: "phone_number",
         Cell: ({ row }) => (
           <div style={{ display: "flex", alignItems: "center" }}>
-            {row.original.phone_number}
+            <a
+              href={`https://wa.me/${row.original.phone_number}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+              title="Chat on WhatsApp"
+            >
+              {row.original.phone_number}
+            </a>
             <FaCopy
               style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
               onClick={() => copyToClipboard(row.original.phone_number)}
@@ -214,39 +222,39 @@ console.log(JSON.stringify(body, null, 2));
           </div>
         ),
       },
-       {
-                     Header: "Email",
-                     accessor: "email",
-                     Cell: ({ row }) => (
-                       <div
-                         style={{
-                           display: "flex",
-                           alignItems: "center",
-                           justifyContent: "space-between", // Push copy button to the right
-                           width: "100%",
-                           maxWidth: "200px", // Adjust width as needed
-                         }}
-                       >
-                         <div
-                           style={{
-                             whiteSpace: "nowrap",
-                             overflow: "hidden",
-                             textOverflow: "ellipsis",
-                             maxWidth: "150px",
-                           }}
-                           title={row.original.email} // Show full email on hover
-                         >
-                           {row.original.email}
-                         </div>
-                         <FaCopy
-                           style={{ cursor: "pointer", color: "#ff9966" }}
-                           onClick={() => copyToClipboard(row.original.email)}
-                           title="Copy Email"
-                         />
-                       </div>
-                     ),
-                   },
-      
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between", // Push copy button to the right
+              width: "100%",
+              maxWidth: "200px", // Adjust width as needed
+            }}
+          >
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "150px",
+              }}
+              title={row.original.email} // Show full email on hover
+            >
+              {row.original.email}
+            </div>
+            <FaCopy
+              style={{ cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.email)}
+              title="Copy Email"
+            />
+          </div>
+        ),
+      },
+
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
@@ -254,7 +262,7 @@ console.log(JSON.stringify(body, null, 2));
           const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
-      
+
           return (
             <div className="d-flex align-items-center">
               <select
@@ -290,20 +298,20 @@ console.log(JSON.stringify(body, null, 2));
           );
         },
       },
-      
+
       {
         Header: "Source",
         accessor: "sources",
       },
-       // Customer Status Column
-       {
+      // Customer Status Column
+      {
         Header: "Customer Status",
         accessor: "customer_status",
-        
-       
+
+
       },
 
-    
+
       {
         Header: "Actions",
         Cell: ({ row }) => (
@@ -323,7 +331,7 @@ console.log(JSON.stringify(body, null, 2));
           </div>
         ),
       }
-     
+
     ],
     [data]
   );
@@ -337,7 +345,7 @@ console.log(JSON.stringify(body, null, 2));
             <Row className="mb-3">
               <Col className="d-flex justify-content-between align-items-center">
                 <h3>Lead Details</h3>
-                
+
                 {message && <div className="alert alert-info">{message}</div>}
                 <Button onClick={handleAddLead}>Add Leads</Button>
               </Col>

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaCalendarAlt, FaTimes,FaCopy } from "react-icons/fa";
+import { FaEdit, FaEye, FaComment, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -79,17 +79,17 @@ const Potentialleads = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-      
+
     },
   });
-  
-  
+
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterDestination, setFilterDestination] = useState("");
   const [filterOppStatus1, setFilterOppStatus1] = useState("");
   const [filterOppStatus2, setFilterOppStatus2] = useState("");
-  
+
   // Date filter states for input and applied values
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
@@ -197,7 +197,7 @@ const Potentialleads = () => {
       }
     } catch (error) {
       console.error("Error fetching leads:", error);
-     
+
     }
   };
 
@@ -279,13 +279,13 @@ const Potentialleads = () => {
   }, [formattedData]);
 
 
-   const staticOppStatus2Options = useMemo(() => {
-      if (filterOppStatus1) {
-        return dropdownOptions.secondary[filterOppStatus1] || [];
-      }
-      const allSecondary = Object.values(dropdownOptions.secondary).flat();
-      return Array.from(new Set(allSecondary));
-    }, [filterOppStatus1, dropdownOptions]);
+  const staticOppStatus2Options = useMemo(() => {
+    if (filterOppStatus1) {
+      return dropdownOptions.secondary[filterOppStatus1] || [];
+    }
+    const allSecondary = Object.values(dropdownOptions.secondary).flat();
+    return Array.from(new Set(allSecondary));
+  }, [filterOppStatus1, dropdownOptions]);
 
   // Use appliedFilterStartDate and appliedFilterEndDate for filtering by date.
   const filteredData = useMemo(() => {
@@ -317,7 +317,7 @@ const Potentialleads = () => {
         !filterOppStatus2 ||
         (item.opportunity_status2 &&
           item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
-      
+
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
@@ -391,51 +391,59 @@ const Potentialleads = () => {
         ),
       },
       {
-             Header: "Mobile",
-             accessor: "phone_number",
-             Cell: ({ row }) => (
-               <div style={{ display: "flex", alignItems: "center" }}>
-                 {row.original.phone_number}
-                 <FaCopy
-                   style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                   onClick={() => copyToClipboard(row.original.phone_number)}
-                   title="Copy Phone Number"
-                 />
-               </div>
-             ),
-           },
-            {
-                          Header: "Email",
-                          accessor: "email",
-                          Cell: ({ row }) => (
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between", // Push copy button to the right
-                                width: "100%",
-                                maxWidth: "200px", // Adjust width as needed
-                              }}
-                            >
-                              <div
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  maxWidth: "150px",
-                                }}
-                                title={row.original.email} // Show full email on hover
-                              >
-                                {row.original.email}
-                              </div>
-                              <FaCopy
-                                style={{ cursor: "pointer", color: "#ff9966" }}
-                                onClick={() => copyToClipboard(row.original.email)}
-                                title="Copy Email"
-                              />
-                            </div>
-                          ),
-                        },
+        Header: "Mobile",
+        accessor: "phone_number",
+        Cell: ({ row }) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <a
+              href={`https://wa.me/${row.original.phone_number}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+              title="Chat on WhatsApp"
+            >
+              {row.original.phone_number}
+            </a>
+            <FaCopy
+              style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.phone_number)}
+              title="Copy Phone Number"
+            />
+          </div>
+        ),
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between", // Push copy button to the right
+              width: "100%",
+              maxWidth: "200px", // Adjust width as needed
+            }}
+          >
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "150px",
+              }}
+              title={row.original.email} // Show full email on hover
+            >
+              {row.original.email}
+            </div>
+            <FaCopy
+              style={{ cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.email)}
+              title="Copy Email"
+            />
+          </div>
+        ),
+      },
       {
         Header: "Opportunity Status",
         accessor: "opportunityStatus",
@@ -520,131 +528,131 @@ const Potentialleads = () => {
 
   return (
     <div className="salesOpportunitycontainer">
-    <Navbar onToggleSidebar={setCollapsed} />
-    <div className={`salesOpportunity ${collapsed ? "collapsed" : ""}`}>
-      <div className="potentialleads-table-container">
-        <Row className="mb-3">
-          <Col className="d-flex justify-content-between align-items-center fixed">
-            <h3>Opportunity Details</h3>
-            {message && <div className="alert alert-info">{message}</div>}
-          </Col>
-        </Row>
-        <div>
-          {/* Free text search and calendar toggle */}
-          <Row className="mb-3 align-items-center">
-  <Col md={6} className="d-flex align-items-center gap-2">
-    {/* Free text search input */}
-    <input
-      type="text"
-      className="form-control"
-      placeholder="Free Text Search..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-    />
-    
-    {/* Calendar/X toggle */}
-    {showDateRange ? (
-      <FaTimes
-        onClick={() => setShowDateRange(false)}
-        style={{ cursor: "pointer", fontSize: "1.5rem" }}
-        title="Hide Date Range"
-      />
-    ) : (
-      <FaCalendarAlt
-        onClick={() => setShowDateRange(true)}
-        style={{ cursor: "pointer", fontSize: "1.5rem" }}
-        title="Show Date Range"
-      />
-    )}
-
-    {/* Date range inputs */}
-    {showDateRange && (
-      <div className="d-flex align-items-center gap-2">
-        <input
-          type="date"
-          className="form-control"
-          value={filterStartDate}
-          onChange={(e) => setFilterStartDate(e.target.value)}
-        />
-        <span>to</span>
-        <input
-          type="date"
-          className="form-control"
-          value={filterEndDate}
-          onChange={(e) => setFilterEndDate(e.target.value)}
-        />
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            setAppliedFilterStartDate(filterStartDate);
-            setAppliedFilterEndDate(filterEndDate);
-          }}
-        >
-          OK
-        </button>
-      </div>
-    )}
-  </Col>
-</Row>
-
-          {/* Other filters */}
+      <Navbar onToggleSidebar={setCollapsed} />
+      <div className={`salesOpportunity ${collapsed ? "collapsed" : ""}`}>
+        <div className="potentialleads-table-container">
           <Row className="mb-3">
-            <Col md={3}>
-              <select
-                className="form-select"
-                value={filterDestination}
-                onChange={(e) => setFilterDestination(e.target.value)}
-              >
-                <option value="">Destinations</option>
-                {uniqueDestinations.map((dest) => (
-                  <option key={dest} value={dest}>
-                    {dest}
-                  </option>
-                ))}
-              </select>
-            </Col>
-            <Col md={3}>
-            <select
-                className="form-select"
-                value={filterOppStatus1}
-                onChange={(e) => {
-                  setFilterOppStatus1(e.target.value);
-                  // Reset secondary filter when primary changes
-                  setFilterOppStatus2("");
-                }}
-              >
-                <option value="">Primary Status</option>
-                {dropdownOptions.primary.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </Col>
-            <Col md={3}>
-            <select
-                className="form-select"
-                value={filterOppStatus2}
-                onChange={(e) => setFilterOppStatus2(e.target.value)}
-              >
-                <option value="">Secondary Status</option>
-                {staticOppStatus2Options.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
+            <Col className="d-flex justify-content-between align-items-center fixed">
+              <h3>Opportunity Details</h3>
+              {message && <div className="alert alert-info">{message}</div>}
             </Col>
           </Row>
+          <div>
+            {/* Free text search and calendar toggle */}
+            <Row className="mb-3 align-items-center">
+              <Col md={6} className="d-flex align-items-center gap-2">
+                {/* Free text search input */}
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Free Text Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+
+                {/* Calendar/X toggle */}
+                {showDateRange ? (
+                  <FaTimes
+                    onClick={() => setShowDateRange(false)}
+                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                    title="Hide Date Range"
+                  />
+                ) : (
+                  <FaCalendarAlt
+                    onClick={() => setShowDateRange(true)}
+                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                    title="Show Date Range"
+                  />
+                )}
+
+                {/* Date range inputs */}
+                {showDateRange && (
+                  <div className="d-flex align-items-center gap-2">
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={filterStartDate}
+                      onChange={(e) => setFilterStartDate(e.target.value)}
+                    />
+                    <span>to</span>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={filterEndDate}
+                      onChange={(e) => setFilterEndDate(e.target.value)}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        setAppliedFilterStartDate(filterStartDate);
+                        setAppliedFilterEndDate(filterEndDate);
+                      }}
+                    >
+                      OK
+                    </button>
+                  </div>
+                )}
+              </Col>
+            </Row>
+
+            {/* Other filters */}
+            <Row className="mb-3">
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterDestination}
+                  onChange={(e) => setFilterDestination(e.target.value)}
+                >
+                  <option value="">Destinations</option>
+                  {uniqueDestinations.map((dest) => (
+                    <option key={dest} value={dest}>
+                      {dest}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterOppStatus1}
+                  onChange={(e) => {
+                    setFilterOppStatus1(e.target.value);
+                    // Reset secondary filter when primary changes
+                    setFilterOppStatus2("");
+                  }}
+                >
+                  <option value="">Primary Status</option>
+                  {dropdownOptions.primary.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterOppStatus2}
+                  onChange={(e) => setFilterOppStatus2(e.target.value)}
+                >
+                  <option value="">Secondary Status</option>
+                  {staticOppStatus2Options.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+            </Row>
+          </div>
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <DataTable columns={columns} data={filteredData} />
+          )}
         </div>
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <DataTable columns={columns} data={filteredData} />
-        )}
       </div>
     </div>
-  </div>
   );
 };
 

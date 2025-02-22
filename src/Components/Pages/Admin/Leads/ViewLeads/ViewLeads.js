@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from './../../../../Layout/Table/TableLayout';
-import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus,FaCopy } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus, FaCopy } from 'react-icons/fa';
 import { Button, Row, Col, Modal } from 'react-bootstrap';
 import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 
-      import { HiUserGroup } from "react-icons/hi"; // Import icon
+import { HiUserGroup } from "react-icons/hi"; // Import icon
 
 import './ViewLeads.css'
 
@@ -73,13 +73,13 @@ const AdminViewLeads = () => {
 
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
-      Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   };
 
@@ -90,12 +90,12 @@ const AdminViewLeads = () => {
           ? {
             ...row,
             primaryStatus: value,
-            secondaryStatus: "", 
+            secondaryStatus: "",
           }
           : row
       )
     );
-    updateLeadStatus(rowId, value, ""); 
+    updateLeadStatus(rowId, value, "");
   };
 
   const handleSecondaryStatusChange = (value, rowId) => {
@@ -117,19 +117,19 @@ const AdminViewLeads = () => {
       const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
 
       if (response.status === 200) {
-       
-        setMessage(response.data.message || 'Status updated successfully.'); 
+
+        setMessage(response.data.message || 'Status updated successfully.');
         setTimeout(() => setMessage(""), 3000);
         console.log('Status updated:', response.data);
       } else {
         console.error('Failed to update status:', response.data);
-        
+
         setMessage('Failed to update status. Please try again.');
         setTimeout(() => setMessage(""), 3000);
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      
+
       setMessage('An error occurred while updating the status. Please try again.');
       setTimeout(() => setMessage(""), 3000);
     }
@@ -151,7 +151,7 @@ const AdminViewLeads = () => {
   }, []);
 
   const [managers, setManagers] = useState([]);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const handleAddLead = () => {
     navigate('/a-add-leads');
@@ -164,15 +164,15 @@ const AdminViewLeads = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch managers");
         }
-        const result = await response.json(); 
-        console.log("Fetched data:", result.data); 
-        console.log(JSON.stringify(result.data, null, 2)); 
-        setManagers(result.data); 
-        setLoading(false); 
+        const result = await response.json();
+        console.log("Fetched data:", result.data);
+        console.log(JSON.stringify(result.data, null, 2));
+        setManagers(result.data);
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching managers:", err.message); 
-        setError(err.message); 
-        setLoading(false); 
+        console.error("Error fetching managers:", err.message);
+        setError(err.message);
+        setLoading(false);
       }
     };
 
@@ -196,11 +196,11 @@ const AdminViewLeads = () => {
       if (response.ok) {
         setMessage(data.message);
         setTimeout(() => setMessage(""), 3000);
-        
+
         setData((prevData) =>
           prevData.map((lead) =>
             lead.leadid === leadid
-              ? { ...lead, assign_to_manager: assignee } 
+              ? { ...lead, assign_to_manager: assignee }
               : lead
           )
         );
@@ -219,14 +219,14 @@ const AdminViewLeads = () => {
 
 
 
- 
+
   const columns = useMemo(
     () => [
-      
+
       {
         Header: "Lead Id",
         accessor: "leadid",
-       
+
       },
       {
         Header: "Name",
@@ -242,54 +242,62 @@ const AdminViewLeads = () => {
           </div>
         ),
       },
-      
+
       {
-                   Header: "Mobile",
-                   accessor: "phone_number",
-                   Cell: ({ row }) => (
-                     <div style={{ display: "flex", alignItems: "center" }}>
-                       {row.original.phone_number}
-                       <FaCopy
-                         style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                         onClick={() => copyToClipboard(row.original.phone_number)}
-                         title="Copy Phone Number"
-                       />
-                     </div>
-                   ),
-                 },
-                  {
-                                Header: "Email",
-                                accessor: "email",
-                                Cell: ({ row }) => (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "space-between", // Push copy button to the right
-                                      width: "100%",
-                                      maxWidth: "200px", // Adjust width as needed
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        maxWidth: "150px",
-                                      }}
-                                      title={row.original.email} // Show full email on hover
-                                    >
-                                      {row.original.email}
-                                    </div>
-                                    <FaCopy
-                                      style={{ cursor: "pointer", color: "#ff9966" }}
-                                      onClick={() => copyToClipboard(row.original.email)}
-                                      title="Copy Email"
-                                    />
-                                  </div>
-                                ),
-                              },
-      
+        Header: "Mobile",
+        accessor: "phone_number",
+        Cell: ({ row }) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <a
+              href={`https://wa.me/${row.original.phone_number}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+              title="Chat on WhatsApp"
+            >
+              {row.original.phone_number}
+            </a>
+            <FaCopy
+              style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.phone_number)}
+              title="Copy Phone Number"
+            />
+          </div>
+        ),
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between", // Push copy button to the right
+              width: "100%",
+              maxWidth: "200px", // Adjust width as needed
+            }}
+          >
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "150px",
+              }}
+              title={row.original.email} // Show full email on hover
+            >
+              {row.original.email}
+            </div>
+            <FaCopy
+              style={{ cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.email)}
+              title="Copy Email"
+            />
+          </div>
+        ),
+      },
+
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
@@ -297,7 +305,7 @@ const AdminViewLeads = () => {
           const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
-      
+
           return (
             <div className="d-flex align-items-center">
               <select
@@ -333,7 +341,7 @@ const AdminViewLeads = () => {
           );
         },
       },
-      
+
       {
         Header: 'Source',
         accessor: 'sources',
@@ -341,52 +349,52 @@ const AdminViewLeads = () => {
       {
         Header: "Customer Status",
         accessor: "customer_status",
-        
-       
+
+
       },
 
-      
-      
+
+
       {
         Header: "Manager ",
         Cell: ({ row }) => {
           const assignedManagerId = row.original.managerid || "";
           const assignedManagerName = row.original.assign_to_manager || "";
-      
+
           const [selectedManager, setSelectedManager] = useState(
             assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
           );
           const [showIcon, setShowIcon] = useState(false);
-      
+
           useEffect(() => {
             setSelectedManager(
               assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
             );
             setShowIcon(false);
           }, [assignedManagerId, assignedManagerName]);
-      
+
           const handleChange = (e) => {
             const newValue = e.target.value;
             setSelectedManager(newValue);
             setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
           };
-      
+
           const handleAssignClick = async () => {
             if (selectedManager) {
               const [managerid, assignee] = selectedManager.split("|");
-      
+
               await handleAssignToChange(assignee, row.original.leadid, managerid);
-      
+
               // ✅ Update row data manually to trigger re-render
               row.original.managerid = managerid;
               row.original.assign_to_manager = assignee;
-      
+
               // ✅ Update state to reflect change instantly
               setSelectedManager(`${managerid}|${assignee}`);
               setShowIcon(false);
             }
           };
-      
+
           return (
             <div className="d-flex align-items-center">
               <select
@@ -412,16 +420,16 @@ const AdminViewLeads = () => {
           );
         },
       },
-      
 
-      
+
+
 
       ,
       {
         Header: "Associate ",
         accessor: "assignedSalesName",
-        
-       
+
+
       },
 
       {
@@ -447,7 +455,7 @@ const AdminViewLeads = () => {
           </div>
         ),
       }
-      
+
     ],
     [dropdownOptions, managers]
   );

@@ -10,19 +10,19 @@ import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 const DynamicForm = () => {
   const { authToken, userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-useEffect(() => {
- 
-  const countries = getCountries();
-  const callingCodes = countries.map(country => `+${getCountryCallingCode(country)}`);
-  const uniqueCodes = [...new Set(callingCodes)]; 
-  
-  
-  uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
-  
-  setCountryCodeOptions(uniqueCodes);
-}, []);
+  useEffect(() => {
+
+    const countries = getCountries();
+    const callingCodes = countries.map(country => `+${getCountryCallingCode(country)}`);
+    const uniqueCodes = [...new Set(callingCodes)];
+
+
+    uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+    setCountryCodeOptions(uniqueCodes);
+  }, []);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
@@ -42,7 +42,7 @@ useEffect(() => {
     assignedSalesName: "",
     assign_to_manager: userName,
     managerid: userId,
-    manager_id:null,
+    manager_id: null,
   });
 
 
@@ -62,7 +62,7 @@ useEffect(() => {
           Authorization: `Bearer ${authToken}`,
         },
       });
-      setEmployees(response.data); 
+      setEmployees(response.data);
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
@@ -77,24 +77,24 @@ useEffect(() => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "assignedSalesId") {
-      const selectedEmployeeId = Number(value); 
+      const selectedEmployeeId = Number(value);
       const selectedEmployee = employees.find(employee => employee.id === selectedEmployeeId);
-      
+
       setFormData({
         ...formData,
         assignedSalesId: selectedEmployeeId,
-        assignedSalesName: selectedEmployee ? selectedEmployee.name : '', 
+        assignedSalesName: selectedEmployee ? selectedEmployee.name : '',
       });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
-  
+
   const validateEmail = (email) => {
-   
+
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
   };
@@ -104,9 +104,9 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
-    setMessage(""); 
+    setMessage("");
 
-    
+
     if (formData.phone_number.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits.");
       return;
@@ -117,11 +117,11 @@ useEffect(() => {
       return;
     }
 
-    
+
     const dataToSubmit = {
       ...formData,
-      assignedSalesName: formData.assignedSalesName, 
-      employee_id:formData.assignedSalesId
+      assignedSalesName: formData.assignedSalesName,
+      employee_id: formData.assignedSalesId
     };
 
     console.log(JSON.stringify(dataToSubmit));
@@ -129,7 +129,7 @@ useEffect(() => {
       const response = await axios.post(`${baseURL}/api/leads`, dataToSubmit);
       console.log(response.data);
 
-    
+
       setMessage("Lead added successfully!");
       setTimeout(() => setMessage(""), 3000);
 
@@ -139,7 +139,7 @@ useEffect(() => {
         name: '',
         email: '',
         phone_number: '',
-        country_code: '+1', 
+        country_code: '+1',
         primarySource: '',
         secondarysource: '',
         another_name: '',
@@ -149,20 +149,20 @@ useEffect(() => {
         destination: '',
         description: '',
         assignedSalesId: "",
-        assignedSalesName: "", 
+        assignedSalesName: "",
         assign_to_manager: userName,
         managerid: userId,
-        
+
       });
     } catch (error) {
       console.error("Error adding lead:", error);
-     
+
       setMessage("Error: Failed to add lead. Please try again.");
       setTimeout(() => setMessage(""), 3000);
-  
-  } finally {
-    setLoading(false);
-  }
+
+    } finally {
+      setLoading(false);
+    }
   };
   const handleSubmitAndClose = async (e) => {
     e.preventDefault(); // Prevent default form submission
@@ -182,6 +182,7 @@ useEffect(() => {
   const renderForm = () => {
     const subDropdownOptions = {
       Referral: ["Grade 3", "Grade 2", "Grade 1"],
+      Corporate: ["BIW", "Others"],
       Community: ["BNI", "Rotary", "Lions", "Association", "Others"],
       "Purchased Leads": ["Tripcrafter", "Others"],
       "Social Media": ["Linkedin", "Others"],
@@ -195,12 +196,12 @@ useEffect(() => {
       ],
     };
 
-  
+
     const handleSourceChange = (e) => {
       const { name, value } = e.target;
       setFormData({ ...formData, [name]: value });
 
-    
+
       if (name === "primarySource") {
         setFormData({ ...formData, [name]: value, secondarysource: "" });
       }
@@ -239,61 +240,61 @@ useEffect(() => {
                 }
               }}
             />
-        
+
             {emailError && <span style={{ color: "red", fontSize: "12px" }}>{emailError}</span>}
           </div>
         </div>
         <div className="addleads-input-group">
-  <label>Phone Number<span style={{ color: "red" }}> *</span></label>
-  <div style={{ display: "flex", alignItems: "center" }}>
-    <select
-      name="country_code"
-      value={formData.country_code}
-      onChange={handleChange}
-      style={{
-        width: "80px",
-        marginRight: "10px",
-        padding: "5px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      }}
-    >
-      {countryCodeOptions.map(code => (
-        <option key={code} value={code}>{code}</option>
-      ))}
-    </select>
+          <label>Phone Number<span style={{ color: "red" }}> *</span></label>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <select
+              name="country_code"
+              value={formData.country_code}
+              onChange={handleChange}
+              style={{
+                width: "80px",
+                marginRight: "10px",
+                padding: "5px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            >
+              {countryCodeOptions.map(code => (
+                <option key={code} value={code}>{code}</option>
+              ))}
+            </select>
 
-    
-    <input
-      type="text"
-      name="phone_number"
-      placeholder="Enter Phone Number"
-      value={formData.phone_number}
-      onChange={(e) => {
-        const value = e.target.value;
-        if (/^\d*$/.test(value)) {
-          handleChange(e);
-        }
-      }}
-      onBlur={(e) => {
-        if (formData.phone_number.length !== 10) {
-          setPhoneError("Please enter a valid number.");
-        } else {
-          setPhoneError("");
-        }
-      }}
-      style={{
-        flex: 1,
-        padding: "5px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      }}
-      maxLength={10}
-      required
-    />
-  </div>
-  {phoneError && <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>}
-</div>
+
+            <input
+              type="text"
+              name="phone_number"
+              placeholder="Enter Phone Number"
+              value={formData.phone_number}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) {
+                  handleChange(e);
+                }
+              }}
+              onBlur={(e) => {
+                if (formData.phone_number.length !== 10) {
+                  setPhoneError("Please enter a valid number.");
+                } else {
+                  setPhoneError("");
+                }
+              }}
+              style={{
+                flex: 1,
+                padding: "5px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+              maxLength={10}
+              required
+            />
+          </div>
+          {phoneError && <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>}
+        </div>
         <div className="addleads-input-group">
           <label>Primary Source</label>
           <select
@@ -303,6 +304,7 @@ useEffect(() => {
           >
             <option value="">Select Source</option>
             <option value="Referral">Referral/Repeat</option>
+            <option value="Corporate">Corporate</option>
             <option value="Partner Promotion">Partner Promotion</option>
             <option value="Media Coverage">Media Coverage</option>
             <option value="Blog">Blog</option>
@@ -334,8 +336,8 @@ useEffect(() => {
         <div className="addleads-input-group">
           <label>Assign To</label>
           <select
-            name="assignedSalesId" 
-            value={formData.assignedSalesId}  
+            name="assignedSalesId"
+            value={formData.assignedSalesId}
             onChange={handleChange}
           >
             <option value="">Select Employee</option>
@@ -345,11 +347,11 @@ useEffect(() => {
               </option>
             ))}
           </select>
-         
+
         </div>
 
 
-       
+
         <div className="addleads-input-group">
           <label>Secondary Email</label>
           <input
@@ -412,7 +414,7 @@ useEffect(() => {
         <div className="addleads-form-container">
           <h2 className="addleads-form-header">Add Leads</h2>
           {error && <div className="alert alert-danger">{error}</div>}
-          {message && <div className="alert alert-info">{message}</div>} 
+          {message && <div className="alert alert-info">{message}</div>}
           <form onSubmit={handleSubmit} className="addleads-form">
             {renderForm()}
             <div className="addleads-form-footer">
@@ -420,7 +422,7 @@ useEffect(() => {
                 Back
               </button>
               <button className="btn btn-primary" type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Save"}
               </button>
               <button
                 className="btn btn-success"

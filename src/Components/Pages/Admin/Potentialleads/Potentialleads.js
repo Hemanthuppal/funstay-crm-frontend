@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Navbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes,FaCopy } from "react-icons/fa";
+import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -156,32 +156,32 @@ const Potentialleads = () => {
   };
 
   const handleDelete = async (leadid) => {
-      try {
-        const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
-          method: 'DELETE',
-        });
-    
-        if (response.ok) {
-          setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
-          setMessage('Opportunity has been deleted successfully.');
-          setTimeout(() => {
-            setMessage('');
-          }, 1000);
-        } else {
-          console.error('Error deleting record');
-          setMessage('Failed to delete the opportunity. Please try again.');
-          setTimeout(() => {
-            setMessage('');
-          }, 1000);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        setMessage('An error occurred while deleting the opportunity.');
+    try {
+      const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setData((prevData) => prevData.filter((item) => item.leadid !== leadid));
+        setMessage('Opportunity has been deleted successfully.');
+        setTimeout(() => {
+          setMessage('');
+        }, 1000);
+      } else {
+        console.error('Error deleting record');
+        setMessage('Failed to delete the opportunity. Please try again.');
         setTimeout(() => {
           setMessage('');
         }, 1000);
       }
-    };
+    } catch (error) {
+      console.error('Error:', error);
+      setMessage('An error occurred while deleting the opportunity.');
+      setTimeout(() => {
+        setMessage('');
+      }, 1000);
+    }
+  };
 
 
   const filteredData = useMemo(() => {
@@ -218,54 +218,62 @@ const Potentialleads = () => {
         </div>
       ),
     },
-   {
-                Header: "Mobile",
-                accessor: "phone_number",
-                Cell: ({ row }) => (
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    {row.original.phone_number}
-                    <FaCopy
-                      style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                      onClick={() => copyToClipboard(row.original.phone_number)}
-                      title="Copy Phone Number"
-                    />
-                  </div>
-                ),
-              },
-              {
-                Header: "Email",
-                accessor: "email",
-                Cell: ({ row }) => (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between", // Push copy button to the right
-                      width: "100%",
-                      maxWidth: "200px", // Adjust width as needed
-                    }}
-                  >
-                    <div
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        maxWidth: "150px",
-                      }}
-                      title={row.original.email} // Show full email on hover
-                    >
-                      {row.original.email}
-                    </div>
-                    <FaCopy
-                      style={{ cursor: "pointer", color: "#ff9966" }}
-                      onClick={() => copyToClipboard(row.original.email)}
-                      title="Copy Email"
-                    />
-                  </div>
-                ),
-              },
-              
-   
+    {
+      Header: "Mobile",
+      accessor: "phone_number",
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <a
+            href={`https://wa.me/${row.original.phone_number}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+            title="Chat on WhatsApp"
+          >
+            {row.original.phone_number}
+          </a>
+          <FaCopy
+            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(row.original.phone_number)}
+            title="Copy Phone Number"
+          />
+        </div>
+      ),
+    },
+    {
+      Header: "Email",
+      accessor: "email",
+      Cell: ({ row }) => (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", // Push copy button to the right
+            width: "100%",
+            maxWidth: "200px", // Adjust width as needed
+          }}
+        >
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "150px",
+            }}
+            title={row.original.email} // Show full email on hover
+          >
+            {row.original.email}
+          </div>
+          <FaCopy
+            style={{ cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(row.original.email)}
+            title="Copy Email"
+          />
+        </div>
+      ),
+    },
+
+
     {
       Header: "Opportunity Status",
       accessor: "opportunityStatus",

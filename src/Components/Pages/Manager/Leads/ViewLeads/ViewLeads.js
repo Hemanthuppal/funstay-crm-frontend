@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayout";
 import { Button, Row, Col, Form } from "react-bootstrap";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment ,FaSyncAlt,FaCopy} from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaSyncAlt, FaCopy } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
 import "./ViewLeads.css";
 import axios from "axios";
@@ -24,8 +24,9 @@ const ViewLeads = () => {
       setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
     }).catch(err => {
       console.error('Failed to copy: ', err);
-    });};
-  
+    });
+  };
+
   useEffect(() => {
     const fetchEnquiries = async () => {
       try {
@@ -98,13 +99,13 @@ const ViewLeads = () => {
   };
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
-      Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   };
 
@@ -120,7 +121,7 @@ const ViewLeads = () => {
           : row
       )
     );
-    updateLeadStatus(rowId, value, ""); 
+    updateLeadStatus(rowId, value, "");
   };
 
   const handleSecondaryStatusChange = (value, rowId) => {
@@ -142,9 +143,9 @@ const ViewLeads = () => {
       const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
 
       if (response.status === 200) {
-        
+
         setMessage(response.data.message || 'Status updated successfully.');
-        setTimeout(() => setMessage(""), 3000); 
+        setTimeout(() => setMessage(""), 3000);
         console.log('Status updated:', response.data);
       } else {
         console.error('Failed to update status:', response.data);
@@ -158,7 +159,7 @@ const ViewLeads = () => {
     }
   };
 
-  
+
   const handleAssignLead = async (leadid, employeeId) => {
     const selectedEmp = employees.find((emp) => emp.id === parseInt(employeeId));
     const employeeName = selectedEmp ? selectedEmp.name : "";
@@ -168,7 +169,7 @@ const ViewLeads = () => {
       setTimeout(() => setMessage(""), 3000);
       return;
     }
-    console.log(leadid, employeeId, employeeName,  userName);
+    console.log(leadid, employeeId, employeeName, userName);
     try {
       const response = await axios.post(`${baseURL}/api/assign-lead`, {
         leadid,
@@ -179,7 +180,7 @@ const ViewLeads = () => {
       });
       setMessage(response.data.message);
       setTimeout(() => setMessage(""), 3000);
-    
+
       setData((prevData) =>
         prevData.map((lead) =>
           lead.leadid === leadid ? { ...lead, assignedSalesName: employeeName } : lead
@@ -190,14 +191,14 @@ const ViewLeads = () => {
     }
   };
 
- 
+
   const columns = useMemo(
     () => [
-    
+
       {
         Header: "Lead Id",
         accessor: "leadid",
-       
+
       },
       {
         Header: "Name",
@@ -206,7 +207,7 @@ const ViewLeads = () => {
           <div>
             <div
               style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-              onClick={() => handleViewLeads(row.original)} 
+              onClick={() => handleViewLeads(row.original)}
             >
               {row.original.name}
             </div>
@@ -214,51 +215,59 @@ const ViewLeads = () => {
         ),
       },
       {
-             Header: "Mobile",
-             accessor: "phone_number",
-             Cell: ({ row }) => (
-               <div style={{ display: "flex", alignItems: "center" }}>
-                 {row.original.phone_number}
-                 <FaCopy
-                   style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                   onClick={() => copyToClipboard(row.original.phone_number)}
-                   title="Copy Phone Number"
-                 />
-               </div>
-             ),
-           },
-            {
-                          Header: "Email",
-                          accessor: "email",
-                          Cell: ({ row }) => (
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between", // Push copy button to the right
-                                width: "100%",
-                                maxWidth: "200px", // Adjust width as needed
-                              }}
-                            >
-                              <div
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  maxWidth: "150px",
-                                }}
-                                title={row.original.email} // Show full email on hover
-                              >
-                                {row.original.email}
-                              </div>
-                              <FaCopy
-                                style={{ cursor: "pointer", color: "#ff9966" }}
-                                onClick={() => copyToClipboard(row.original.email)}
-                                title="Copy Email"
-                              />
-                            </div>
-                          ),
-                        },
+        Header: "Mobile",
+        accessor: "phone_number",
+        Cell: ({ row }) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <a
+              href={`https://wa.me/${row.original.phone_number}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+              title="Chat on WhatsApp"
+            >
+              {row.original.phone_number}
+            </a>
+            <FaCopy
+              style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.phone_number)}
+              title="Copy Phone Number"
+            />
+          </div>
+        ),
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between", // Push copy button to the right
+              width: "100%",
+              maxWidth: "200px", // Adjust width as needed
+            }}
+          >
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "150px",
+              }}
+              title={row.original.email} // Show full email on hover
+            >
+              {row.original.email}
+            </div>
+            <FaCopy
+              style={{ cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.email)}
+              title="Copy Email"
+            />
+          </div>
+        ),
+      },
 
       {
         Header: "Lead Status",
@@ -308,7 +317,7 @@ const ViewLeads = () => {
         Header: "Source",
         accessor: "sources",
       },
-   
+
       {
         Header: "Customer Status",
         accessor: "customer_status",
@@ -316,7 +325,7 @@ const ViewLeads = () => {
 
       },
 
-  
+
 
       {
         Header: "Assign",
@@ -325,13 +334,13 @@ const ViewLeads = () => {
           const assignedSalesId = row.original.assignedSalesId || "";
           const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
           const [showIcon, setShowIcon] = useState(false);
-      
+
           const handleChange = (e) => {
             const newValue = e.target.value;
             setSelectedEmployee(newValue);
             setShowIcon(newValue !== assignedSalesId); // Show icon only if selection changes
           };
-      
+
           const handleAssignClick = () => {
             if (selectedEmployee) {
               handleAssignLead(row.original.leadid, selectedEmployee);
@@ -341,7 +350,7 @@ const ViewLeads = () => {
               setTimeout(() => setMessage(""), 3000);
             }
           };
-      
+
           return (
             <div className="d-flex align-items-center">
               <Form.Select
@@ -366,9 +375,9 @@ const ViewLeads = () => {
           );
         },
       },
-      
-      
-    
+
+
+
       {
         Header: "Actions",
         Cell: ({ row }) => (
@@ -392,7 +401,7 @@ const ViewLeads = () => {
           </div>
         ),
       }
-    
+
     ],
     [employees]
   );

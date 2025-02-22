@@ -3,7 +3,7 @@ import axios from "axios";
 import DataTable from "./../../../Layout/Table/TableLayout"; // Ensure this path is correct
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./Customer.css";
-import { FaEye, FaEdit, FaTrash,FaCopy } from "react-icons/fa";
+import { FaEye, FaEdit, FaTrash, FaCopy } from "react-icons/fa";
 import { baseURL } from "../../../Apiservices/Api";
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +12,7 @@ const SalesCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]); // State for storing matched customer data
   const { authToken, userId } = useContext(AuthContext);
-  const [message,setMessage] =  useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
   useEffect(() => {
     const fetchCustomersAndLeads = async () => {
@@ -23,25 +23,25 @@ const SalesCustomer = () => {
             Authorization: `Bearer ${authToken}`,
           },
         });
-  
+
         if (leadsResponse.status === 200) {
           const leadsData = leadsResponse.data;
-  
+
           // Filter leads matching criteria
           const filteredLeads = leadsData.filter(
             (lead) => lead.assignedSalesId == userId && lead.status === "opportunity"
           );
-  
+
           // Fetch all customers
           const customersResponse = await axios.get(`${baseURL}/api/customers`, {
             headers: {
               Authorization: `Bearer ${authToken}`,
             },
           });
-  
+
           if (customersResponse.status === 200) {
             const customersData = customersResponse.data;
-  
+
             // Find matching customers based on customerid in filtered leads
             const matchedCustomers = customersData
               .filter(customer =>
@@ -51,7 +51,7 @@ const SalesCustomer = () => {
                 ...customer,
                 formattedId: `CUS${String(customer.id).padStart(4, '0')}` // Format the ID here
               }));
-  
+
             setData(matchedCustomers); // Update state with matched customer data
           } else {
             console.error("Error fetching customers:", customersResponse.statusText);
@@ -64,7 +64,7 @@ const SalesCustomer = () => {
         alert("Failed to fetch data.");
       }
     };
-  
+
     fetchCustomersAndLeads();
   }, [authToken, userId]);
 
@@ -95,7 +95,7 @@ const SalesCustomer = () => {
     });
   };
 
- 
+
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
@@ -106,7 +106,7 @@ const SalesCustomer = () => {
       {
         Header: "Customer ID",
         accessor: "id", // This is the key in your customer data
-       
+
       },
       {
         Header: "Name",
@@ -121,52 +121,60 @@ const SalesCustomer = () => {
         ),
       },
       {
-                  Header: "Mobile",
-                  accessor: "phone_number",
-                  Cell: ({ row }) => (
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      {row.original.phone_number}
-                      <FaCopy
-                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                        onClick={() => copyToClipboard(row.original.phone_number)}
-                        title="Copy Phone Number"
-                      />
-                    </div>
-                  ),
-                },
-                  {
-                                Header: "Email",
-                                accessor: "email",
-                                Cell: ({ row }) => (
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      justifyContent: "space-between", // Push copy button to the right
-                                      width: "100%",
-                                      maxWidth: "200px", // Adjust width as needed
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        maxWidth: "150px",
-                                      }}
-                                      title={row.original.email} // Show full email on hover
-                                    >
-                                      {row.original.email}
-                                    </div>
-                                    <FaCopy
-                                      style={{ cursor: "pointer", color: "#ff9966" }}
-                                      onClick={() => copyToClipboard(row.original.email)}
-                                      title="Copy Email"
-                                    />
-                                  </div>
-                                ),
-                              },
-     
+        Header: "Mobile",
+        accessor: "phone_number",
+        Cell: ({ row }) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <a
+              href={`https://wa.me/${row.original.phone_number}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+              title="Chat on WhatsApp"
+            >
+              {row.original.phone_number}
+            </a>
+            <FaCopy
+              style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.phone_number)}
+              title="Copy Phone Number"
+            />
+          </div>
+        ),
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+        Cell: ({ row }) => (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between", // Push copy button to the right
+              width: "100%",
+              maxWidth: "200px", // Adjust width as needed
+            }}
+          >
+            <div
+              style={{
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "150px",
+              }}
+              title={row.original.email} // Show full email on hover
+            >
+              {row.original.email}
+            </div>
+            <FaCopy
+              style={{ cursor: "pointer", color: "#ff9966" }}
+              onClick={() => copyToClipboard(row.original.email)}
+              title="Copy Email"
+            />
+          </div>
+        ),
+      },
+
 
 
       {
@@ -177,7 +185,7 @@ const SalesCustomer = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToLead(row.original.id)}
             />
-             <FaEdit
+            <FaEdit
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToEditLead(row.original.id)}
             />

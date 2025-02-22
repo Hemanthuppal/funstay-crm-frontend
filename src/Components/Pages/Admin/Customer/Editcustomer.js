@@ -179,6 +179,20 @@ const EditLeadOppView = () => {
             setTimeout(() => setMessage(""), 3000);
         }
     };
+
+    const handleUpdateAndClose = async (e) => {
+        e.preventDefault(); // Prevent default form submission
+        setLoading(true);
+
+        try {
+            await handleCustomerSubmit(e); // Call the original handleSubmit function
+            navigate("/a-customers"); // Redirect to leads list page after saving
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
     const handleOpportunitySubmit = async (index) => {
         try {
             const trip = travelOpportunity[index];
@@ -199,6 +213,19 @@ const EditLeadOppView = () => {
             console.error("Error updating opportunity details:", err);
             setMessage("Failed to update opportunity details");
             setTimeout(() => setMessage(""), 3000);
+        }
+    };
+
+    const handleUpdateAndCloseOpp = async (e) => {
+        setLoading(true);
+
+        try {
+            await handleOpportunitySubmit(e); // Call the original handleSubmit function
+            navigate("/a-customers"); // Redirect to leads list page after saving
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -252,11 +279,16 @@ const EditLeadOppView = () => {
                                                 </Button>
                                             ) : (
                                                 <>
+                                                    <Button variant="warning" type="submit">
+                                                        Update
+                                                    </Button>
                                                     <Button
                                                         variant="success"
-                                                        type="submit"
+                                                        type="button"
+                                                        onClick={handleUpdateAndClose}
+                                                        style={{ marginLeft: "10px" }}
                                                     >
-                                                        Update
+                                                        Update & Close
                                                     </Button>
                                                     <Button
                                                         variant="secondary"
@@ -269,6 +301,7 @@ const EditLeadOppView = () => {
                                                 </>
                                             )}
                                         </div>
+
                                         {loading ? (
                                             <p>Loading customer details...</p>
                                         ) : error ? (
@@ -386,7 +419,8 @@ const EditLeadOppView = () => {
                                                         <Accordion.Header>
                                                             <div className="d-flex justify-content-between align-items-center w-100">
                                                                 <span>
-                                                                    InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                                    InProgress to {trip.destination} on{" "}
+                                                                    {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
                                                                 </span>
                                                                 {!editOpportunityMode[index] ? (
                                                                     <Button
@@ -399,7 +433,7 @@ const EditLeadOppView = () => {
                                                                 ) : (
                                                                     <>
                                                                         <Button
-                                                                            variant="success"
+                                                                            variant="warning"
                                                                             size="sm"
                                                                             onClick={(e) => {
                                                                                 e.stopPropagation();
@@ -408,6 +442,17 @@ const EditLeadOppView = () => {
                                                                             style={{ marginRight: "5px" }}
                                                                         >
                                                                             Update
+                                                                        </Button>
+                                                                        <Button
+                                                                            variant="success"
+                                                                            size="sm"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleUpdateAndCloseOpp(index);
+                                                                            }}
+                                                                            style={{ marginRight: "5px" }}
+                                                                        >
+                                                                            Update & Close
                                                                         </Button>
                                                                         <Button
                                                                             variant="secondary"
@@ -422,6 +467,7 @@ const EditLeadOppView = () => {
                                                                     </>
                                                                 )}
                                                             </div>
+
                                                         </Accordion.Header>
                                                         <Accordion.Body>
                                                             <Row>
@@ -604,28 +650,28 @@ const EditLeadOppView = () => {
                                             <Form.Group>
                                                 <Form.Label>Comments</Form.Label>
                                                 <div className="s-Opp-Commentsection">
-                                                {travelOpportunity[activeKey]?.comments?.length > 0 ? (
-                                                    travelOpportunity[activeKey].comments.map((comment, index) => (
-                                                        <div key={index} className="comment" style={{ marginBottom: "10px" }}>
-                                                            <p>
-                                                                <strong>{comment.name}</strong> (
-                                                                {new Date(comment.timestamp).toLocaleString("en-IN", {
-                                                                    day: "2-digit",
-                                                                    month: "2-digit",
-                                                                    year: "numeric",
-                                                                    hour: "2-digit",
-                                                                    minute: "2-digit",
-                                                                    second: "2-digit",
-                                                                    hour12: true,
-                                                                })}
-                                                                )
-                                                            </p>
-                                                            <p>{comment.text}</p>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <p>No comments available</p>
-                                                )}
+                                                    {travelOpportunity[activeKey]?.comments?.length > 0 ? (
+                                                        travelOpportunity[activeKey].comments.map((comment, index) => (
+                                                            <div key={index} className="comment" style={{ marginBottom: "10px" }}>
+                                                                <p>
+                                                                    <strong>{comment.name}</strong> (
+                                                                    {new Date(comment.timestamp).toLocaleString("en-IN", {
+                                                                        day: "2-digit",
+                                                                        month: "2-digit",
+                                                                        year: "numeric",
+                                                                        hour: "2-digit",
+                                                                        minute: "2-digit",
+                                                                        second: "2-digit",
+                                                                        hour12: true,
+                                                                    })}
+                                                                    )
+                                                                </p>
+                                                                <p>{comment.text}</p>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p>No comments available</p>
+                                                    )}
                                                 </div>
                                             </Form.Group>
                                         </Col>

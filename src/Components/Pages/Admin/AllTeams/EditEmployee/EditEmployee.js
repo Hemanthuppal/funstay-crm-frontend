@@ -83,6 +83,12 @@ const EditEmployee = () => {
     }
   };
 
+  const handleSubmitAndClose = async (e) => {
+    await handleSubmit(e);
+    navigate("/a-allteams"); // Change to your actual employee list route
+  };
+  
+
   return (
     <div className="salesViewLeadsContainer">
       <Navbar onToggleSidebar={setCollapsed} />
@@ -202,9 +208,20 @@ const EditEmployee = () => {
               >
                 Back
               </button>
+
               <button className="btn btn-primary" type="submit" disabled={loading}>
                 {loading ? "Updating..." : "Update"}
               </button>
+
+              <button
+                className="btn btn-success"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmitAndClose}
+              >
+                {loading ? "Updating..." : "Update & Close"}
+              </button>
+
             </div>
           </form>
         </div>

@@ -9,21 +9,21 @@ import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 
 const DynamicForm = () => {
-   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
-    useEffect(() => {
-      // Get all country codes and their calling codes
-      const countries = getCountries();
-      const callingCodes = countries.map(
-        (country) => `+${getCountryCallingCode(country)}`
-      );
-      const uniqueCodes = [...new Set(callingCodes)]; // Remove duplicates
-  
-      // Sort numerically
-      uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
-  
-      setCountryCodeOptions(uniqueCodes);
-    }, []);
-  const {  userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
+  const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+  useEffect(() => {
+    // Get all country codes and their calling codes
+    const countries = getCountries();
+    const callingCodes = countries.map(
+      (country) => `+${getCountryCallingCode(country)}`
+    );
+    const uniqueCodes = [...new Set(callingCodes)]; // Remove duplicates
+
+    // Sort numerically
+    uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
+
+    setCountryCodeOptions(uniqueCodes);
+  }, []);
+  const { userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
@@ -43,7 +43,7 @@ const DynamicForm = () => {
     assignedSalesName: userName,
     assign_to_manager: assignManager,
     managerid: managerId,
-    employee_id:null
+    employee_id: null
   });
 
   console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
@@ -54,8 +54,8 @@ const DynamicForm = () => {
   const [phoneError, setPhoneError] = useState(""); // State for phone number error
   const [emailError, setEmailError] = useState("");
   const [error, setError] = useState(null);
-const [loading,setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -127,6 +127,19 @@ const [loading,setLoading] = useState(false);
       setLoading(false);
     }
   };
+  const handleSubmitAndClose = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true);
+
+    try {
+      await handleSubmit(e); // Call the original handleSubmit function
+      navigate("/View-lead"); // Redirect to leads list page after saving
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderForm = () => {
     const subDropdownOptions = {
@@ -154,6 +167,7 @@ const [loading,setLoading] = useState(false);
         setFormData({ ...formData, [name]: value, secondarysource: "" });
       }
     };
+
 
     return (
       <div className="addleads-form-grid">
@@ -193,65 +207,65 @@ const [loading,setLoading] = useState(false);
           </div>
         </div>
         <div className="addleads-input-group">
-      <label>
-        Phone Number<span style={{ color: "red" }}> *</span>
-      </label>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        {/* Country Code Dropdown */}
-        <select
-          name="country_code"
-          value={formData.country_code}
-          onChange={handleChange}
-          style={{
-            width: "80px",
-            marginRight: "10px",
-            padding: "5px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-        >
-          {countryCodeOptions.map((code) => (
-            <option key={code} value={code}>
-              {code}
-            </option>
-          ))}
-        </select>
+          <label>
+            Phone Number<span style={{ color: "red" }}> *</span>
+          </label>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            {/* Country Code Dropdown */}
+            <select
+              name="country_code"
+              value={formData.country_code}
+              onChange={handleChange}
+              style={{
+                width: "80px",
+                marginRight: "10px",
+                padding: "5px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+            >
+              {countryCodeOptions.map((code) => (
+                <option key={code} value={code}>
+                  {code}
+                </option>
+              ))}
+            </select>
 
-        {/* Phone Number Input */}
-        <input
-          type="text"
-          name="phone_number"
-          placeholder="Enter Phone Number"
-          value={formData.phone_number}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (/^\d*$/.test(value)) {
-              handleChange(e);
-            }
-          }}
-          onBlur={() => {
-            if (formData.phone_number.length !== 10) {
-              setPhoneError("Please enter a valid number.");
-            } else {
-              setPhoneError("");
-            }
-          }}
-          style={{
-            flex: 1,
-            padding: "5px",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
-          maxLength={10}
-          required
-        />
-      </div>
+            {/* Phone Number Input */}
+            <input
+              type="text"
+              name="phone_number"
+              placeholder="Enter Phone Number"
+              value={formData.phone_number}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (/^\d*$/.test(value)) {
+                  handleChange(e);
+                }
+              }}
+              onBlur={() => {
+                if (formData.phone_number.length !== 10) {
+                  setPhoneError("Please enter a valid number.");
+                } else {
+                  setPhoneError("");
+                }
+              }}
+              style={{
+                flex: 1,
+                padding: "5px",
+                border: "1px solid #ccc",
+                borderRadius: "4px",
+              }}
+              maxLength={10}
+              required
+            />
+          </div>
 
-      {/* Error Message */}
-      {phoneError && (
-        <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>
-      )}
-    </div>
+          {/* Error Message */}
+          {phoneError && (
+            <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>
+          )}
+        </div>
         <div className="addleads-input-group">
           <label>Primary Source</label>
           <select
@@ -371,10 +385,19 @@ const [loading,setLoading] = useState(false);
                 Back
               </button>
               <button className="btn btn-primary" type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Save"}
+              </button>
+              <button
+                className="btn btn-success"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmitAndClose} // Now this function exists!
+              >
+                {loading ? "Saving..." : "Save & Close"}
               </button>
             </div>
           </form>
+
         </div>
       </div>
     </div>

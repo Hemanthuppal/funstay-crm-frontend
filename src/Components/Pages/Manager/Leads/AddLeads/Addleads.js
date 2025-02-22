@@ -164,6 +164,19 @@ useEffect(() => {
     setLoading(false);
   }
   };
+  const handleSubmitAndClose = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true);
+
+    try {
+      await handleSubmit(e); // Call the original handleSubmit function
+      navigate("/m-view-leads"); // Redirect to leads list page after saving
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const renderForm = () => {
@@ -408,6 +421,14 @@ useEffect(() => {
               </button>
               <button className="btn btn-primary" type="submit" disabled={loading}>
               {loading ? "Saving..." : "Save"}
+              </button>
+              <button
+                className="btn btn-success"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmitAndClose} // Now this function exists!
+              >
+                {loading ? "Saving..." : "Save & Close"}
               </button>
             </div>
           </form>

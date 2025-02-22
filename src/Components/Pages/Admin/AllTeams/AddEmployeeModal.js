@@ -11,7 +11,7 @@ const AddEmployeeModal = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
-  const [message, setMessage] = useState(""); 
+  const [message, setMessage] = useState("");
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     mobile: "",
@@ -21,7 +21,7 @@ const AddEmployeeModal = () => {
     assignManager: "",
   });
 
-  const [managers, setManagers] = useState([]); 
+  const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -30,13 +30,13 @@ const AddEmployeeModal = () => {
       try {
         const response = await fetch(`${baseURL}/managers`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, 
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
         const data = await response.json();
 
         if (response.ok) {
-          setManagers(data.data || []); 
+          setManagers(data.data || []);
         } else {
           throw new Error(data.message || "Failed to fetch managers.");
         }
@@ -66,7 +66,7 @@ const AddEmployeeModal = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, 
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(newEmployee),
       });
@@ -78,7 +78,7 @@ const AddEmployeeModal = () => {
         throw new Error(data.message || "Failed to add employee.");
       }
 
-    
+
       setNewEmployee({
         name: "",
         mobile: "",
@@ -95,6 +95,10 @@ const AddEmployeeModal = () => {
     } finally {
       setLoading(false);
     }
+  };
+  const handleSubmitAndClose = async (e) => {
+    await handleSubmit(e);
+    navigate("/a-allteams"); // Change to your target route
   };
 
   return (
@@ -149,26 +153,26 @@ const AddEmployeeModal = () => {
                 />
               </div>
               <div className="addemployee-input-group">
-  <label>Password</label>
-  <div className="password-input-container">
-    <input
-      type={showPassword ? "text" : "password"} 
-      name="password"
-      placeholder="Enter Password"
-      value={newEmployee.password}
-      onChange={(e) =>
-        setNewEmployee({ ...newEmployee, password: e.target.value })
-      }
-      required
-    />
-    <span
-      className="password-eye-icon"
-      onClick={() => setShowPassword(!showPassword)}
-    >
-      {showPassword ? <FaEyeSlash /> : <FaEye />}
-    </span>
-  </div>
-</div>
+                <label>Password</label>
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Enter Password"
+                    value={newEmployee.password}
+                    onChange={(e) =>
+                      setNewEmployee({ ...newEmployee, password: e.target.value })
+                    }
+                    required
+                  />
+                  <span
+                    className="password-eye-icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
+              </div>
               <div className="addemployee-input-group">
                 <label>Role</label>
                 <select
@@ -220,6 +224,7 @@ const AddEmployeeModal = () => {
               >
                 Back
               </button>
+
               <button
                 className="btn btn-primary"
                 type="submit"
@@ -227,6 +232,16 @@ const AddEmployeeModal = () => {
               >
                 {loading ? "Submitting..." : "Submit"}
               </button>
+
+              <button
+                className="btn btn-success"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmitAndClose}
+              >
+                {loading ? "Submitting..." : "Submit & Close"}
+              </button>
+
             </div>
           </form>
         </div>

@@ -295,6 +295,21 @@ const EditOppLead = () => {
     }
   };
 
+  const [loading, setLoading] = useState(false);
+          const handleSubmitAndClose = async (e) => {
+            e.preventDefault(); // Prevent default form submission
+            setLoading(true);
+        
+            try {
+              await handleSubmit(e); // Call the original handleSubmit function
+              navigate("/potential-leads"); // Redirect to leads list page after saving
+            } catch (error) {
+              console.error("Error submitting form:", error);
+            } finally {
+              setLoading(false);
+            }
+          };
+
   // const [dropdownOptions] = useState({
   //   primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
   //   secondary: {
@@ -717,6 +732,14 @@ const EditOppLead = () => {
               </button>
               <button className="btn btn-primary" type="submit">
                 Submit
+              </button>
+              <button
+                className="btn btn-success"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmitAndClose}
+              >
+                {loading ? "Submiting..." : "Submit & Close"}
               </button>
             </div>
           </form>

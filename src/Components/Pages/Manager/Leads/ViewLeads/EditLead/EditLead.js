@@ -140,6 +140,20 @@ console.log("Fetched primarySource:", leadData.primarySource);
       setError("Failed to update data.");
     }
   };
+   const [loading, setLoading] = useState(false);
+    const handleSubmitAndClose = async (e) => {
+      e.preventDefault(); // Prevent default form submission
+      setLoading(true);
+  
+      try {
+        await handleFormSubmit(e); // Call the original handleSubmit function
+        navigate("/m-view-leads"); // Redirect to leads list page after saving
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   const [leadDropdownOptions] = useState({
     primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
@@ -393,6 +407,14 @@ console.log("Fetched primarySource:", leadData.primarySource);
                 <button className="btn btn-primary" type="submit">
                   Submit
                 </button>
+                <button
+                className="btn btn-success"
+                type="button"
+                disabled={loading}
+                onClick={handleSubmitAndClose}
+              >
+                {loading ? "Submiting..." : "Submit & Close"}
+              </button>
               </div>
             </Form>
           </div>

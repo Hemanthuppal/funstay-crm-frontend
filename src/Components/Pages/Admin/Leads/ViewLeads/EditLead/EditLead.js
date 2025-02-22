@@ -15,7 +15,7 @@ const EditOppLead = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
- 
+
 
   useEffect(() => {
     const countries = getCountries();
@@ -103,7 +103,7 @@ const EditOppLead = () => {
   };
 
   const handleFormSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     const leadData = {
       lead_type: formData.lead_type,
@@ -130,7 +130,7 @@ const EditOppLead = () => {
       await axios.put(`${baseURL}/api/update-lead-customer/${leadid}`, leadData);
       setMessage('Updated Successfully');
       setTimeout(() => setMessage(""), 3000);
-     
+
     } catch (error) {
       console.error("Error updating data:", error);
       setError("Failed to update data.");
@@ -148,6 +148,28 @@ const EditOppLead = () => {
     },
   });
 
+   const [loading, setLoading] = useState(true);
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      await axios.put(`${baseURL}/api/update-lead-customer/${leadid}`, formData);
+      setMessage("Updated Successfully");
+      setTimeout(() => {
+        setMessage("");
+        navigate("/a-view-lead"); // Redirect after success
+      }, 3000);
+    } catch (error) {
+      console.error("Error updating lead:", error);
+      setError("Failed to update lead. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="salesViewLeadsContainer">
       <Navbar onToggleSidebar={setCollapsed} />
@@ -157,13 +179,13 @@ const EditOppLead = () => {
 
           <div className="editlead-form">
             <Form className="s-edit-opp-lead-FormLable" onSubmit={handleFormSubmit}>
-           
+
               <h5>Lead Details</h5>
               {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
               {error && <div className="alert alert-danger">{error}</div>} {/* Display error message */}
 
               <Row>
-            
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>
@@ -176,58 +198,58 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>
-      Phone Number
-    </Form.Label>
-    <div style={{ display: "flex", alignItems: "center" }}>
-     
-      <Form.Select
-        name="country_code"
-        value={formData.country_code || "+91"} 
-        onChange={handleChange}
-        style={{
-          width: "80px",
-          marginRight: "10px",
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      >
-        {countryCodeOptions.map((code) => (
-          <option key={code} value={code}>
-            {code}
-          </option>
-        ))}
-      </Form.Select>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Phone Number
+                    </Form.Label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
 
-    
-      <Form.Control
-        type="text"
-        name="phone_number"
-        placeholder="Enter Phone Number"
-        value={formData.phone_number || ""} 
-        onChange={(e) => {
-          const value = e.target.value;
-          if (/^\d*$/.test(value)) {
-            handleChange(e);
-          }
-        }}
-      
-        style={{
-          flex: 1,
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-        required
-      />
-    </div>
+                      <Form.Select
+                        name="country_code"
+                        value={formData.country_code || "+91"}
+                        onChange={handleChange}
+                        style={{
+                          width: "80px",
+                          marginRight: "10px",
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {countryCodeOptions.map((code) => (
+                          <option key={code} value={code}>
+                            {code}
+                          </option>
+                        ))}
+                      </Form.Select>
 
-    
-   
-  </Form.Group>
-</Col>
+
+                      <Form.Control
+                        type="text"
+                        name="phone_number"
+                        placeholder="Enter Phone Number"
+                        value={formData.phone_number || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleChange(e);
+                          }
+                        }}
+
+                        style={{
+                          flex: 1,
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                        required
+                      />
+                    </div>
+
+
+
+                  </Form.Group>
+                </Col>
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
@@ -281,7 +303,7 @@ const EditOppLead = () => {
                     </Form.Group>
                   </Col>
                 )}
-                 <Col md={4}>
+                <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Origin City</Form.Label>
                     <Form.Control
@@ -303,7 +325,7 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-               
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Secondary Email</Form.Label>
@@ -326,50 +348,50 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-               
-               <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Primary Status</Form.Label>
-    <Form.Select
-      name="primaryStatus"
-      value={formData.primaryStatus}
-      onChange={handleChange}
-    >
-      {!formData.primaryStatus && <option value="">Select Status</option>}
-      {leadDropdownOptions.primary.map((status) => (
-        <option key={status} value={status}>
-          {status}
-        </option>
-      ))}
-    </Form.Select>
-  </Form.Group>
-</Col>
 
-<Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Secondary Status</Form.Label>
-    <Form.Select
-      name="secondaryStatus"
-      value={formData.secondaryStatus}
-      onChange={handleChange}
-      disabled={
-        !formData.primaryStatus ||
-        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus)
-      }
-    >
-      {!formData.secondaryStatus && <option value="">Select Status</option>}
-      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
-        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
-          <option key={status} value={status}>
-            {status}
-          </option>
-        ))
-      ) : (
-        <option value="" disabled>No options available</option>
-      )}
-    </Form.Select>
-  </Form.Group>
-</Col>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Primary Status</Form.Label>
+                    <Form.Select
+                      name="primaryStatus"
+                      value={formData.primaryStatus}
+                      onChange={handleChange}
+                    >
+                      {!formData.primaryStatus && <option value="">Select Status</option>}
+                      {leadDropdownOptions.primary.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Secondary Status</Form.Label>
+                    <Form.Select
+                      name="secondaryStatus"
+                      value={formData.secondaryStatus}
+                      onChange={handleChange}
+                      disabled={
+                        !formData.primaryStatus ||
+                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus)
+                      }
+                    >
+                      {!formData.secondaryStatus && <option value="">Select Status</option>}
+                      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
+                        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No options available</option>
+                      )}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
 
                 <Col md={12}>
                   <Form.Group className="mb-3">
@@ -390,7 +412,15 @@ const EditOppLead = () => {
                 <button className="btn btn-primary" type="submit">
                   Submit
                 </button>
+                <button
+                  className="btn btn-success"
+                  type="button"
+                  onClick={(e) => handleEditSubmit(e, "submitAndClose")}
+                >
+                  Submit & Close
+                </button>
               </div>
+
             </Form>
           </div>
         </div>

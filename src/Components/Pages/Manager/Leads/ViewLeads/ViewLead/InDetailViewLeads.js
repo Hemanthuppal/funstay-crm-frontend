@@ -121,16 +121,24 @@ const InDetailViewLeads = () => {
                     </div>
 
                     <div className="mb-3 d-flex flex-wrap">
-                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-                        Phone Number:
-                      </span>
-                      <span>{formData.country_code}{formData.phone_number}</span>
-                      <FaCopy
-                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                        onClick={() => copyToClipboard(`${formData.country_code}${formData.phone_number}`)}
-                        title="Copy Phone Number"
-                      />
-                    </div>
+  <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+    Phone Number:
+  </span>
+  <a 
+    href={`https://wa.me/${formData.country_code}${formData.phone_number}`} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{ textDecoration: "none", color: "blue" }}
+  >
+    {formData.country_code}{formData.phone_number}
+  </a>
+  <FaCopy
+    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+    onClick={() => copyToClipboard(`${formData.country_code}${formData.phone_number}`)}
+    title="Copy Phone Number"
+  />
+</div>
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Primary Source:

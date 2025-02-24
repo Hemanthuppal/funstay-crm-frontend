@@ -61,7 +61,7 @@ const SalesCustomer = () => {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert("Failed to fetch data.");
+        setMessage("Failed to fetch data.");
       }
     };
 

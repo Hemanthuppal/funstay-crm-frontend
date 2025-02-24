@@ -50,18 +50,20 @@ const AddEmployeeModal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     const { name, mobile, email, password, role, assignManager } = newEmployee;
-
-    if (!name || !mobile || !email || !password || !role) {
-      alert("Please fill in all the fields.");
-      return;
+    
+    // Validate required fields
+    if (!name || !mobile || !email || !password || !role || (role === "employee" && !assignManager)) {
+      setError("All fields are required."); // Set error message for missing fields
+      setTimeout(() => setError(""), 1000);
+      return false; // Prevent form submission
     }
-
+  
     try {
       setLoading(true);
       setError(null);
-
+  
       const response = await fetch(`${baseURL}/register`, {
         method: "POST",
         headers: {
@@ -70,15 +72,14 @@ const AddEmployeeModal = () => {
         },
         body: JSON.stringify(newEmployee),
       });
-
+  
       const data = await response.json();
-      console.log(JSON.stringify(newEmployee));
-
+  
       if (!response.ok) {
         throw new Error(data.message || "Failed to add employee.");
       }
-
-
+  
+      // Reset form on successful submission
       setNewEmployee({
         name: "",
         mobile: "",
@@ -87,19 +88,26 @@ const AddEmployeeModal = () => {
         role: "",
         assignManager: "",
       });
-      setMessage("Employee added successfully!");
-      setTimeout(() => setMessage(""), 3000);
+  
+      setMessage("Employee added successfully.");
+      setTimeout(() => setMessage(""), 1000); // Show success message
+      return true; // Indicate success
     } catch (error) {
       setError(error.message);
-      setTimeout(() => setMessage(""), 3000);
+      return false; // Indicate failure
     } finally {
       setLoading(false);
     }
   };
+  
   const handleSubmitAndClose = async (e) => {
-    await handleSubmit(e);
-    navigate("/a-allteams"); // Change to your target route
+    const isSuccess = await handleSubmit(e);
+    if (isSuccess) {
+      navigate("/a-allteams"); // Only navigate if submission was successful
+    }
   };
+  
+  
 
   return (
     <div className="salesViewLeadsContainer">
@@ -114,7 +122,7 @@ const AddEmployeeModal = () => {
           <form onSubmit={handleSubmit}>
             <div className="addemployee-form-grid">
               <div className="addemployee-input-group">
-                <label>Name</label>
+                <label>Name<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
                   name="name"
@@ -127,7 +135,7 @@ const AddEmployeeModal = () => {
                 />
               </div>
               <div className="addemployee-input-group">
-                <label>Mobile</label>
+                <label>Mobile<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
                   name="mobile"
@@ -140,7 +148,7 @@ const AddEmployeeModal = () => {
                 />
               </div>
               <div className="addemployee-input-group">
-                <label>Email</label>
+                <label>Email<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="email"
                   name="email"
@@ -153,7 +161,7 @@ const AddEmployeeModal = () => {
                 />
               </div>
               <div className="addemployee-input-group">
-                <label>Password</label>
+                <label>Password<span style={{ color: "red" }}> *</span></label>
                 <div className="password-input-container">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -174,7 +182,7 @@ const AddEmployeeModal = () => {
                 </div>
               </div>
               <div className="addemployee-input-group">
-                <label>Role</label>
+                <label>Role<span style={{ color: "red" }}> *</span></label>
                 <select
                   name="role"
                   value={newEmployee.role}
@@ -194,7 +202,7 @@ const AddEmployeeModal = () => {
               </div>
               {newEmployee.role === "employee" && (
                 <div className="addemployee-input-group">
-                  <label>Assign Manager</label>
+                  <label>Assign Manager<span style={{ color: "red" }}> *</span></label>
                   <select
                     name="assignManager"
                     value={newEmployee.assignManager}

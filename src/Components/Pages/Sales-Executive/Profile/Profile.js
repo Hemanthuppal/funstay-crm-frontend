@@ -54,20 +54,22 @@ const ProfileForm = () => {
     }
   };
 
-  const handleSubmit = async (navigateAfterUpdate = false) => {
+  const handleSubmit = async (e, navigateToProfile = false) => {
+    e.preventDefault();
+
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("email", formData.email);
+    data.append("mobile", formData.mobile);
+    data.append("role", formData.role);
+    data.append("dob", formData.dob);
+    data.append("qualification", formData.qualification);
+    data.append("address", formData.address);
+    if (formData.image) {
+      data.append("image", formData.image);
+    }
+
     try {
-      const data = new FormData();
-      data.append("name", formData.name);
-      data.append("email", formData.email);
-      data.append("mobile", formData.mobile);
-      data.append("role", formData.role);
-      data.append("dob", formData.dob);
-      data.append("qualification", formData.qualification);
-      data.append("address", formData.address);
-      if (formData.image) {
-        data.append("image", formData.image);
-      }
-  
       const response = await fetch(`${baseURL}/employee/update/${userId}`, {
         method: "PUT",
         headers: {
@@ -75,26 +77,25 @@ const ProfileForm = () => {
         },
         body: data,
       });
-  
+
       const result = await response.json();
       if (response.ok) {
         setMessage("Profile updated successfully!");
         setTimeout(() => setMessage(""), 3000);
         setIsEditing(false);
-        
-        // Update UI immediately
+
+        // Update UI with new data
         setFormData((prevData) => ({
           ...prevData,
           ...result,
           imageUrl: result.image || prevData.imageUrl,
         }));
-  
-        // Navigate if Update & Close was clicked
-        if (navigateAfterUpdate) {
-          navigate("/s-dashboard"); // Change to your target page
-        } else {
-          window.location.reload();
+
+        // If "Update & Close" was clicked, navigate to another page
+        if (navigateToProfile) {
+          setTimeout(() => navigate("/s-dashboard"), 1000);
         }
+
       } else {
         setMessage(result.message || "Error updating profile");
         setTimeout(() => setMessage(""), 3000);
@@ -105,7 +106,7 @@ const ProfileForm = () => {
       setTimeout(() => setMessage(""), 3000);
     }
   };
-  
+
 
 
   return (
@@ -219,19 +220,25 @@ const ProfileForm = () => {
             </div>
 
             <div className="profile-form-footer">
+              {/* Back Button */}
               <button type="button" className="profile-btn profile-btn-secondary" onClick={() => navigate(-1)}>
                 Back
               </button>
 
               {isEditing ? (
                 <>
+                  {/* Cancel Button */}
                   <button type="button" className="profile-btn profile-btn-secondary" onClick={() => setIsEditing(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="profile-btn profile-btn-primary" onClick={() => handleSubmit(true)}>
+
+                  {/* Update Button */}
+                  <button type="submit" className="profile-btn profile-btn-primary" onClick={(e) => handleSubmit(e, false)}>
                     Update
                   </button>
-                  <button type="button" className="profile-btn profile-btn-primary" onClick={() => handleSubmit(true)}>
+
+                  {/* Update & Close Button */}
+                  <button type="submit" className="btn btn-success" onClick={(e) => handleSubmit(e, true)}>
                     Update & Close
                   </button>
                 </>
@@ -248,5 +255,4 @@ const ProfileForm = () => {
     </div>
   );
 };
-
 export default ProfileForm;

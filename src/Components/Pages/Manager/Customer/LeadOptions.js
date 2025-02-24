@@ -4,7 +4,7 @@ import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
 import "../Potentialleads/LeadDetails.css";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
-import { FaPhone, FaEnvelope,FaCopy } from "react-icons/fa";
+import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
 
 import { baseURL } from "../../../Apiservices/Api";
 
@@ -21,15 +21,15 @@ const LeadOppView = () => {
     const navigate = useNavigate();
     const customerId = location.state?.id || null;
     console.log("customerId=", customerId);
-    const [message,setMessage] = useState('');
+    const [message, setMessage] = useState('');
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
             setMessage("Copied to clipboard!");
             setTimeout(() => setMessage(""), 1000); // Optional: Show a message
         }).catch(err => {
-          console.error('Failed to copy: ', err);
+            console.error('Failed to copy: ', err);
         });
-      };
+    };
 
     const fetchCustomerDetails = async (id) => {
         try {
@@ -94,7 +94,7 @@ const LeadOppView = () => {
                             <h2> Customer Details</h2>
                         </Card.Header>
                         <Card.Body>
-                        {message && <div className="alert alert-info">{message}</div>} 
+                            {message && <div className="alert alert-info">{message}</div>}
                             <Row>
 
                                 <Col md={6}>
@@ -115,27 +115,35 @@ const LeadOppView = () => {
                                             </Row>
                                             <Row>
                                                 <Col md={6}>
-                                                 <p>
-                                                   <strong><FaPhone /> Phone:</strong> {customer.country_code || "+91"}&nbsp;{customer.phone_number || "N/A"}
-                                                   <FaCopy
-                                                     style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                                                     onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
-                                                     title="Copy Phone Number"
-                                                   />
-                                                 </p>
-                                               </Col>
-                                               <Col md={6}>
-                                                       <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
-                                                         <p style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexGrow: 1 }}>
-                                                           <strong><FaEnvelope /> Email:</strong> {customer.email || "N/A"}
-                                                         </p>
-                                                         <FaCopy
-                                                           style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                                                           onClick={() => copyToClipboard(customer.email || "")}
-                                                           title="Copy Email"
-                                                         />
-                                                       </div>
-                                                     </Col>
+                                                    <p>
+                                                    <strong><FaPhone /> Phone:</strong> 
+                                                    <a 
+                                                      href={`https://wa.me/${customer.country_code || "91"}${customer.phone_number || ""}`} 
+                                                      target="_blank" 
+                                                      rel="noopener noreferrer"
+                                                      style={{ textDecoration: "none", color: "blue",  marginLeft: "5px" }}
+                                                    >
+                                                      {customer.country_code || "+91"} {customer.phone_number || "N/A"}
+                                                    </a>
+                                                    <FaCopy
+                                                      style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                                      onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
+                                                      title="Copy Phone Number"
+                                                    />
+                                                  </p>
+                                                </Col>
+                                                <Col md={6}>
+                                                    <div style={{ display: "flex", alignItems: "center", overflow: "hidden" }}>
+                                                        <p style={{ margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flexGrow: 1 }}>
+                                                            <strong><FaEnvelope /> Email:</strong> {customer.email || "N/A"}
+                                                        </p>
+                                                        <FaCopy
+                                                            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                                            onClick={() => copyToClipboard(customer.email || "")}
+                                                            title="Copy Email"
+                                                        />
+                                                    </div>
+                                                </Col>
                                             </Row>
                                         </>
                                     ) : (
@@ -151,50 +159,50 @@ const LeadOppView = () => {
                                             onSelect={(key) => setActiveKey(key)}
                                         >
                                             {travelOpportunity.map((trip, index) => (
-                                                    <Accordion.Item eventKey={index.toString()} key={index}>
-                                                                                                                                                       <Accordion.Header>
-                                                                                                                                                               InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
-                                                                                                                                                       </Accordion.Header>
-                                                                                                                                                       <Accordion.Body>
-                                                                                                                                                               <Row>
-                                                                                                                                                               <Col md={6}><p><strong>Origin City:</strong> {trip.origincity}</p></Col>
-                                                                                                                                                                       <Col md={6}><p><strong>Destination:</strong> {trip.destination}</p></Col>
-                                                                                                                                                                      
-                                                                                                                                                               </Row>
-                                                                                                                                                               <Row>
-                                                                                                                                                               <Col md={6}><p><strong>Start Date:</strong> {new Date(trip.start_date).toLocaleDateString("en-GB")}</p></Col>
-                                                                                                                                                                       <Col md={6}><p><strong>End Date:</strong> {new Date(trip.end_date).toLocaleDateString("en-GB")}</p></Col>
-                                                                                                                                                                    
-                                                                                                                                                               </Row>
-                                                                                                                                                               <Row>
-                                                                                                                                                               <Col md={6}><p><strong>Duration:</strong> {trip.duration}</p></Col>
-                                                                                                                                                                       <Col md={6}><p><strong>Adults:</strong> {trip.adults_count}</p></Col>
-                                                                                                                                                                      
-                                                                                                                                                               </Row>
-                                                                                                                                                               <Row>
-                                                                                                                                                               <Col md={6}><p><strong>Children:</strong> {trip.children_count}</p></Col>
-                                                                                                                                                                       <Col md={6}><p><strong>Child Age:</strong> {trip.child_ages || "N/A"} Years</p></Col>
-                                                                                                                                                                       
-                                                                                                                                                               </Row>
-                                                                                                                                                               <Row>
-                                                                                                                                                               <Col md={6}><p><strong>Approx Budget:</strong> ₹{trip.approx_budget}</p></Col>
-                                                                                                                                                                       <Col md={6}>
-                                               
-                                                                                                                                                                               <p>
-                                                                                                                                                                                       <strong>Reminder Setting:</strong> {new Date(trip.reminder_setting).toLocaleString("en-IN", {
-                                                                                                                                                                                               day: "2-digit",
-                                                                                                                                                                                               month: "2-digit",
-                                                                                                                                                                                               year: "numeric",
-                                                                                                                                                                                               hour: "2-digit",
-                                                                                                                                                                                               minute: "2-digit",
-                                                                                                                                                                                               second: "2-digit",
-                                                                                                                                                                                               hour12: true
-                                                                                                                                                                                       })}
-                                                                                                                                                                               </p>
-                                                                                                                                                                       </Col>
-                                                                                                                                                               </Row>
-                                                                                                                                                       </Accordion.Body>
-                                                                                                                                               </Accordion.Item>
+                                                <Accordion.Item eventKey={index.toString()} key={index}>
+                                                    <Accordion.Header>
+                                                        InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                    </Accordion.Header>
+                                                    <Accordion.Body>
+                                                        <Row>
+                                                            <Col md={6}><p><strong>Origin City:</strong> {trip.origincity}</p></Col>
+                                                            <Col md={6}><p><strong>Destination:</strong> {trip.destination}</p></Col>
+
+                                                        </Row>
+                                                        <Row>
+                                                            <Col md={6}><p><strong>Start Date:</strong> {new Date(trip.start_date).toLocaleDateString("en-GB")}</p></Col>
+                                                            <Col md={6}><p><strong>End Date:</strong> {new Date(trip.end_date).toLocaleDateString("en-GB")}</p></Col>
+
+                                                        </Row>
+                                                        <Row>
+                                                            <Col md={6}><p><strong>Duration:</strong> {trip.duration}</p></Col>
+                                                            <Col md={6}><p><strong>Adults:</strong> {trip.adults_count}</p></Col>
+
+                                                        </Row>
+                                                        <Row>
+                                                            <Col md={6}><p><strong>Children:</strong> {trip.children_count}</p></Col>
+                                                            <Col md={6}><p><strong>Child Age:</strong> {trip.child_ages || "N/A"} Years</p></Col>
+
+                                                        </Row>
+                                                        <Row>
+                                                            <Col md={6}><p><strong>Approx Budget:</strong> &nbsp;Rs {trip.approx_budget}</p></Col>
+                                                            <Col md={6}>
+
+                                                                <p>
+                                                                    <strong>Reminder Setting:</strong> {new Date(trip.reminder_setting).toLocaleString("en-IN", {
+                                                                        day: "2-digit",
+                                                                        month: "2-digit",
+                                                                        year: "numeric",
+                                                                        hour: "2-digit",
+                                                                        minute: "2-digit",
+                                                                        second: "2-digit",
+                                                                        hour12: true
+                                                                    })}
+                                                                </p>
+                                                            </Col>
+                                                        </Row>
+                                                    </Accordion.Body>
+                                                </Accordion.Item>
                                             ))}
                                         </Accordion>
                                     ) : (

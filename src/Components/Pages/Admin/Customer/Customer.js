@@ -47,7 +47,7 @@ const AdminCustomer = () => {
         }
       } catch (error) {
         console.error("Error fetching customers:", error);
-        alert("Failed to fetch customers.");
+        setMessage("Failed to fetch customers.");
       }
     };
 

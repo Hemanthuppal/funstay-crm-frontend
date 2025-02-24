@@ -99,13 +99,14 @@ const ViewLeads = () => {
   };
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk","Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
       Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      "Plan Cancelled": [],
     },
   };
 

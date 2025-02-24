@@ -12,15 +12,15 @@ const LeadOppView = () => {
     const location = useLocation();
     const { leadid } = location.state;
     const navigate = useNavigate();
-    const [message,setMessage] = useState('');
+    const [message, setMessage] = useState('');
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
-          setMessage("Copied to clipboard!");
-          setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
+            setMessage("Copied to clipboard!");
+            setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
         }).catch(err => {
-          console.error('Failed to copy: ', err);
+            console.error('Failed to copy: ', err);
         });
-      };
+    };
 
     useEffect(() => {
         const fetchLeadDetails = async () => {
@@ -63,7 +63,7 @@ const LeadOppView = () => {
                             <h2> Customer and Opportunity Details</h2>
                         </Card.Header>
                         <Card.Body>
-                        {message && <div className="alert alert-info">{message}</div>}
+                            {message && <div className="alert alert-info">{message}</div>}
                             <Row>
                                 {/* Customer Details Section */}
                                 <Col md={6}>
@@ -77,24 +77,32 @@ const LeadOppView = () => {
   </>
 )} */}
 
-<p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
+                                    <p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
+                                  <p>
+                                    <strong>Phone Number:</strong> 
+                                    <a 
+                                      href={`https://wa.me/${lead.lead.country_code}${lead.lead.phone_number}`} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      style={{ textDecoration: "none", color: "blue",  marginLeft: "5px" }}
+                                    >
+                                      {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
+                                    </a>
+                                    <FaCopy
+                                      style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                      onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
+                                      title="Copy Phone Number"
+                                    />
+                                  </p>
                                     <p>
-  <strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
-    title="Copy Phone Number"
-  />
-</p>
-<p>
-  <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(lead.lead.email)}
-    title="Copy Email"
-  />
-</p>
+                                        <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
+                                        <FaCopy
+                                            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                            onClick={() => copyToClipboard(lead.lead.email)}
+                                            title="Copy Email"
+                                        />
+                                    </p>
                                     <p><strong>Primary Source:</strong> {lead.lead.primarySource || 'N/A'}</p>
                                     <p><strong>Secondary Source:</strong> {lead.lead.secondarysource || 'N/A'}</p>
                                     <p><strong>Primary Status:</strong> {lead.lead.opportunity_status1 || 'N/A'}</p>
@@ -102,11 +110,11 @@ const LeadOppView = () => {
                                     <p><strong>Travel Type:</strong> {lead.lead.travel_type || 'N/A'}</p>
                                     <p><strong>Channel:</strong> {lead.lead.channel || 'N/A'}</p>
                                     <hr />
-                                    
+
                                     <h5>Opportunity Details</h5>
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
-                                        <p><strong>Origin City:</strong> {lead.travelOpportunities[0].origincity || 'N/A'}</p>
+                                            <p><strong>Origin City:</strong> {lead.travelOpportunities[0].origincity || 'N/A'}</p>
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
                                             <p>
                                                 <strong>Start Date:</strong>{" "}
@@ -129,10 +137,10 @@ const LeadOppView = () => {
                                             <p><strong>Number of Adults:</strong> {lead.travelOpportunities[0].adults_count || 'N/A'}</p>
                                             <p><strong>Number of Children:</strong> {lead.travelOpportunities[0].children_count || 'N/A'}</p>
                                             <p><strong>Child Age:</strong> {lead.travelOpportunities[0].child_ages || 'N/A'}</p>
-                                            <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
+                                            <p><strong>Approx Budget:</strong>&nbsp;Rs  {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
                                             {/* <p><strong>Notes:</strong> {lead.travelOpportunities[0].notes || 'N/A'}</p> */}
                                             <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
-                                       
+
                                             <p>
                                                 <strong>Created Date:</strong>{" "}
                                                 {lead.travelOpportunities[0].created_at
@@ -149,12 +157,12 @@ const LeadOppView = () => {
                                     <h5>Additional Details</h5>
                                     <p><strong>Notes:</strong></p>
                                     <div className="s-Opp-Commentsection">
-                                    {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
-                                         <>
-                                         <p> {lead.travelOpportunities[0].notes || 'N/A'}</p>
-                                         </>
+                                        {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                            <>
+                                                <p> {lead.travelOpportunities[0].notes || 'N/A'}</p>
+                                            </>
                                         )}
-                                        </div>
+                                    </div>
                                     <p><strong>Comments:</strong></p>
                                     <div className="s-Opp-Commentsection">
                                         {sortedComments.length > 0 ? (

@@ -105,6 +105,8 @@ const CommentsPage = () => {
             <Form.Group>
               <Form.Label>Add a New Comment</Form.Label>
               <Form.Control
+           as ="textarea"
+                  rows={4}
                 type="text"
                 placeholder="Write your comment here..."
                 value={newComment}

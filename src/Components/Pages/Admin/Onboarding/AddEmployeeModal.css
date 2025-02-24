@@ -1,4 +1,4 @@
-.addemployee-form-container {
+/* .addemployee-form-container {
     width: 100%;
     margin: 20px auto;
     background: white;
@@ -142,12 +142,7 @@
     color: red;
   }
   
-  /* .form-control,
-  .form-select {
-    font-size: 14px;
-    padding: 0.5rem;
-  }
-   */
+ 
   .address-type-toggle {
     background-color: #f8f9fa;
     padding: 10px;
@@ -192,4 +187,4 @@
       padding: 8px 12px;
       font-size: 14px;
     }
-  }
+  } */

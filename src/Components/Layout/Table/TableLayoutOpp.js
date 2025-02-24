@@ -109,7 +109,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
     {
       columns,
       data: filteredData,
-      initialState: {  pageIndex: 0, pageSize: 5, globalFilter: initialSearchValue  },
+      initialState: {  pageIndex: 0, pageSize: 20, globalFilter: initialSearchValue  },
  // Set initial global filter
     },
     useGlobalFilter,
@@ -129,12 +129,13 @@ export default function DataTable({ columns, data, initialSearchValue }) {
             onChange={(e) => setPageSize(Number(e.target.value))}
            // Optional: Adjust width
           >
-            {[5, 10, 20].map((size) => (
+            {[20,50,100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>
             ))}
           </select>
+          {/* <span className="fw-bold">Total Records: {filteredData.length}</span> */}
         </div>
 
         {/* Global Search Filter */}

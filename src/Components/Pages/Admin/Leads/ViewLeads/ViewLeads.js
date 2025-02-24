@@ -73,13 +73,14 @@ const AdminViewLeads = () => {
 
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk","Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
       Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      "Plan Cancelled": [],
     },
   };
 
@@ -205,7 +206,7 @@ const AdminViewLeads = () => {
           )
         );
       } else {
-        alert(data.message);
+        setMessage(data.message);
       }
     } catch (error) {
       console.error('Error updating assignee:', error);
@@ -307,7 +308,8 @@ const AdminViewLeads = () => {
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
 
           return (
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center"
+            >
               <select
                 value={primaryStatus}
                 onChange={(e) =>

@@ -69,7 +69,7 @@
   transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-.Admin-myteam .collapsed {
+.Admin-myteam.collapsed {
   margin-left: 50px;
   width: calc(100% - 50px); 
 }

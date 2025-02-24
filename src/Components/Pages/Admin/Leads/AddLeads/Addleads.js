@@ -49,6 +49,7 @@ const DynamicForm = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const nameInputRef = useRef(null);
+  const [nameError, setNameError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [error, setError] = useState(null);
@@ -109,16 +110,25 @@ const DynamicForm = () => {
     setLoading(true);
     setMessage("");
 
-    // Validate phone number
-    if (formData.phone_number.length !== 10) {
-      setPhoneError("Phone number must be exactly 10 digits.");
+    // Validate name (Required)
+    if (!formData.name.trim()) {
+      setNameError("Name is required.");
       setLoading(false);
       return;
     }
 
+   
+
     // Validate email
     if (!validateEmail(formData.email)) {
       setEmailError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+     // Validate phone number
+     if (formData.phone_number.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits.");
       setLoading(false);
       return;
     }
@@ -168,6 +178,7 @@ const DynamicForm = () => {
 
 
 
+
   const renderForm = () => {
     const subDropdownOptions = {
       Referral: ["Grade 3", "Grade 2", "Grade 1"],
@@ -199,7 +210,9 @@ const DynamicForm = () => {
     return (
       <div className="addleads-form-grid">
         <div className="addleads-input-group">
-          <label>Name<span style={{ color: "red" }}> *</span></label>
+          <label>
+            Name<span style={{ color: "red" }}> *</span>
+          </label>
           <input
             type="text"
             name="name"
@@ -209,8 +222,18 @@ const DynamicForm = () => {
             ref={nameInputRef}
             required
             autoFocus
+            onBlur={() => {
+              if (!formData.name.trim()) {
+                setNameError("Please enter a valid name.");
+              } else {
+                setNameError("");
+              }
+            }}
+            className={nameError ? "error-input" : ""} // Add class if error exists
           />
+          {nameError && <span style={{ color: "red", fontSize: "12px" }}>{nameError}</span>}
         </div>
+
         <div className="addleads-input-group">
           <label>Email<span style={{ color: "red" }}> *</span></label>
           <div style={{ display: "flex", flexDirection: "column" }}>

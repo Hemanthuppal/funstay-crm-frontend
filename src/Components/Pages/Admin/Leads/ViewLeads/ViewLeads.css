@@ -25,7 +25,7 @@
   transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-.admin-ViewLead .collapsed {
+.admin-ViewLead.collapsed {
   margin-left: 50px; 
   width: calc(100% - 50px);
 }

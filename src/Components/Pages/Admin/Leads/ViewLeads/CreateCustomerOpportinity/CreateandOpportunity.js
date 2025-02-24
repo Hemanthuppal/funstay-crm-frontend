@@ -126,7 +126,8 @@ const CreateCustomerOpportunity = () => {
     setError(null);
   
     if (!formData.origincity || !formData.destination || !startDate || !endDate) {
-      setMessage("All required fields must be filled in.");
+      setMessage(" Required fields must be filled in.");
+      setTimeout(() => setMessage(""), 3000);
       setLoading(false);
       return false;
     }
@@ -157,7 +158,7 @@ const CreateCustomerOpportunity = () => {
         setTimeout(() => setMessage(""), 3000);
   
         if (!isSaveAndClose) {
-          navigate("/a-view-lead"); // Default navigation
+          navigate("/a-potential-leads"); // Default navigation
         }
   
         return true; // Success
@@ -506,25 +507,25 @@ const CreateCustomerOpportunity = () => {
               }}
               disabled={loading}
             >
-              {loading ? "Saving..." : "Save"}
+              {loading ? "Saving..." : "Save & Close"}
             </button>
 
             {/* Save & Close Button */}
-            <button
+            {/* <button
               className="btn btn-success"
               onClick={async () => {
                 if (activeTab === "customer") {
-                  const success = await handleSubmitCustomer(true); // Pass true for Save & Close
+                  const success = await handleSubmitCustomer(true); 
                   if (success) navigate("/a-view-lead");
                 } else {
                   const success = await handleSubmitOpportunity(true);
-                  if (success) navigate("/a-view-lead");
+                  if (success) navigate("/a-potential-leads");
                 }
               }}
               disabled={loading}
             >
               {loading ? "Saving..." : "Save & Close"}
-            </button>
+            </button> */}
           </div>
 
         </div>

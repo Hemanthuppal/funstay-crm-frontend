@@ -14,7 +14,7 @@ const CreateCustomerOpportunity = () => {
   const [endDate, setEndDate] = useState("");
   const [duration, setDuration] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
- 
+
 
   useEffect(() => {
     const countries = getCountries();
@@ -111,12 +111,12 @@ const CreateCustomerOpportunity = () => {
       if (response.status === 200) {
         setMessage("Customer data submitted successfully!");
         setTimeout(() => setMessage(""), 3000);
-        
-        if(!isSaveAndClose){
-        setActiveTab("opportunity"); // Switch to the "opportunity" tab after submission
+
+        if (!isSaveAndClose) {
+          setActiveTab("opportunity"); // Switch to the "opportunity" tab after submission
+        }
+        return true; // Success
       }
-      return true; // Success
-    }
     } catch (err) {
       console.error("Error updating customer and lead data:", err);
       setError("Error updating customer and lead data.");
@@ -131,8 +131,9 @@ const CreateCustomerOpportunity = () => {
     setLoading(true);
     setError(null);
 
-    if (!formData.origincity ||!formData.destination || !startDate || !endDate ) {
-      setMessage("All required fields must be filled in.");
+    if (!formData.origincity || !formData.destination || !startDate || !endDate) {
+      setMessage(" Required fields must be filled in.");
+      setTimeout(() => setMessage(""), 3000);
       setLoading(false);
       return;
     }
@@ -162,11 +163,11 @@ const CreateCustomerOpportunity = () => {
         setTimeout(() => setMessage(""), 3000);
 
         if (!isSaveAndClose) {
-          navigate("/view-leads"); // Default navigation
+          navigate("/potential-leads"); // Default navigation
         }
-  
+
         return true; // Success
-        
+
       }
     } catch (err) {
       console.error("Error creating opportunity:", err);
@@ -187,13 +188,14 @@ const CreateCustomerOpportunity = () => {
         setLeadData(response.data);
 
         // Pre-fill destination if available in lead data
-       
-          setFormData((prev) => ({ ...prev, destination: response.data.destination,
-            notes: response.data.description || "", 
-            description: response.data.description || "",
-            origincity: response.data.origincity || "",
-          }));
-       
+
+        setFormData((prev) => ({
+          ...prev, destination: response.data.destination,
+          notes: response.data.description || "",
+          description: response.data.description || "",
+          origincity: response.data.origincity || "",
+        }));
+
       } catch (err) {
         console.error("Error fetching lead data:", err);
         setError("Error fetching lead data.");
@@ -270,55 +272,55 @@ const CreateCustomerOpportunity = () => {
                 <input type="text" name="name" value={customerData.name} onChange={handleChange} />
               </div>
               <div className="createcustomer-input-group">
-  <label>
-    Mobile
-  </label>
-  <div style={{ display: "flex", alignItems: "center" }}>
-    {/* Country Code Dropdown */}
-    <select
-      name="country_code"
-      value={customerData.country_code || "+91"} // Default country code
-      onChange={handleChange}
-      style={{
-        width: "80px",
-        marginRight: "10px",
-        padding: "5px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      }}
-    >
-      {countryCodeOptions.map((code) => (
-        <option key={code} value={code}>
-          {code}
-        </option>
-      ))}
-    </select>
+                <label>
+                  Mobile
+                </label>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  {/* Country Code Dropdown */}
+                  <select
+                    name="country_code"
+                    value={customerData.country_code || "+91"} // Default country code
+                    onChange={handleChange}
+                    style={{
+                      width: "80px",
+                      marginRight: "10px",
+                      padding: "5px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {countryCodeOptions.map((code) => (
+                      <option key={code} value={code}>
+                        {code}
+                      </option>
+                    ))}
+                  </select>
 
-    {/* Phone Number Input */}
-    <input
-      type="text"
-      name="phone_number"
-      placeholder="Enter Mobile Number"
-      value={customerData.phone_number || ""} // Prevent undefined error
-      onChange={(e) => {
-        const value = e.target.value;
-        if (/^\d*$/.test(value)) {
-          handleChange(e);
-        }
-      }}
-    
-      style={{
-        flex: 1,
-        padding: "5px",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-      }}
-      required
-    />
-  </div>
+                  {/* Phone Number Input */}
+                  <input
+                    type="text"
+                    name="phone_number"
+                    placeholder="Enter Mobile Number"
+                    value={customerData.phone_number || ""} // Prevent undefined error
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        handleChange(e);
+                      }
+                    }}
 
- 
-</div>
+                    style={{
+                      flex: 1,
+                      padding: "5px",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                    }}
+                    required
+                  />
+                </div>
+
+
+              </div>
 
               <div className="createcustomer-input-group">
                 <label>Email ID</label>
@@ -358,7 +360,7 @@ const CreateCustomerOpportunity = () => {
 
           <div className={`createcustomer-tab-content ${activeTab === "opportunity" ? "active" : ""}`}>
             <div className="createcustomer-form-grid">
-            <div className="createcustomer-input-group">
+              <div className="createcustomer-input-group">
                 <label>Origin City<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
@@ -411,22 +413,22 @@ const CreateCustomerOpportunity = () => {
                 <input type="text" value={duration} readOnly />
               </div> */}
               <div className="createcustomer-input-group">
-              <label>Duration (Nights)</label>
-  <input
-    type="number"
-    value={duration ? parseInt(duration) : ""}
-    onChange={(e) => {
-      const newDuration = parseInt(e.target.value) || 0;
-      setDuration(newDuration);
-      if (startDate) {
-        const newEndDate = new Date(startDate);
-        newEndDate.setDate(newEndDate.getDate() + newDuration);
-        setEndDate(newEndDate.toISOString().split("T")[0]);
-      }
-    }}
-    required
-  />
-</div>
+                <label>Duration (Nights)</label>
+                <input
+                  type="number"
+                  value={duration ? parseInt(duration) : ""}
+                  onChange={(e) => {
+                    const newDuration = parseInt(e.target.value) || 0;
+                    setDuration(newDuration);
+                    if (startDate) {
+                      const newEndDate = new Date(startDate);
+                      newEndDate.setDate(newEndDate.getDate() + newDuration);
+                      setEndDate(newEndDate.toISOString().split("T")[0]);
+                    }
+                  }}
+                  required
+                />
+              </div>
 
               <div className="createcustomer-input-group">
                 <label>No of Adults</label>
@@ -484,17 +486,17 @@ const CreateCustomerOpportunity = () => {
                 />
               </div>
               <div className="createcustomer-input-group">
-  <label>Reminder Setting</label>
-  <input
-    type="datetime-local" // Change to datetime-local for date and time
-    name="reminder_setting"
-    min={new Date().toISOString().slice(0, 16)} // Set min to current date and time
-    max={startDate ? new Date(startDate).toISOString().slice(0, 16) : ""} // Set max to start date if available
-    value={formData.reminder_setting}
-    onChange={handleChange}
-    required
-  />
-</div>
+                <label>Reminder Setting</label>
+                <input
+                  type="datetime-local" // Change to datetime-local for date and time
+                  name="reminder_setting"
+                  min={new Date().toISOString().slice(0, 16)} // Set min to current date and time
+                  max={startDate ? new Date(startDate).toISOString().slice(0, 16) : ""} // Set max to start date if available
+                  value={formData.reminder_setting}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -502,8 +504,8 @@ const CreateCustomerOpportunity = () => {
             <button className="createcustomer-btn createcustomer-close-btn" onClick={() => navigate(-1)}>
               Back
             </button>
-             {/* Save Button */}
-             <button
+            {/* Save Button */}
+            <button
               className="createcustomer-btn createcustomer-submit-btn"
               onClick={async () => {
                 if (activeTab === "customer") {
@@ -514,25 +516,25 @@ const CreateCustomerOpportunity = () => {
               }}
               disabled={loading}
             >
-              {loading ? "Saving..." : "Save"}
+              {loading ? "Saving..." : "Save & Close"}
             </button>
 
             {/* Save & Close Button */}
-            <button
+            {/* <button
               className="btn btn-success"
               onClick={async () => {
                 if (activeTab === "customer") {
-                  const success = await handleSubmitCustomer(true); // Pass true for Save & Close
+                  const success = await handleSubmitCustomer(true);
                   if (success) navigate("/view-lead");
                 } else {
                   const success = await handleSubmitOpportunity(true);
-                  if (success) navigate("/view-lead");
+                  if (success) navigate("/potential-leads");
                 }
               }}
               disabled={loading}
             >
               {loading ? "Saving..." : "Save & Close"}
-            </button>
+            </button> */}
           </div>
           {error && <div className="error-message">{error}</div>}
         </div>

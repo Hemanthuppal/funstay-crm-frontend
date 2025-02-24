@@ -157,16 +157,16 @@ console.log("Fetched primarySource:", leadData.primarySource);
     };
 
   const [leadDropdownOptions] = useState({
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk" , "Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
       Duplicate: [],
       "False Lead": [],
       Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      "Plan Cancelled": [],
     },
   });
-
   return (
     <div className="salesViewLeadsContainer">
       <Navbar onToggleSidebar={setCollapsed} />
@@ -373,7 +373,7 @@ console.log("Fetched primarySource:", leadData.primarySource);
                       onChange={handleChange}
                       disabled={
                         !formData.primaryStatus ||
-                        ["No Response", "Duplicate", "False Lead"].includes(formData.primaryStatus)
+                        ["No Response", "Duplicate", "False Lead", "Plan Cancelled"].includes(formData.primaryStatus)
                       }
                     >
                       {!formData.secondaryStatus && <option value="">Select Status</option>}

@@ -54,6 +54,7 @@ const DynamicForm = () => {
   const [emailError, setEmailError] = useState("");
   const [error, setError] = useState(null);
   const [employees, setEmployees] = useState([]);
+   const [nameError, setNameError] = useState("");
 
   const fetchEmployees = async () => {
     try {
@@ -101,19 +102,31 @@ const DynamicForm = () => {
 
 
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, action = "save") => {
     setLoading(true);
     e.preventDefault();
     setMessage("");
 
 
-    if (formData.phone_number.length !== 10) {
-      setPhoneError("Phone number must be exactly 10 digits.");
+    if (!formData.name.trim()) {
+      setNameError("Name is required.");
+      setLoading(false);
       return;
     }
 
+   
+
+    // Validate email
     if (!validateEmail(formData.email)) {
       setEmailError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+     // Validate phone number
+     if (formData.phone_number.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits.");
+      setLoading(false);
       return;
     }
 
@@ -154,6 +167,9 @@ const DynamicForm = () => {
         managerid: userId,
 
       });
+      if (action === "saveAndClose") {
+        navigate("/m-view-leads");
+      }
     } catch (error) {
       console.error("Error adding lead:", error);
 
@@ -164,19 +180,19 @@ const DynamicForm = () => {
       setLoading(false);
     }
   };
-  const handleSubmitAndClose = async (e) => {
-    e.preventDefault(); // Prevent default form submission
-    setLoading(true);
+  // const handleSubmitAndClose = async (e) => {
+  //   e.preventDefault(); 
+  //   setLoading(true);
 
-    try {
-      await handleSubmit(e); // Call the original handleSubmit function
-      navigate("/m-view-leads"); // Redirect to leads list page after saving
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     await handleSubmit(e);
+  //     navigate("/m-view-leads"); 
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
 
   const renderForm = () => {
@@ -209,8 +225,10 @@ const DynamicForm = () => {
 
     return (
       <div className="addleads-form-grid">
-        <div className="addleads-input-group">
-          <label>Name<span style={{ color: "red" }}> *</span></label>
+       <div className="addleads-input-group">
+          <label>
+            Name<span style={{ color: "red" }}> *</span>
+          </label>
           <input
             type="text"
             name="name"
@@ -220,7 +238,16 @@ const DynamicForm = () => {
             ref={nameInputRef}
             required
             autoFocus
+            onBlur={() => {
+              if (!formData.name.trim()) {
+                setNameError("Please enter a valid name.");
+              } else {
+                setNameError("");
+              }
+            }}
+            className={nameError ? "error-input" : ""} // Add class if error exists
           />
+          {nameError && <span style={{ color: "red", fontSize: "12px" }}>{nameError}</span>}
         </div>
         <div className="addleads-input-group">
           <label>Email<span style={{ color: "red" }}> *</span></label>
@@ -428,7 +455,7 @@ const DynamicForm = () => {
                 className="btn btn-success"
                 type="button"
                 disabled={loading}
-                onClick={handleSubmitAndClose} // Now this function exists!
+                onClick={(e) => handleSubmit(e, "saveAndClose")}
               >
                 {loading ? "Saving..." : "Save & Close"}
               </button>

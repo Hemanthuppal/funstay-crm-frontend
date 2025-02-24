@@ -80,13 +80,21 @@ const LeadOppView = () => {
 )} */}
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
                                     <p>
-  <strong>Phone Number:</strong> {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
-    title="Copy Phone Number"
-  />
-</p>
+                                      <strong>Phone Number:</strong> 
+                                      <a 
+                                        href={`https://wa.me/${lead.lead.country_code}${lead.lead.phone_number}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        style={{ textDecoration: "none", color: "blue",  marginLeft: "5px" }}
+                                      >
+                                        {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
+                                      </a>
+                                      <FaCopy
+                                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                        onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
+                                        title="Copy Phone Number"
+                                      />
+                                    </p>
 <p>
   <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
   <FaCopy
@@ -129,7 +137,7 @@ const LeadOppView = () => {
                                             <p><strong>Number of Adults:</strong> {lead.travelOpportunities[0].adults_count || 'N/A'}</p>
                                             <p><strong>Number of Children:</strong> {lead.travelOpportunities[0].children_count || 'N/A'}</p>
                                             <p><strong>Child Age:</strong> {lead.travelOpportunities[0].child_ages || 'N/A'}</p>
-                                            <p><strong>Approx Budget:</strong> {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
+                                            <p><strong>Approx Budget:</strong>&nbsp;Rs  {lead.travelOpportunities[0].approx_budget || 'N/A'}</p>
                                             {/* <p><strong>Notes:</strong> {lead.travelOpportunities[0].notes || 'N/A'}</p> */}
                                             <p><strong>Reminder Setting:</strong> {lead.travelOpportunities[0].reminder_setting ? new Date(lead.travelOpportunities[0].reminder_setting).toLocaleString() : 'N/A'}</p>
                                             <p>

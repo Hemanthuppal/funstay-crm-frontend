@@ -271,11 +271,22 @@ const Potentialleads = () => {
 
 
 
+  // const uniqueDestinations = useMemo(() => {
+  //   const destinations = formattedData
+  //     .map((item) => item.travel_destination)
+  //     .filter((dest) => dest && dest.trim() !== "");
+  //   return Array.from(new Set(destinations));
+  // }, [formattedData]);
+
   const uniqueDestinations = useMemo(() => {
-    const destinations = formattedData
-      .map((item) => item.travel_destination)
-      .filter((dest) => dest && dest.trim() !== "");
-    return Array.from(new Set(destinations));
+    // Normalize the destinations by trimming spaces and converting to lowercase
+    const normalizedDestinations = data.map(item => item.travel_destination.trim().toLowerCase());
+
+    // Use a Set to get unique values, then convert back to the original format
+    const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
+
+    // Map back to the original format (if needed)
+    return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
   }, [formattedData]);
 
 
@@ -553,7 +564,13 @@ const Potentialleads = () => {
                 {/* Calendar/X toggle */}
                 {showDateRange ? (
                   <FaTimes
-                    onClick={() => setShowDateRange(false)}
+                  onClick={() => {
+                    setShowDateRange(false);
+                    setFilterStartDate("");
+                    setFilterEndDate("");
+                    setAppliedFilterStartDate("");
+                    setAppliedFilterEndDate("");
+                  }}
                     style={{ cursor: "pointer", fontSize: "1.5rem" }}
                     title="Hide Date Range"
                   />

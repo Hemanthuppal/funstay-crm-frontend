@@ -121,12 +121,13 @@ const CreateCustomerOpportunity = () => {
   };
 
 
-  const handleSubmitOpportunity = async (navigateToPage = false) => {
+  const handleSubmitOpportunity =  async (isSaveAndClose = false) => {
     setLoading(true);
     setError(null);
 
     if (!formData.origincity || !formData.destination || !startDate || !endDate) {
-      setMessage("All required fields must be filled in.");
+      setMessage(" Required fields must be filled in.");
+      setTimeout(() => setMessage(""), 3000);
       setLoading(false);
       return;
     }
@@ -155,11 +156,11 @@ const CreateCustomerOpportunity = () => {
         setMessage("Opportunity created successfully!");
         setTimeout(() => setMessage(""), 3000);
 
-        if (navigateToPage) {
-          navigate("/m-view-leads");
-        } else {
-          navigate("/m-view-leads");
+        if (!isSaveAndClose) {
+          navigate("/m-potential-leads"); // Default navigation
         }
+  
+        return true; // Success
       }
     } catch (err) {
       console.error("Error creating opportunity:", err);
@@ -487,28 +488,40 @@ const CreateCustomerOpportunity = () => {
           </div>
 
           <div className="createcustomer-form-footer">
-            {/* Back Button */}
             <button className="createcustomer-btn createcustomer-close-btn" onClick={() => navigate(-1)}>
               Back
             </button>
-
-            {/* Save Button */}
-            <button
+             {/* Save Button */}
+             <button
               className="createcustomer-btn createcustomer-submit-btn"
-              onClick={activeTab === "customer" ? () => handleSubmitCustomer(false) : () => handleSubmitOpportunity(false)}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
-
-            {/* Save & Close Button */}
-            <button
-              className="btn btn-success"
-              onClick={activeTab === "customer" ? () => handleSubmitCustomer(true) : () => handleSubmitOpportunity(true)}
+              onClick={async () => {
+                if (activeTab === "customer") {
+                  await handleSubmitCustomer(); // Save Customer
+                } else {
+                  await handleSubmitOpportunity(); // Save Opportunity
+                }
+              }}
               disabled={loading}
             >
               {loading ? "Saving..." : "Save & Close"}
             </button>
+
+            {/* Save & Close Button */}
+            {/* <button
+              className="btn btn-success"
+              onClick={async () => {
+                if (activeTab === "customer") {
+                  const success = await handleSubmitCustomer(true); // Pass true for Save & Close
+                  if (success) navigate("/m-view-leads");
+                } else {
+                  const success = await handleSubmitOpportunity(true);
+                  if (success) navigate("/m-potential-leads");
+                }
+              }}
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save & Close"}
+            </button> */}
           </div>
 
           {error && <div className="error-message">{error}</div>}

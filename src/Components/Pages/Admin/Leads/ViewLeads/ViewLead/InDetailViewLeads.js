@@ -3,8 +3,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../../../Shared/Navbar/Navbar";
 import "./InDetailViewLeads.css";
-import axios from "axios"; 
-import {baseURL} from "../../../../../Apiservices/Api";
+import axios from "axios";
+import { baseURL } from "../../../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
 
 const InDetailViewLeads = () => {
@@ -33,11 +33,12 @@ const InDetailViewLeads = () => {
     channel: "",
     created_at: "",
   });
-  const [error, setError] = useState(null); 
-  const[message,setMessage] = useState('')
+  const [error, setError] = useState(null);
+  const [message, setMessage] = useState('')
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!"); // Optional: Show a message
+      setTimeout(() => setMessage(""), 1000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
@@ -95,7 +96,7 @@ const InDetailViewLeads = () => {
               {leadid ? (
                 <div className="row">
                   <div className="col-md-6">
-                   
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Lead ID:
@@ -109,28 +110,36 @@ const InDetailViewLeads = () => {
                       <span>{formData.name}</span>
                     </div>
                     <div className="mb-3 d-flex flex-wrap">
-  <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
-    Email:
-  </span>
-  <span>{formData.email}</span>
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(formData.email)}
-    title="Copy Email"
-  />
-</div>
+                      <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
+                        Email:
+                      </span>
+                      <span>{formData.email}</span>
+                      <FaCopy
+                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                        onClick={() => copyToClipboard(formData.email)}
+                        title="Copy Email"
+                      />
+                    </div>
 
-<div className="mb-3 d-flex flex-wrap">
+                    <div className="mb-3 d-flex flex-wrap">
   <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
     Phone Number:
   </span>
-  <span>{formData.country_code}{formData.phone_number}</span>
+  <a 
+    href={`https://wa.me/${formData.country_code}${formData.phone_number}`} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{ textDecoration: "none", color: "blue",  }}
+  >
+    {formData.country_code}{formData.phone_number}
+  </a>
   <FaCopy
     style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
     onClick={() => copyToClipboard(`${formData.country_code}${formData.phone_number}`)}
     title="Copy Phone Number"
   />
 </div>
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Primary Source:
@@ -157,7 +166,7 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.destination}</span>
                     </div>
-                
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Secondary Email:
@@ -170,7 +179,7 @@ const InDetailViewLeads = () => {
                       </span>
                       <span>{formData.another_phone_number}</span>
                     </div>
-                   
+
                     <div className="mb-3 d-flex flex-wrap">
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Description:

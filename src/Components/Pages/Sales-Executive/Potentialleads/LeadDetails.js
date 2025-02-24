@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { Row, Col, Card } from 'react-bootstrap';
+import React, { useState, useEffect, useContext } from "react";
+import { Row, Col, Card, Button, Form } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
+import { AuthContext } from '../../../AuthContext/AuthContext';
 
 const LeadOppView = () => {
+    const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
     const [collapsed, setCollapsed] = useState(false);
     const [lead, setLead] = useState(null);
     const location = useLocation();
     const { leadid } = location.state;
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
+    const [newComment, setNewComment] = useState('');
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
             setMessage("Copied to clipboard!");
@@ -43,6 +46,42 @@ const LeadOppView = () => {
     if (!lead) {
         return <div>Loading...</div>; // Show a loading state while fetching data
     }
+
+    const addComment = async () => {
+        if (!newComment.trim()) return;
+        const commentName = `${userName} (Sales)`;
+
+        const commentData = {
+            leadid: leadid,
+            text: newComment,
+            timestamp: new Date().toISOString(),
+            name: commentName, // Replace with actual user name if needed
+        };
+
+        try {
+            const response = await fetch(`${baseURL}/comments/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(commentData),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add comment");
+            }
+
+            const savedComment = await response.json();
+
+            // Update the state to display the new comment
+            setLead((prevLead) => ({
+                ...prevLead,
+                comments: [...prevLead.comments, savedComment]
+            }));
+
+            setNewComment(''); // Clear input after submission
+        } catch (error) {
+            console.error('Error adding comment:', error);
+        }
+    };
 
     const handleEdit = (leadId) => {
         navigate(`/edit-opportunity/${leadId}`, {
@@ -79,22 +118,22 @@ const LeadOppView = () => {
 
                                     <p><strong>Opp Id:</strong> {lead.lead.leadid || 'N/A'}</p>
                                     <p><strong>Name:</strong> {lead.lead.name || 'N/A'}</p>
-                                  <p>
-                                    <strong>Phone Number:</strong> 
-                                    <a 
-                                      href={`https://wa.me/${lead.lead.country_code}${lead.lead.phone_number}`} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      style={{ textDecoration: "none", color: "blue",  marginLeft: "5px" }}
-                                    >
-                                      {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
-                                    </a>
-                                    <FaCopy
-                                      style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-                                      onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
-                                      title="Copy Phone Number"
-                                    />
-                                  </p>
+                                    <p>
+                                        <strong>Phone Number:</strong>
+                                        <a
+                                            href={`https://wa.me/${lead.lead.country_code}${lead.lead.phone_number}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ textDecoration: "none", color: "blue", marginLeft: "5px" }}
+                                        >
+                                            {lead.lead.country_code} {lead.lead.phone_number || 'N/A'}
+                                        </a>
+                                        <FaCopy
+                                            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                            onClick={() => copyToClipboard(`${lead.lead.country_code}${lead.lead.phone_number}`)}
+                                            title="Copy Phone Number"
+                                        />
+                                    </p>
                                     <p>
                                         <strong>Email ID:</strong> {lead.lead.email || 'N/A'}
                                         <FaCopy
@@ -163,22 +202,60 @@ const LeadOppView = () => {
                                             </>
                                         )}
                                     </div>
-                                    <p><strong>Comments:</strong></p>
-                                    <div className="s-Opp-Commentsection">
-                                        {sortedComments.length > 0 ? (
-                                            sortedComments.map(comment => (
-                                                <div key={comment.id}>
-                                                    <p>
-                                                        <strong>{new Date(comment.timestamp).toLocaleString()}:</strong>
-                                                    </p>
-                                                    <p><strong>{comment.name}</strong>{comment.text}</p>
-                                                    <hr /> {/* Optional: Add a horizontal line between comments */}
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p>No comments available.</p>
-                                        )}
+                                    <div className="comment-section-container">
+                                        <p><strong>Comments:</strong></p>
+
+                                        {/* Comment Input Section */}
+                                        <div className="comment-input-container">
+                                            <Form.Group>
+                                                <Form.Label><strong>Add a New Comment</strong></Form.Label>
+                                                <Form.Control
+                                                    as="textarea"
+                                                    rows={4}
+                                                    placeholder="Write your comment here..."
+                                                    value={newComment}
+                                                    onChange={(e) => setNewComment(e.target.value)}
+                                                    autoFocus
+                                                />
+                                                <Button
+                                                    className="mt-2 btn-warning text-white"
+                                                    onClick={addComment}
+                                                    disabled={!newComment.trim()}
+                                                >
+                                                    Add Comment
+                                                </Button>
+                                            </Form.Group>
+                                        </div>
+
+                                        {/* Display Comments */}
+                                        <div className="comment-list" style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px", marginTop:"15px",backgroundColor:"#f1f7ff" }}>
+                                            {sortedComments.length > 0 ? (
+                                                sortedComments.map((comment) => (
+                                                    <div key={comment.id} className="comment-item">
+                                                        <p className="comment-timestamp">
+                                                            {new Date(comment.timestamp).toLocaleString("en-IN", {
+                                                                timeZone: "Asia/Kolkata",
+                                                                day: "2-digit",
+                                                                month: "2-digit",
+                                                                year: "numeric",
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                                second: "2-digit",
+                                                                hour12: true,
+                                                            })}
+                                                        </p>
+                                                        <p className="comment-text">
+                                                            <strong>{comment.name}</strong>: {comment.text}
+                                                        </p>
+                                                        <hr />
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p>No comments available.</p>
+                                            )}
+                                        </div>
                                     </div>
+
                                 </Col>
                             </Row>
                         </Card.Body>
@@ -195,4 +272,4 @@ const LeadOppView = () => {
     );
 };
 
-export default LeadOppView;
+export default LeadOppView; 

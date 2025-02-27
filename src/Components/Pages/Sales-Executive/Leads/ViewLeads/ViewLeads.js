@@ -47,7 +47,7 @@ const ViewLeads = () => {
   };
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk","Plan Cancelled"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk", "Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
@@ -329,6 +329,10 @@ const ViewLeads = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleAddUser(row.original)}
             />
+             <FaComment
+                          style={{ color: "#ff9966", cursor: "pointer" }}
+                          onClick={() => navigate(`/comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
+                        />
           </div>
         ),
       }

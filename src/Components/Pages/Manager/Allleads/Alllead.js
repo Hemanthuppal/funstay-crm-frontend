@@ -30,7 +30,7 @@ const AdminViewLeads = () => {
 
 
   const handleViewLeads = (lead) => {
-    navigate(`/m-views-lead/${lead.leadid}`, {
+    navigate(`/m-viewallleads/${lead.leadid}`, {
       state: { leadid: lead.leadid },
     });
   };

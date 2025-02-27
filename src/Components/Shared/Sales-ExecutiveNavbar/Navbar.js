@@ -155,11 +155,17 @@ const Sales = ({ onToggleSidebar }) => {
                                   {/* <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
                                   {notification.name}{notification.message}
                                   </div> */}
-                                  <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
+       <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
+  {`${(notification.name || "")} ${(notification.message || "")}`.slice(0, 40)}
+  {(notification.name?.length || 0) + (notification.message?.length || 0) > 40 ? "..." : ""}
+</div>
+
+
+                                  {/* <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
   {(notification.name + notification.message).length > 40 
     ? (notification.name + notification.message).slice(0, 40) + "..." 
     : notification.name + notification.message}
-</div>
+</div> */}
 
                                   <div style={{ fontSize: "0.8em", color: "#888" }}>
                                     {new Date(notification.createdAt).toLocaleString()}

@@ -75,7 +75,11 @@ import Viewonboarding from "./Components/Pages/Admin/Onboarding/AllTeams";
 import ViewonboardingId from "./Components/Pages/Admin/Onboarding/TeamMembersTable";
 import Mobile from "./Mobile";
 import EditEmployee from "./Components/Pages/Admin/AllTeams/EditEmployee/EditEmployee";
-import M_Allleads from "./Components/Pages/Manager/Allleads/Alllead"
+import M_Allleads from "./Components/Pages/Manager/Allleads/Alllead";
+
+import Tabelfilter from "./Tabelfilter";
+import M_viewallleads from "./Components/Pages/Manager/Viewallleads/InDetailViewLeads";
+import S_viewallleads from "./Components/Pages/Sales-Executive/Viewallleads/InDetailViewLeads";
 
 
 function App() {
@@ -205,6 +209,20 @@ function App() {
 
                 <Route path="/m-allleads" element={<M_Allleads />} />
                 <Route path="/m-views-lead/:leadid" element={<M_InDetailViewLeads />} />
+
+
+                <Route path="/tablefilter" element={<Tabelfilter />} />
+
+
+                <Route path="/m-viewallleads/:leadid" element={<M_viewallleads />} />
+                <Route path="/s-viewallleads/:leadid" element={<S_viewallleads />} />
+
+
+
+                //comments
+                <Route path="/comments/:leadid" element={<CommentsPage />} />
+                <Route path="/m-comments/:leadid" element={<M_CommentsPage />} />
+                <Route path="/a-comments/:leadid" element={<A_CommentsPage />} />
                 </Route>
             </Routes>
 

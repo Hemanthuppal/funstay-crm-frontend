@@ -8,11 +8,13 @@ import axios from "axios";
 import { baseURL } from "../../../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
 import { AuthContext } from '../../../../../AuthContext/AuthContext';
+import { adminMail } from '../../../../../Apiservices/Api';
 
 const InDetailViewLeads = () => {
   const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const [assignedSalesId, setAssignedSalesId] = useState(null);
   const { leadid } = location.state;
   const [collapsed, setCollapsed] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -107,22 +109,71 @@ const InDetailViewLeads = () => {
     fetchLeadDetails();
   }, [leadid]);
 
+  // const handleAddComment = async () => {
+  //   if (!newComment.trim()) return;
+  //   const trimmedComment = newComment.trim();
+  //   const commentName = `${userName} (Manager)`;
+    
+  //   const comment = {
+  //     name: commentName,
+  //     leadid: leadid,
+  //     timestamp: new Date().toISOString(),
+  //     text: trimmedComment,
+  //     notificationmessage: `${commentName}: ${trimmedComment}  `,
+     
+  //     userId: assignedSalesId,
+  //     email: `${adminMail}`
+  //   };
+    
+   
+  //   console.log(JSON.stringify(comment, null, 2));
+  //   console.log(assignedSalesId)
+  //   try {
+  //     const commenturl = `${baseURL}/comments/add`;
+  //     const response = await fetch(commenturl, {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(comment),
+  //     });
+
+  //     if (response.ok) {
+  //       const addedComment = await response.json();
+  //       setComments((prevComments) => [...prevComments, addedComment]);
+  //       setNewComment("");
+  //     } else {
+  //       console.error("Failed to add comment");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error adding comment:", error);
+  //   }
+  // };
+
+
   const addComment = async () => {
     if (!newComment.trim()) return;
+    const trimmedComment = newComment.trim();
     const commentName = `${userName} (Manager)`;
-
-    const commentData = {
+    
+    const comment = {
+      name: commentName,
       leadid: leadid,
-      text: newComment,
       timestamp: new Date().toISOString(),
-      name: commentName, // Replace with actual user name if needed
+      text: trimmedComment,
+      notificationmessage: `${commentName}: ${trimmedComment}  `,
+     
+      userId: assignedSalesId,
+      email: `${adminMail}`
     };
+    
+   
+    console.log(JSON.stringify(comment, null, 2));
+    console.log(assignedSalesId)
 
     try {
       const response = await fetch(`${baseURL}/comments/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(commentData),
+        body: JSON.stringify(comment),
       });
 
       if (!response.ok) {

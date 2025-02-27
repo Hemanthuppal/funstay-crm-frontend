@@ -8,6 +8,7 @@ import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from "../../../AuthContext/AuthContext";
 
+
 const SalesCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);

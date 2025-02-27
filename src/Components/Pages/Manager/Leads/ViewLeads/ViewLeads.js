@@ -399,6 +399,10 @@ const ViewLeads = () => {
               style={{ color: "ff9966", cursor: "pointer" }}
               onClick={() => handleAddUser(row.original)}
             />
+             <FaComment
+                          style={{ color: "#ff9966", cursor: "pointer" }}
+                          onClick={() => navigate(`/m-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
+                        />
           </div>
         ),
       }

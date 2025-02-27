@@ -14,6 +14,8 @@ const LeadOppView = () => {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
+     const [assignedSalesId, setAssignedSalesId] = useState(null);
+        const [managerid, setManagerId] = useState(null);
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
             setMessage("Copied to clipboard!");
@@ -47,39 +49,47 @@ const LeadOppView = () => {
         return <div>Loading...</div>;
     }
 
-    const addComment = async () => {
-        if (!newComment.trim()) return;
-
-        const commentData = {
-            leadid: leadid,
-            text: newComment,
-            timestamp: new Date().toISOString(),
-            name: "Admin", // Replace with actual user name if needed
+  const addComment = async () => {
+      if (!newComment.trim()) return;
+  
+      const trimmedComment = newComment.trim();
+        const commentName = "Admin";
+    
+        const comment = {
+          name: commentName,
+          leadid: leadid,
+          timestamp: new Date().toISOString(),
+          text: trimmedComment,
+          notificationmessage: `${commentName}:${trimmedComment}  `,
+    
+          managerId: managerid,
+          userId: assignedSalesId,
+          email: null
         };
-
-        try {
-            const response = await fetch(`${baseURL}/comments/add`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(commentData),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to add comment");
-            }
-
-            const savedComment = await response.json();
-
-            // Update the state to display the new comment
-            setLead((prevLead) => ({
-                ...prevLead,
-                comments: [...prevLead.comments, savedComment]
-            }));
-
-            setNewComment(''); // Clear input after submission
-        } catch (error) {
-            console.error('Error adding comment:', error);
+  
+      try {
+        const response = await fetch(`${baseURL}/comments/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(comment),
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to add comment");
         }
+  
+        const savedComment = await response.json();
+  
+        // Update the state to display the new comment
+        setLead((prevLead) => ({
+          ...prevLead,
+          comments: [...prevLead.comments, savedComment]
+        }));
+  
+        setNewComment(''); // Clear input after submission
+      } catch (error) {
+        console.error('Error adding comment:', error);
+      }
     };
 
     if (!lead) {

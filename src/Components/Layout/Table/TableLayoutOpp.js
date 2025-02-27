@@ -135,7 +135,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
               </option>
             ))}
           </select>
-          {/* <span className="fw-bold">Total Records: {filteredData.length}</span> */}
+          <span className="fw-bold">Total Records: {filteredData.length}</span>
         </div>
 
         {/* Global Search Filter */}

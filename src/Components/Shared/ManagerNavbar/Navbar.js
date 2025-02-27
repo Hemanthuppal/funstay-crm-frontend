@@ -234,7 +234,7 @@ const Manager = ({ onToggleSidebar }) => {
                 </Link>
               </li>
               <li className={`manager-nav-item ${location.pathname.startsWith("/m-allleads")||
-              location.pathname.startsWith("/m-views-lead")
+              location.pathname.startsWith("/m-viewallleads")
                ? "active"
                 : ""
                 }`}>

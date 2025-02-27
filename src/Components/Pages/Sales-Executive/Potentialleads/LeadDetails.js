@@ -6,6 +6,7 @@ import Navbar from '../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
 import { AuthContext } from '../../../AuthContext/AuthContext';
+import { adminMail } from '../../../Apiservices/Api';
 
 const LeadOppView = () => {
     const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
@@ -49,39 +50,46 @@ const LeadOppView = () => {
 
     const addComment = async () => {
         if (!newComment.trim()) return;
+        const trimmedComment = newComment.trim();
         const commentName = `${userName} (Sales)`;
-
-        const commentData = {
-            leadid: leadid,
-            text: newComment,
-            timestamp: new Date().toISOString(),
-            name: commentName, // Replace with actual user name if needed
+        
+        const comment = {
+          name: commentName,
+          leadid: leadid,
+          timestamp: new Date().toISOString(),
+          text: trimmedComment,
+          notificationmessage: `${commentName} :${trimmedComment}  `,
+          // notificationmessage: `${commentName} :${trimmedComment}  ${leadid}`,
+          // userId, // Uncomment if needed
+          managerId: managerId,
+          email: `${adminMail}`
         };
-
+        console.log(JSON.stringify(comment, null, 2));
         try {
-            const response = await fetch(`${baseURL}/comments/add`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(commentData),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to add comment");
-            }
-
-            const savedComment = await response.json();
-
-            // Update the state to display the new comment
-            setLead((prevLead) => ({
-                ...prevLead,
-                comments: [...prevLead.comments, savedComment]
-            }));
-
-            setNewComment(''); // Clear input after submission
+          const response = await fetch(`${baseURL}/comments/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(comment),
+          });
+    
+          if (!response.ok) {
+            throw new Error("Failed to add comment");
+          }
+    
+          const savedComment = await response.json();
+    
+          // Update the state to display the new comment
+          setLead((prevLead) => ({
+            ...prevLead,
+            comments: [...prevLead.comments, savedComment]
+          }));
+    
+          setNewComment(''); // Clear input after submission
         } catch (error) {
-            console.error('Error adding comment:', error);
+          console.error('Error adding comment:', error);
         }
-    };
+      };
+    
 
     const handleEdit = (leadId) => {
         navigate(`/edit-opportunity/${leadId}`, {

@@ -349,6 +349,7 @@ const EditOppLead = () => {
       "In Progress": [
         "Understood Requirement",
         "Sent first quote",
+        "Amendment Requested",
         "Sent amended quote",
         "Negotiation Process",
         "Verbally Confirmed-Awaiting token amount",

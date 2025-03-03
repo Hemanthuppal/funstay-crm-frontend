@@ -3,6 +3,7 @@ import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import "./AddLeads.css";
+import Select from "react-select";
 import Navbar from '../../../../Shared/Navbar/Navbar';
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
@@ -34,7 +35,7 @@ const DynamicForm = () => {
     primarySource: '',
     secondarysource: '',
     origincity: '',
-    destination: '',
+    destination: [],
     another_name: '',
     another_email: '',
     another_phone_number: '',
@@ -55,6 +56,66 @@ const DynamicForm = () => {
   const [error, setError] = useState(null);
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phone_number") {
+      const formattedValue = value.replace(/\D/g, "");
+      if (formattedValue.length <= 10) {
+        setFormData({ ...formData, [name]: formattedValue });
+      }
+    } else if (name === "managerid") {
+      const selectedEmployeeId = Number(value);
+      const selectedEmployee = managers.find(employee => employee.id === selectedEmployeeId);
+      setFormData({
+        ...formData,
+        managerid: selectedEmployeeId,
+        assign_to_manager: selectedEmployee ? selectedEmployee.name : '',
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+  
+    useEffect(() => {
+    const loadScript = (url, callback) => {
+      let script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.defer = true;
+      script.onload = callback;
+      document.body.appendChild(script);
+    };
+
+    loadScript(
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+      () => {
+        if (window.google) {
+          const autocomplete = new window.google.maps.places.Autocomplete(
+            document.getElementById("origincity"),
+            { types: ["(cities)"] }
+          );
+
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.address_components) {
+              let city = "", state = "", country = "";
+              place.address_components.forEach((component) => {
+                if (component.types.includes("locality")) {
+                  city = component.long_name;
+                } else if (component.types.includes("administrative_area_level_1")) {
+                  state = component.long_name;
+                } else if (component.types.includes("country")) {
+                  country = component.long_name;
+                }
+              });
+              handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+            }
+          });
+        }
+      }
+    );
+  }, [handleChange]);
 
   useEffect(() => {
     const fetchManagers = async () => {
@@ -80,29 +141,33 @@ const DynamicForm = () => {
     fetchManagers();
   }, [authToken]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "phone_number") {
-      const formattedValue = value.replace(/\D/g, "");
-      if (formattedValue.length <= 10) {
-        setFormData({ ...formData, [name]: formattedValue });
-      }
-    } else if (name === "managerid") {
-      const selectedEmployeeId = Number(value);
-      const selectedEmployee = managers.find(employee => employee.id === selectedEmployeeId);
-      setFormData({
-        ...formData,
-        managerid: selectedEmployeeId,
-        assign_to_manager: selectedEmployee ? selectedEmployee.name : '',
-      });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
-
   const validateEmail = (email) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
+  };
+
+  const [destinationOptions, setDestinationOptions] = useState([]);
+
+  // Fetch destination options when the component mounts
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/destinations`);
+        setDestinationOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      }
+    };
+  
+    fetchDestinations();
+  }, []);
+  
+
+  const handleDestinationChange = (selectedOptions) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      destination: selectedOptions, // ✅ Ensure destination is updated properly
+    }));
   };
 
   const handleSubmit = async (e, action = "save") => {
@@ -140,8 +205,14 @@ const DynamicForm = () => {
       admin: userName,
     };
 
+    const formattedDestinations = formData.destination.map((dest) => dest.label); 
+
     try {
-      const response = await axios.post(`${baseURL}/api/leads`, dataToSubmit);
+      const response = await axios.post(`${baseURL}/api/leads`, {
+        ...formData,
+        dataToSubmit,
+        destination: formattedDestinations, // ✅ Send only labels to the backend
+      });
       console.log(response.data);
       setMessage("Lead added successfully!");
 
@@ -158,7 +229,7 @@ const DynamicForm = () => {
         another_email: '',
         another_phone_number: '',
         origincity: '',
-        destination: '',
+        destination: [],
         description: '',
         managerid: "",
         assign_to_manager: "",
@@ -175,8 +246,6 @@ const DynamicForm = () => {
       setLoading(false);
     }
   };
-
-
 
 
   const renderForm = () => {
@@ -384,23 +453,23 @@ const DynamicForm = () => {
           />
         </div>
         <div className="addleads-input-group">
-          <label>Origin City</label>
-          <input
-            type="text"
-            name="origincity"
-            placeholder="Enter Origin City"
-            value={formData.origincity}
-            onChange={handleChange}
-          />
+        <label>Origin City</label>
+      <input
+        type="text"
+        id="origincity"
+        name="origincity"
+        placeholder="Enter Origin City"
+        value={formData.origincity}
+        onChange={handleChange}
+      />
         </div>
         <div className="addleads-input-group">
-          <label>Destination</label>
-          <input
-            type="text"
-            name="destination"
-            placeholder="Enter Destination"
+        <label>Destination</label>
+          <Select
+            isMulti
+            options={destinationOptions} // 
             value={formData.destination}
-            onChange={handleChange}
+            onChange={handleDestinationChange}
           />
         </div>
         <div className="addleads-input-group full-width">

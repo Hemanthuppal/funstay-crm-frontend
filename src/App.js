@@ -80,6 +80,7 @@ import M_Allleads from "./Components/Pages/Manager/Allleads/Alllead";
 import Tabelfilter from "./Tabelfilter";
 import M_viewallleads from "./Components/Pages/Manager/Viewallleads/InDetailViewLeads";
 import S_viewallleads from "./Components/Pages/Sales-Executive/Viewallleads/InDetailViewLeads";
+import Destinations from "./Components/Pages/Admin/Destinations/Destinations";
 
 
 function App() {
@@ -223,6 +224,10 @@ function App() {
                 <Route path="/comments/:leadid" element={<CommentsPage />} />
                 <Route path="/m-comments/:leadid" element={<M_CommentsPage />} />
                 <Route path="/a-comments/:leadid" element={<A_CommentsPage />} />
+
+                <Route path="/a-destinations" element={<Destinations />} />
+
+
                 </Route>
             </Routes>
 

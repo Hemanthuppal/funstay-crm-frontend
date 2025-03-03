@@ -281,6 +281,22 @@ const Navbar = ({ onToggleSidebar }) => {
                 </Link>
               </li>
               <li
+                className={`admin-nav-item ${location.pathname.startsWith("/a-destinations")                   
+                    
+                   
+                    ? "active"
+                    : ""
+                  }`}
+              >
+                <Link className="nav-link" to="/a-destinations" onClick={handleNavItemClick}>
+                  <FaPeopleCarry className="admin-nav-icon" />
+                  {!collapsed && <span className="link_text">All Destinations </span>}
+                </Link>
+
+
+               
+              </li>
+              <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||                   
                     location.pathname.startsWith("/addemployee") ||
                     location.pathname.startsWith("/team-members") ||

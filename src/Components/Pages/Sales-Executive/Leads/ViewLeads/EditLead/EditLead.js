@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import Select from "react-select";
 import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditLead.css';
+
 import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
@@ -15,7 +17,7 @@ const EditOppLead = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
- 
+
 
   useEffect(() => {
     const countries = getCountries();
@@ -42,7 +44,7 @@ const EditOppLead = () => {
     primaryStatus: '',
     secondaryStatus: '',
     origincity: '',
-    destination: '',
+    destination: [], // Now stored as an array
     primarySource: '',
     secondarysource: '',
   });
@@ -63,6 +65,8 @@ const EditOppLead = () => {
     ],
   };
 
+  const [destinationOptions, setDestinationOptions] = useState([]); // Multi-select options
+
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
@@ -81,11 +85,13 @@ const EditOppLead = () => {
           another_name: leadData.another_name || '',
           another_email: leadData.another_email || '',
           another_phone_number: leadData.another_phone_number || '',
+          origincity: leadData.origincity || '',
+          destination: leadData.destination
+            ? leadData.destination.split(", ").map((item) => ({ value: item, label: item }))
+            : [],
           corporate_id: leadData.corporate_id || '',
           primaryStatus: leadData.primaryStatus || '',
           secondaryStatus: leadData.secondaryStatus || '',
-          origincity: leadData.origincity || '',
-          destination: leadData.destination || '',
           primarySource: leadData.primarySource || '',
           secondarysource: leadData.secondarysource || '',
         }));
@@ -95,8 +101,31 @@ const EditOppLead = () => {
       }
     };
 
+    const fetchDestinationOptions = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/destinations`);
+        const options = response.data.map((dest) => ({
+          value: dest.value, // ✅ Ensure it's { value, label }
+          label: dest.label,
+        }));
+        setDestinationOptions(options);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      }
+    };
+
+
     fetchLeadData();
+    fetchDestinationOptions(); // ✅ Fetch available destinations on mount
   }, [leadid]);
+
+  const handleMultiSelectChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      destination: selectedOptions || [], // ✅ Always an array, never undefined
+    }));
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -118,27 +147,36 @@ const EditOppLead = () => {
       another_email: formData.another_email,
       another_phone_number: formData.another_phone_number,
       origincity: formData.origincity,
-      destination: formData.destination,
+      destination: formData.destination.length
+            ? formData.destination.map((item) => item.value).join(", ")
+            : "",
       corporate_id: formData.corporate_id,
       primaryStatus: formData.primaryStatus,
       secondaryStatus: formData.secondaryStatus,
       primarySource: formData.primarySource,
       secondarysource: formData.secondarysource,
     };
+
     console.log(JSON.stringify(leadData, null, 2));
+
     try {
-      // await axios.put(`${baseURL}/api/leads/${leadid}`, leadData);
       await axios.put(`${baseURL}/api/update-lead-customer/${leadid}`, leadData);
-      setMessage('Updated Successfully');
-      setTimeout(() => setMessage(""), 3000);
-      // navigate('/view-lead'); 
+      setMessage("Updated Successfully");
+      setTimeout(() => {
+        setMessage("");
+        navigate("/view-lead"); // Redirect after success
+      }, 2000);
     } catch (error) {
-      console.error("Error updating data:", error);
-      setError("Failed to update data.");
+      console.error("Error updating lead:", error);
+      setError("Failed to update lead.");
+    } finally {
+      setLoading(false);
     }
   };
 
+
   const [loading, setLoading] = useState(false);
+
   const handleSubmitAndClose = async (e) => {
     e.preventDefault(); // Prevent default form submission
     setLoading(true);
@@ -153,17 +191,17 @@ const EditOppLead = () => {
     }
   };
 
-   const [leadDropdownOptions] = useState({
-     primary: ["New", "No Response", "Duplicate", "False Lead", "Junk" , "Plan Cancelled"],
-     secondary: {
-       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
-       "No Response": [],
-       Duplicate: [],
-       "False Lead": [],
-       Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
-       "Plan Cancelled": [],
-     },
-   });
+  const [leadDropdownOptions] = useState({
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk", "Plan Cancelled"],
+    secondary: {
+      New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
+      "No Response": [],
+      Duplicate: [],
+      "False Lead": [],
+      Junk: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
+      "Plan Cancelled": [],
+    },
+  });
 
   return (
     <div className="salesViewLeadsContainer">
@@ -204,58 +242,58 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>
-      Phone Number
-    </Form.Label>
-    <div style={{ display: "flex", alignItems: "center" }}>
-      {/* Country Code Dropdown */}
-      <Form.Select
-        name="country_code"
-        value={formData.country_code || "+91"} // Default value
-        onChange={handleChange}
-        style={{
-          width: "80px",
-          marginRight: "10px",
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      >
-        {countryCodeOptions.map((code) => (
-          <option key={code} value={code}>
-            {code}
-          </option>
-        ))}
-      </Form.Select>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Phone Number
+                    </Form.Label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      {/* Country Code Dropdown */}
+                      <Form.Select
+                        name="country_code"
+                        value={formData.country_code || "+91"} // Default value
+                        onChange={handleChange}
+                        style={{
+                          width: "80px",
+                          marginRight: "10px",
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {countryCodeOptions.map((code) => (
+                          <option key={code} value={code}>
+                            {code}
+                          </option>
+                        ))}
+                      </Form.Select>
 
-      {/* Phone Number Input */}
-      <Form.Control
-        type="text"
-        name="phone_number"
-        placeholder="Enter Phone Number"
-        value={formData.phone_number || ""} // Prevents undefined errors
-        onChange={(e) => {
-          const value = e.target.value;
-          if (/^\d*$/.test(value)) {
-            handleChange(e);
-          }
-        }}
-      
-        style={{
-          flex: 1,
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-        required
-      />
-    </div>
+                      {/* Phone Number Input */}
+                      <Form.Control
+                        type="text"
+                        name="phone_number"
+                        placeholder="Enter Phone Number"
+                        value={formData.phone_number || ""} // Prevents undefined errors
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleChange(e);
+                          }
+                        }}
 
-    {/* Validation Error Message */}
-   
-  </Form.Group>
-</Col>
+                        style={{
+                          flex: 1,
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                        required
+                      />
+                    </div>
+
+                    {/* Validation Error Message */}
+
+                  </Form.Group>
+                </Col>
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
@@ -324,11 +362,12 @@ const EditOppLead = () => {
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>
-                    <Form.Control
-                      type="text"
+                    <Select
+                      isMulti
                       name="destination"
+                      options={destinationOptions} // ✅ Use fetched options
                       value={formData.destination}
-                      onChange={handleChange}
+                      onChange={handleMultiSelectChange}
                     />
                   </Form.Group>
                 </Col>
@@ -376,49 +415,49 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col> */}
-               <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Primary Status</Form.Label>
-    <Form.Select
-      name="primaryStatus"
-      value={formData.primaryStatus}
-      onChange={handleChange}
-    >
-      {!formData.primaryStatus && <option value="">Select Status</option>}
-      {leadDropdownOptions.primary.map((status) => (
-        <option key={status} value={status}>
-          {status}
-        </option>
-      ))}
-    </Form.Select>
-  </Form.Group>
-</Col>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Primary Status</Form.Label>
+                    <Form.Select
+                      name="primaryStatus"
+                      value={formData.primaryStatus}
+                      onChange={handleChange}
+                    >
+                      {!formData.primaryStatus && <option value="">Select Status</option>}
+                      {leadDropdownOptions.primary.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
 
-<Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Secondary Status</Form.Label>
-    <Form.Select
-      name="secondaryStatus"
-      value={formData.secondaryStatus}
-      onChange={handleChange}
-      disabled={
-        !formData.primaryStatus ||
-        ["No Response", "Duplicate", "False Lead","Plan Cancelled"].includes(formData.primaryStatus)
-      }
-    >
-      {!formData.secondaryStatus && <option value="">Select Status</option>}
-      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
-        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
-          <option key={status} value={status}>
-            {status}
-          </option>
-        ))
-      ) : (
-        <option value="" disabled>No options available</option>
-      )}
-    </Form.Select>
-  </Form.Group>
-</Col>
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Secondary Status</Form.Label>
+                    <Form.Select
+                      name="secondaryStatus"
+                      value={formData.secondaryStatus}
+                      onChange={handleChange}
+                      disabled={
+                        !formData.primaryStatus ||
+                        ["No Response", "Duplicate", "False Lead", "Plan Cancelled"].includes(formData.primaryStatus)
+                      }
+                    >
+                      {!formData.secondaryStatus && <option value="">Select Status</option>}
+                      {formData.primaryStatus && leadDropdownOptions.secondary[formData.primaryStatus] ? (
+                        leadDropdownOptions.secondary[formData.primaryStatus].map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>No options available</option>
+                      )}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
 
                 <Col md={12}>
                   <Form.Group className="mb-3">
@@ -440,13 +479,13 @@ const EditOppLead = () => {
                   Submit
                 </button>
                 <button
-                className="btn btn-success"
-                type="button"
-                disabled={loading}
-                onClick={handleSubmitAndClose}
-              >
-                {loading ? "Submiting..." : "Submit & Close"}
-              </button>
+                  className="btn btn-success"
+                  type="button"
+                  disabled={loading}
+                  onClick={handleSubmitAndClose}
+                >
+                  {loading ? "Submiting..." : "Submit & Close"}
+                </button>
               </div>
             </Form>
           </div>

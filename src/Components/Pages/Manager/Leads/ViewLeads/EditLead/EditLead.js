@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import Select from "react-select";
 import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
@@ -44,7 +45,7 @@ const EditOppLead = () => {
     primaryStatus: '',
     secondaryStatus: '',
     origincity: '',
-    destination: '',
+    destination: [],
     primarySource: '',
     secondarysource: '',
   });
@@ -64,6 +65,8 @@ const EditOppLead = () => {
       "Others",
     ],
   };
+
+  const [destinationOptions, setDestinationOptions] = useState([]); // Multi-select options
 
   useEffect(() => {
     const fetchLeadData = async () => {
@@ -89,7 +92,9 @@ console.log("Fetched primarySource:", leadData.primarySource);
           primaryStatus: leadData.primaryStatus || '',
           secondaryStatus: leadData.secondaryStatus || '',
           origincity: leadData.origincity || '',
-          destination: leadData.destination || '',
+          destination: leadData.destination
+            ? leadData.destination.split(", ").map((item) => ({ value: item, label: item }))
+            : [],
           primarySource: leadData.primarySource || '',
           secondarysource: leadData.secondarysource || '',
         }));
@@ -99,8 +104,31 @@ console.log("Fetched primarySource:", leadData.primarySource);
       }
     };
 
+    const fetchDestinationOptions = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/destinations`);
+        const options = response.data.map((dest) => ({
+          value: dest.value, // ✅ Ensure it's { value, label }
+          label: dest.label,
+        }));
+        setDestinationOptions(options);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      }
+    };
+
+
     fetchLeadData();
+    fetchDestinationOptions();
   }, [leadid]);
+
+  const handleMultiSelectChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      destination: selectedOptions || [], // ✅ Always an array, never undefined
+    }));
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -122,7 +150,9 @@ console.log("Fetched primarySource:", leadData.primarySource);
       another_email: formData.another_email,
       another_phone_number: formData.another_phone_number,
       origincity: formData.origincity,
-      destination: formData.destination,
+      destination: formData.destination.length
+            ? formData.destination.map((item) => item.value).join(", ")
+            : "",
       corporate_id: formData.corporate_id,
       primaryStatus: formData.primaryStatus,
       secondaryStatus: formData.secondaryStatus,
@@ -142,6 +172,7 @@ console.log("Fetched primarySource:", leadData.primarySource);
     }
   };
    const [loading, setLoading] = useState(false);
+   
     const handleSubmitAndClose = async (e) => {
       e.preventDefault(); // Prevent default form submission
       setLoading(true);
@@ -314,11 +345,12 @@ console.log("Fetched primarySource:", leadData.primarySource);
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>
-                    <Form.Control
-                      type="text"
+                    <Select
+                      isMulti
                       name="destination"
+                      options={destinationOptions} // ✅ Use fetched options
                       value={formData.destination}
-                      onChange={handleChange}
+                      onChange={handleMultiSelectChange}
                     />
                   </Form.Group>
                 </Col>

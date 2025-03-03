@@ -1,6 +1,7 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import Select from "react-select";
 import "./AddLeads.css";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +34,7 @@ const DynamicForm = () => {
     primarySource: '',
     secondarysource: '',
     origincity: '',
-    destination: '',
+    destination: [], // Now correctly initialized as an array
     another_name: '',
     another_email: '',
     another_phone_number: '',
@@ -55,7 +56,7 @@ const DynamicForm = () => {
   const [emailError, setEmailError] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-   const [nameError, setNameError] = useState("");
+  const [nameError, setNameError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,10 +72,75 @@ const DynamicForm = () => {
     }
   };
 
+  
+      useEffect(() => {
+      const loadScript = (url, callback) => {
+        let script = document.createElement("script");
+        script.src = url;
+        script.async = true;
+        script.defer = true;
+        script.onload = callback;
+        document.body.appendChild(script);
+      };
+  
+      loadScript(
+        "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+        () => {
+          if (window.google) {
+            const autocomplete = new window.google.maps.places.Autocomplete(
+              document.getElementById("origincity"),
+              { types: ["(cities)"] }
+            );
+  
+            autocomplete.addListener("place_changed", () => {
+              const place = autocomplete.getPlace();
+              if (place && place.address_components) {
+                let city = "", state = "", country = "";
+                place.address_components.forEach((component) => {
+                  if (component.types.includes("locality")) {
+                    city = component.long_name;
+                  } else if (component.types.includes("administrative_area_level_1")) {
+                    state = component.long_name;
+                  } else if (component.types.includes("country")) {
+                    country = component.long_name;
+                  }
+                });
+                handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+              }
+            });
+          }
+        }
+      );
+    }, [handleChange]);
+
   const validateEmail = (email) => {
     // Basic email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
+  };
+
+  const [destinationOptions, setDestinationOptions] = useState([]);
+
+  // Fetch destination options when the component mounts
+  useEffect(() => {
+    const fetchDestinations = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/destinations`);
+        setDestinationOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      }
+    };
+
+    fetchDestinations();
+  }, []);
+
+
+  const handleDestinationChange = (selectedOptions) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      destination: selectedOptions, // ✅ Ensure destination is updated properly
+    }));
   };
 
   console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
@@ -90,7 +156,7 @@ const DynamicForm = () => {
       return;
     }
 
-   
+
 
     // Validate email
     if (!validateEmail(formData.email)) {
@@ -99,15 +165,19 @@ const DynamicForm = () => {
       return;
     }
 
-     // Validate phone number
-     if (formData.phone_number.length !== 10) {
+    // Validate phone number
+    if (formData.phone_number.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits.");
       setLoading(false);
       return;
     }
+    const formattedDestinations = formData.destination.map((dest) => dest.label);
 
     try {
-      const response = await axios.post(`${baseURL}/api/leads`, formData);
+      const response = await axios.post(`${baseURL}/api/leads`, {
+        ...formData,
+        destination: formattedDestinations, // ✅ Send only labels to the backend
+      });
       console.log(response.data);
       console.log(JSON.stringify(formData));
       // Set success message
@@ -126,7 +196,7 @@ const DynamicForm = () => {
         another_email: '',
         another_phone_number: '',
         origincity: '',
-        destination: '',
+        destination: [],
         description: '',
       });
       if (action === "saveAndClose") {
@@ -141,7 +211,7 @@ const DynamicForm = () => {
       setLoading(false);
     }
   };
- 
+
 
   const renderForm = () => {
     const subDropdownOptions = {
@@ -174,7 +244,7 @@ const DynamicForm = () => {
 
     return (
       <div className="addleads-form-grid">
-       <div className="addleads-input-group">
+        <div className="addleads-input-group">
           <label>
             Name<span style={{ color: "red" }}> *</span>
           </label>
@@ -355,6 +425,7 @@ const DynamicForm = () => {
           <label>Origin City</label>
           <input
             type="text"
+            id="origincity"
             name="origincity"
             placeholder="Enter Origin City"
             value={formData.origincity}
@@ -363,12 +434,11 @@ const DynamicForm = () => {
         </div>
         <div className="addleads-input-group">
           <label>Destination</label>
-          <input
-            type="text"
-            name="destination"
-            placeholder="Enter Destination"
+          <Select
+            isMulti
+            options={destinationOptions} // 
             value={formData.destination}
-            onChange={handleChange}
+            onChange={handleDestinationChange}
           />
         </div>
         <div className="addleads-input-group full-width">

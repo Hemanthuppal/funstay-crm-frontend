@@ -64,7 +64,7 @@ const EditOppLead = () => {
     ],
   };
 
-   const [destinationOptions, setDestinationOptions] = useState([]); // Multi-select options
+  const [destinationOptions, setDestinationOptions] = useState([]); // Multi-select options
 
   useEffect(() => {
     const fetchLeadData = async () => {
@@ -122,6 +122,46 @@ const EditOppLead = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  useEffect(() => {
+    const loadScript = (url, callback) => {
+      let script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.defer = true;
+      script.onload = callback;
+      document.body.appendChild(script);
+    };
+
+    loadScript(
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+      () => {
+        if (window.google) {
+          const autocomplete = new window.google.maps.places.Autocomplete(
+            document.getElementById("origincity"),
+            { types: ["(cities)"] }
+          );
+
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.address_components) {
+              let city = "", state = "", country = "";
+              place.address_components.forEach((component) => {
+                if (component.types.includes("locality")) {
+                  city = component.long_name;
+                } else if (component.types.includes("administrative_area_level_1")) {
+                  state = component.long_name;
+                } else if (component.types.includes("country")) {
+                  country = component.long_name;
+                }
+              });
+              handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+            }
+          });
+        }
+      }
+    );
+  }, [handleChange]);
+
   const handleMultiSelectChange = (selectedOptions) => {
     setFormData((prev) => ({
       ...prev,
@@ -145,8 +185,8 @@ const EditOppLead = () => {
       another_phone_number: formData.another_phone_number,
       origincity: formData.origincity,
       destination: formData.destination.length
-            ? formData.destination.map((item) => item.value).join(", ")
-            : "",
+        ? formData.destination.map((item) => item.value).join(", ")
+        : "",
       corporate_id: formData.corporate_id,
       primaryStatus: formData.primaryStatus,
       secondaryStatus: formData.secondaryStatus,
@@ -167,7 +207,7 @@ const EditOppLead = () => {
   };
 
   const [leadDropdownOptions] = useState({
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk" , "Plan Cancelled"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk", "Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
@@ -178,23 +218,17 @@ const EditOppLead = () => {
     },
   });
 
-   const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmitAndClose = async (e) => {
+    e.preventDefault(); // Prevent default form submission
     setLoading(true);
-    setError(null);
 
     try {
-      await axios.put(`${baseURL}/api/update-lead-customer/${leadid}`, formData);
-      setMessage("Updated Successfully");
-      setTimeout(() => {
-        setMessage("");
-        navigate("/a-view-lead"); // Redirect after success
-      }, 3000);
+      await handleFormSubmit(e); // Call the original handleSubmit function
+      navigate("/a-view-lead"); // Redirect to leads list page after saving
     } catch (error) {
-      console.error("Error updating lead:", error);
-      setError("Failed to update lead. Please try again.");
+      console.error("Error submitting form:", error);
     } finally {
       setLoading(false);
     }
@@ -339,9 +373,11 @@ const EditOppLead = () => {
                     <Form.Label>Origin City</Form.Label>
                     <Form.Control
                       type="text"
+                      id="origincity"
                       name="origincity"
                       value={formData.origincity}
                       onChange={handleChange}
+                      placeholder="Enter Origin City"
                     />
                   </Form.Group>
                 </Col>
@@ -408,7 +444,7 @@ const EditOppLead = () => {
                       onChange={handleChange}
                       disabled={
                         !formData.primaryStatus ||
-                        ["No Response", "Duplicate", "False Lead","Plan Cancelled"].includes(formData.primaryStatus)
+                        ["No Response", "Duplicate", "False Lead", "Plan Cancelled"].includes(formData.primaryStatus)
                       }
                     >
                       {!formData.secondaryStatus && <option value="">Select Status</option>}
@@ -447,7 +483,7 @@ const EditOppLead = () => {
                 <button
                   className="btn btn-success"
                   type="button"
-                  onClick={(e) => handleEditSubmit(e, "submitAndClose")}
+                  onClick={(e) => handleSubmitAndClose(e, "submitAndClose")}
                 >
                   Submit & Close
                 </button>

@@ -16,15 +16,15 @@ const EditOppLead = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
- 
+
 
   useEffect(() => {
-    
+
     const countries = getCountries();
     const callingCodes = countries.map(
       (country) => `+${getCountryCallingCode(country)}`
     );
-    const uniqueCodes = [...new Set(callingCodes)]; 
+    const uniqueCodes = [...new Set(callingCodes)];
 
     uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
 
@@ -74,8 +74,8 @@ const EditOppLead = () => {
         const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         const leadData = response.data;
 
-console.log("Fetched secondarysource:", leadData.secondarysource);
-console.log("Fetched primarySource:", leadData.primarySource);
+        console.log("Fetched secondarysource:", leadData.secondarysource);
+        console.log("Fetched primarySource:", leadData.primarySource);
         setFormData((prev) => ({
           ...prev,
           lead_type: leadData.lead_type || '',
@@ -135,8 +135,48 @@ console.log("Fetched primarySource:", leadData.primarySource);
     setFormData({ ...formData, [name]: value });
   };
 
+  useEffect(() => {
+    const loadScript = (url, callback) => {
+      let script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.defer = true;
+      script.onload = callback;
+      document.body.appendChild(script);
+    };
+
+    loadScript(
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+      () => {
+        if (window.google) {
+          const autocomplete = new window.google.maps.places.Autocomplete(
+            document.getElementById("origincity"),
+            { types: ["(cities)"] }
+          );
+
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.address_components) {
+              let city = "", state = "", country = "";
+              place.address_components.forEach((component) => {
+                if (component.types.includes("locality")) {
+                  city = component.long_name;
+                } else if (component.types.includes("administrative_area_level_1")) {
+                  state = component.long_name;
+                } else if (component.types.includes("country")) {
+                  country = component.long_name;
+                }
+              });
+              handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+            }
+          });
+        }
+      }
+    );
+  }, [handleChange]);
+
   const handleFormSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     const leadData = {
       lead_type: formData.lead_type,
@@ -151,8 +191,8 @@ console.log("Fetched primarySource:", leadData.primarySource);
       another_phone_number: formData.another_phone_number,
       origincity: formData.origincity,
       destination: formData.destination.length
-            ? formData.destination.map((item) => item.value).join(", ")
-            : "",
+        ? formData.destination.map((item) => item.value).join(", ")
+        : "",
       corporate_id: formData.corporate_id,
       primaryStatus: formData.primaryStatus,
       secondaryStatus: formData.secondaryStatus,
@@ -165,30 +205,30 @@ console.log("Fetched primarySource:", leadData.primarySource);
       await axios.put(`${baseURL}/api/update-lead-customer/${leadid}`, leadData);
       setMessage('Updated Successfully');
       setTimeout(() => setMessage(""), 3000);
-      
+
     } catch (error) {
       console.error("Error updating data:", error);
       setError("Failed to update data.");
     }
   };
-   const [loading, setLoading] = useState(false);
-   
-    const handleSubmitAndClose = async (e) => {
-      e.preventDefault(); // Prevent default form submission
-      setLoading(true);
-  
-      try {
-        await handleFormSubmit(e); // Call the original handleSubmit function
-        navigate("/m-view-leads"); // Redirect to leads list page after saving
-      } catch (error) {
-        console.error("Error submitting form:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmitAndClose = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true);
+
+    try {
+      await handleFormSubmit(e); // Call the original handleSubmit function
+      navigate("/m-view-leads"); // Redirect to leads list page after saving
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [leadDropdownOptions] = useState({
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk" , "Plan Cancelled"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk", "Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
@@ -207,13 +247,13 @@ console.log("Fetched primarySource:", leadData.primarySource);
 
           <div className="editlead-form">
             <Form className="s-edit-opp-lead-FormLable" onSubmit={handleFormSubmit}>
-            
+
               <h5>Lead Details</h5>
-              {message && <div className="alert alert-info">{message}</div>} 
-              {error && <div className="alert alert-danger">{error}</div>} 
+              {message && <div className="alert alert-info">{message}</div>}
+              {error && <div className="alert alert-danger">{error}</div>}
 
               <Row>
-              
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>
@@ -226,57 +266,57 @@ console.log("Fetched primarySource:", leadData.primarySource);
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>
-      Phone Number
-    </Form.Label>
-    <div style={{ display: "flex", alignItems: "center" }}>
-    
-      <Form.Select
-        name="country_code"
-        value={formData.country_code || "+91"} 
-        onChange={handleChange}
-        style={{
-          width: "80px",
-          marginRight: "10px",
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      >
-        {countryCodeOptions.map((code) => (
-          <option key={code} value={code}>
-            {code}
-          </option>
-        ))}
-      </Form.Select>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Phone Number
+                    </Form.Label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
 
-      
-      <Form.Control
-        type="text"
-        name="phone_number"
-        placeholder="Enter Phone Number"
-        value={formData.phone_number || ""}
-        onChange={(e) => {
-          const value = e.target.value;
-          if (/^\d*$/.test(value)) {
-            handleChange(e);
-          }
-        }}
-       
-        style={{
-          flex: 1,
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-        required
-      />
-    </div>
+                      <Form.Select
+                        name="country_code"
+                        value={formData.country_code || "+91"}
+                        onChange={handleChange}
+                        style={{
+                          width: "80px",
+                          marginRight: "10px",
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {countryCodeOptions.map((code) => (
+                          <option key={code} value={code}>
+                            {code}
+                          </option>
+                        ))}
+                      </Form.Select>
 
-  
-  </Form.Group>
-</Col>
+
+                      <Form.Control
+                        type="text"
+                        name="phone_number"
+                        placeholder="Enter Phone Number"
+                        value={formData.phone_number || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleChange(e);
+                          }
+                        }}
+
+                        style={{
+                          flex: 1,
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                        required
+                      />
+                    </div>
+
+
+                  </Form.Group>
+                </Col>
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
@@ -336,9 +376,11 @@ console.log("Fetched primarySource:", leadData.primarySource);
                     <Form.Label>Origin City</Form.Label>
                     <Form.Control
                       type="text"
+                      id="origincity"
                       name="origincity"
                       value={formData.origincity}
                       onChange={handleChange}
+                      placeholder="Enter Origin City"
                     />
                   </Form.Group>
                 </Col>
@@ -354,7 +396,7 @@ console.log("Fetched primarySource:", leadData.primarySource);
                     />
                   </Form.Group>
                 </Col>
-           
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Secondary Email</Form.Label>
@@ -377,7 +419,7 @@ console.log("Fetched primarySource:", leadData.primarySource);
                     />
                   </Form.Group>
                 </Col>
-             
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Primary Status</Form.Label>
@@ -442,13 +484,13 @@ console.log("Fetched primarySource:", leadData.primarySource);
                   Submit
                 </button>
                 <button
-                className="btn btn-success"
-                type="button"
-                disabled={loading}
-                onClick={handleSubmitAndClose}
-              >
-                {loading ? "Submiting..." : "Submit & Close"}
-              </button>
+                  className="btn btn-success"
+                  type="button"
+                  disabled={loading}
+                  onClick={handleSubmitAndClose}
+                >
+                  {loading ? "Submiting..." : "Submit & Close"}
+                </button>
               </div>
             </Form>
           </div>

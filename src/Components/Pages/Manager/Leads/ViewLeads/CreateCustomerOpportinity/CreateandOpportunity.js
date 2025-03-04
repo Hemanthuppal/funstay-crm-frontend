@@ -3,7 +3,7 @@ import "./CreateandOpportunity.css";
 import axios from 'axios';
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/ManagerNavbar/Navbar";
-
+import Select from "react-select";
 import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
@@ -41,7 +41,7 @@ const CreateCustomerOpportunity = () => {
   });
   const [formData, setFormData] = useState({
     origincity: '',
-    destination: "",
+    destination: [],
     adults_count: "",
     children_count: "",
     approx_budget: "",
@@ -87,6 +87,46 @@ const CreateCustomerOpportunity = () => {
     }
   };
 
+  useEffect(() => {
+    const loadScript = (url, callback) => {
+      let script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.defer = true;
+      script.onload = callback;
+      document.body.appendChild(script);
+    };
+
+    loadScript(
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+      () => {
+        if (window.google) {
+          const autocomplete = new window.google.maps.places.Autocomplete(
+            document.getElementById("origincity"),
+            { types: ["(cities)"] }
+          );
+
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.address_components) {
+              let city = "", state = "", country = "";
+              place.address_components.forEach((component) => {
+                if (component.types.includes("locality")) {
+                  city = component.long_name;
+                } else if (component.types.includes("administrative_area_level_1")) {
+                  state = component.long_name;
+                } else if (component.types.includes("country")) {
+                  country = component.long_name;
+                }
+              });
+              handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+            }
+          });
+        }
+      }
+    );
+  }, [handleChange]);
+
   const handleChildAgeChange = (index, value) => {
     const updatedAges = [...childrenAges];
     updatedAges[index] = value;
@@ -120,59 +160,6 @@ const CreateCustomerOpportunity = () => {
     }
   };
 
-
-  const handleSubmitOpportunity =  async (isSaveAndClose = false) => {
-    setLoading(true);
-    setError(null);
-
-    if (!formData.origincity || !formData.destination || !startDate || !endDate) {
-      setMessage(" Required fields must be filled in.");
-      setTimeout(() => setMessage(""), 3000);
-      setLoading(false);
-      return;
-    }
-
-    const opportunityData = {
-      leadid: leadid,
-      customerid: customerData.id,
-      origincity: formData.origincity,
-      destination: formData.destination,
-      start_date: startDate,
-      end_date: endDate,
-      duration: duration,
-      adults_count: formData.adults_count,
-      children_count: formData.children_count,
-      child_ages: childrenAges.join(","),
-      approx_budget: formData.approx_budget,
-      notes: formData.notes,
-      reminder_setting: formData.reminder_setting,
-    };
-
-    console.log("Opportunity data being submitted:", JSON.stringify(opportunityData, null, 2));
-
-    try {
-      const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);
-      if (response.status === 201) {
-        setMessage("Opportunity created successfully!");
-        setTimeout(() => setMessage(""), 3000);
-
-        if (!isSaveAndClose) {
-          navigate("/m-potential-leads"); // Default navigation
-        }
-  
-        return true; // Success
-      }
-    } catch (err) {
-      console.error("Error creating opportunity:", err);
-      setError("Error creating opportunity. Please try again.");
-      setMessage("Failed to create opportunity. Please try again.");
-      setTimeout(() => setMessage(""), 3000);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
   useEffect(() => {
     const fetchLeadData = async () => {
       setLoading(true);
@@ -180,11 +167,14 @@ const CreateCustomerOpportunity = () => {
         const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         console.log("Fetched lead data:", JSON.stringify(response.data, null, 2));
         setLeadData(response.data);
+        const LeadData = response.data;
 
 
 
         setFormData((prev) => ({
-          ...prev, destination: response.data.destination,
+          ...prev, destination: LeadData.destination
+            ? LeadData.destination.split(", ").map((item) => ({ value: item, label: item }))
+            : [],
           notes: response.data.description || "",
           description: response.data.description || "",
           origincity: response.data.origincity || "",
@@ -228,9 +218,85 @@ const CreateCustomerOpportunity = () => {
       }
     };
 
+    const fetchDestinationOptions = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/destinations`);
+        const options = response.data.map((dest) => ({
+          value: dest.value, // ✅ Ensure it's { value, label }
+          label: dest.label,
+        }));
+        setDestinationOptions(options);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      }
+    };
+
     fetchLeadData();
     fetchCustomerData();
+    fetchDestinationOptions();
   }, [leadid]);
+
+  const [destinationOptions, setDestinationOptions] = useState([]);
+  const handleMultiSelectChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      destination: selectedOptions || [], // ✅ Always an array, never undefined
+    }));
+  };
+
+  const handleSubmitOpportunity = async (isSaveAndClose = false) => {
+    setLoading(true);
+    setError(null);
+
+    if (!formData.origincity || !formData.destination || !startDate || !endDate) {
+      setMessage(" Required fields must be filled in.");
+      setTimeout(() => setMessage(""), 3000);
+      setLoading(false);
+      return;
+    }
+
+    const opportunityData = {
+      leadid: leadid,
+      customerid: customerData.id,
+      origincity: formData.origincity,
+      destination: formData.destination.length
+      ? formData.destination.map((item) => item.value).join(", ")
+      : "",
+      start_date: startDate,
+      end_date: endDate,
+      duration: duration,
+      adults_count: formData.adults_count,
+      children_count: formData.children_count,
+      child_ages: childrenAges.join(","),
+      approx_budget: formData.approx_budget,
+      notes: formData.notes,
+      reminder_setting: formData.reminder_setting,
+    };
+
+    console.log("Opportunity data being submitted:", JSON.stringify(opportunityData, null, 2));
+
+    try {
+      const response = await axios.post(`${baseURL}/api/opportunities/create`, opportunityData);
+      if (response.status === 201) {
+        setMessage("Opportunity created successfully!");
+        setTimeout(() => setMessage(""), 3000);
+
+        if (!isSaveAndClose) {
+          navigate("/m-potential-leads"); // Default navigation
+        }
+
+        return true; // Success
+      }
+    } catch (err) {
+      console.error("Error creating opportunity:", err);
+      setError("Error creating opportunity. Please try again.");
+      setMessage("Failed to create opportunity. Please try again.");
+      setTimeout(() => setMessage(""), 3000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div className="salesViewLeadsContainer">
@@ -354,6 +420,7 @@ const CreateCustomerOpportunity = () => {
                 <label>Origin City<span style={{ color: "red" }}> *</span></label>
                 <input
                   type="text"
+                  id="origincity"
                   name="origincity"
                   value={formData.origincity}
                   onChange={handleChange}
@@ -362,12 +429,12 @@ const CreateCustomerOpportunity = () => {
               </div>
               <div className="createcustomer-input-group">
                 <label>Destination<span style={{ color: "red" }}> *</span></label>
-                <input
-                  type="text"
+                <Select
+                  isMulti
                   name="destination"
+                  options={destinationOptions} // ✅ Use fetched options
                   value={formData.destination}
-                  onChange={handleChange}
-                  required
+                  onChange={handleMultiSelectChange}
                 />
               </div>
               <div className="createcustomer-input-group">
@@ -491,8 +558,8 @@ const CreateCustomerOpportunity = () => {
             <button className="createcustomer-btn createcustomer-close-btn" onClick={() => navigate(-1)}>
               Back
             </button>
-             {/* Save Button */}
-             <button
+            {/* Save Button */}
+            <button
               className="createcustomer-btn createcustomer-submit-btn"
               onClick={async () => {
                 if (activeTab === "customer") {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import Select from "react-select";
 import Navbar from "./../../../../Shared/ManagerNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
@@ -9,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
-const EditOppLead = () => {
+const EditOppLead = () => { 
   const location = useLocation();
   const { leadid } = location.state;
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const EditOppLead = () => {
     primaryStatus: '',
     secondaryStatus: '',
     origincity: '',
-    destination: '',
+    destination: [], 
     start_date: '',
     end_date: '',
     duration: '',
@@ -108,8 +109,9 @@ const EditOppLead = () => {
         setFormData((prev) => ({
           ...prev,
           origincity: opportunityData.origincity || '',
-          destination: opportunityData.destination || '',
-         
+          destination: opportunityData.destination
+            ? opportunityData.destination.split(", ").map((item) => ({ value: item, label: item }))
+            : [],
           start_date: formattedStartDate,
           end_date: formattedEndDate,
           duration: opportunityData.duration || '',
@@ -126,9 +128,31 @@ const EditOppLead = () => {
       }
     };
 
+    const fetchDestinationOptions = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/destinations`);
+        const options = response.data.map((dest) => ({
+          value: dest.value, // ✅ Ensure it's { value, label }
+          label: dest.label,
+        }));
+        setDestinationOptions(options);
+      } catch (error) {
+        console.error("Error fetching destinations:", error);
+      }
+    };
+
     fetchLeadData();
     fetchOpportunityData();
+    fetchDestinationOptions();
   }, [leadid]);
+
+  const [destinationOptions, setDestinationOptions] = useState([]);
+  const handleMultiSelectChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      destination: selectedOptions || [], // ✅ Always an array, never undefined
+    }));
+  };
   const [leadDropdownOptions] = useState({
     primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
     secondary: {
@@ -208,6 +232,46 @@ const EditOppLead = () => {
     }
   };
 
+  useEffect(() => {
+        const loadScript = (url, callback) => {
+          let script = document.createElement("script");
+          script.src = url;
+          script.async = true;
+          script.defer = true;
+          script.onload = callback;
+          document.body.appendChild(script);
+        };
+    
+        loadScript(
+          "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+          () => {
+            if (window.google) {
+              const autocomplete = new window.google.maps.places.Autocomplete(
+                document.getElementById("origincity"),
+                { types: ["(cities)"] }
+              );
+    
+              autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (place && place.address_components) {
+                  let city = "", state = "", country = "";
+                  place.address_components.forEach((component) => {
+                    if (component.types.includes("locality")) {
+                      city = component.long_name;
+                    } else if (component.types.includes("administrative_area_level_1")) {
+                      state = component.long_name;
+                    } else if (component.types.includes("country")) {
+                      country = component.long_name;
+                    }
+                  });
+                  handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+                }
+              });
+            }
+          }
+        );
+      }, [handleChange]);
+
   const handleChildrenCountChange = (e) => {
     const { value } = e.target;
     const count = parseInt(value, 10);
@@ -270,7 +334,9 @@ const EditOppLead = () => {
 
     const opportunityData = {
       origincity: formData.origincity,
-      destination: formData.destination,
+      destination: formData.destination.length
+        ? formData.destination.map((item) => item.value).join(", ")
+        : "",
       start_date: formData.start_date,
       end_date: formData.end_date,
       duration: formData.duration,
@@ -505,6 +571,7 @@ const EditOppLead = () => {
                     <Form.Label>Origin City</Form.Label>
                     <Form.Control
                       type="text"
+                      id="origincity"
                       name="origincity"
                       value={formData.origincity}
                       onChange={handleChange}
@@ -514,11 +581,12 @@ const EditOppLead = () => {
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>
-                    <Form.Control
-                      type="text"
+                    <Select
+                      isMulti
                       name="destination"
+                      options={destinationOptions} // ✅ Use fetched options
                       value={formData.destination}
-                      onChange={handleChange}
+                      onChange={handleMultiSelectChange}
                     />
                   </Form.Group>
                 </Col>

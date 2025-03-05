@@ -112,7 +112,7 @@ const Destinations = () => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Enter Destination"
+                  placeholder="Enter New Destination"
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                 />

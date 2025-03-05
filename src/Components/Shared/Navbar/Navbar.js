@@ -1,6 +1,6 @@
 import React, { useState,useContext ,useEffect} from "react";
 import { Link } from "react-router-dom";
-import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaTachometerAlt, FaBell, FaEnvelope, FaCaretDown,FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry, FaHSquare          } from "react-icons/fa";
+import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaTachometerAlt, FaMapMarkerAlt,FaBell, FaEnvelope, FaCaretDown,FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry, FaHSquare          } from "react-icons/fa";
 import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -289,7 +289,7 @@ const Navbar = ({ onToggleSidebar }) => {
                   }`}
               >
                 <Link className="nav-link" to="/a-destinations" onClick={handleNavItemClick}>
-                  <FaPeopleCarry className="admin-nav-icon" />
+                  <FaMapMarkerAlt  className="admin-nav-icon" />
                   {!collapsed && <span className="link_text">All Destinations </span>}
                 </Link>
 

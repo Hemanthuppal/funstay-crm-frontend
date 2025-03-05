@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import DataTable from "./../../../../Layout/Table/TableLayout";
+import DataTable from "./../../../../Layout/Table/TableLayoutOpp";
 import { Button, Row, Col, Form } from "react-bootstrap";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaSyncAlt, FaCopy } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaSyncAlt, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
 import "./ViewLeads.css";
 import axios from "axios";
@@ -15,6 +15,19 @@ const ViewLeads = () => {
   const [message, setMessage] = useState('');
   const { authToken, userId, managerId, userName } = useContext(AuthContext);
   const [data, setData] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterOppStatus1, setFilterOppStatus1] = useState('');
+  const [filterOppStatus2, setFilterOppStatus2] = useState('');
+  const [filterAssignee, setFilterAssignee] = useState("");
+  const [showDateRange, setShowDateRange] = useState(false);
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+  const [filterDestination, setFilterDestination] = useState("");
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState('');
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState('');
+
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -99,7 +112,7 @@ const ViewLeads = () => {
   };
 
   const dropdownOptions = {
-    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk","Plan Cancelled"],
+    primary: ["New", "No Response", "Duplicate", "False Lead", "Junk", "Plan Cancelled"],
     secondary: {
       New: ["Yet to Contact", "Not picking up call", "Asked to call later"],
       "No Response": [],
@@ -191,6 +204,42 @@ const ViewLeads = () => {
       console.error("Error assigning lead:", error);
     }
   };
+
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      const matchesFreeText = !searchTerm || Object.values(item).some(val => val && val.toString().toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesPrimaryStatus =
+        !filterOppStatus1 || (item.primaryStatus && item.primaryStatus.toLowerCase() === filterOppStatus1.toLowerCase());
+      const matchesSecondaryStatus =
+        !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() === filterOppStatus2.toLowerCase());
+      const matchesDestination = !filterDestination || (item.destination && item.destination.toLowerCase() == filterDestination.toLowerCase());
+      const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
+      const matchesDateRange = (() => {
+        if (appliedFilterStartDate && appliedFilterEndDate) {
+          const start = new Date(appliedFilterStartDate);
+          const end = new Date(appliedFilterEndDate);
+          const createdAt = new Date(item.created_at);
+          return createdAt >= start && createdAt <= end;
+        }
+        return true;
+      })();
+
+
+      return matchesFreeText && matchesPrimaryStatus && matchesDestination && matchesAssignee && matchesSecondaryStatus && matchesDateRange;
+    });
+  }, [searchTerm, filterOppStatus1, filterAssignee, filterDestination, filterOppStatus2, appliedFilterStartDate, appliedFilterEndDate, data]);
+
+  const uniqueDestinations = useMemo(() => {
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+  }, [data]);
 
 
   const columns = useMemo(
@@ -399,10 +448,10 @@ const ViewLeads = () => {
               style={{ color: "ff9966", cursor: "pointer" }}
               onClick={() => handleAddUser(row.original)}
             />
-             <FaComment
-                          style={{ color: "#ff9966", cursor: "pointer" }}
-                          onClick={() => navigate(`/m-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
-                        />
+            <FaComment
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() => navigate(`/m-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
+            />
           </div>
         ),
       }
@@ -424,7 +473,81 @@ const ViewLeads = () => {
                 <Button onClick={handleAddLead}>Add Leads</Button>
               </Col>
             </Row>
-            <DataTable columns={columns} data={data} />
+            <Row className="mb-3 align-items-center">
+              <Col md={6} className="d-flex align-items-center gap-2">
+                <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                {showDateRange ? (
+                  <FaTimes
+                    onClick={() => {
+                      setShowDateRange(false);
+                      setFilterStartDate("");
+                      setFilterEndDate("");
+                      setAppliedFilterStartDate("");
+                      setAppliedFilterEndDate("");
+                    }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
+                ) : (
+                  <FaCalendarAlt onClick={() => setShowDateRange(true)} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
+                )}
+                {showDateRange && (
+                  <div className="d-flex align-items-center gap-2">
+                    <input type="date" className="form-control" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} />
+                    <span>to</span>
+                    <input type="date" className="form-control" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} />
+                    <button className="btn btn-primary" onClick={() => { setAppliedFilterStartDate(filterStartDate); setAppliedFilterEndDate(filterEndDate); }}>OK</button>
+                  </div>
+                )}
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={3}>
+                <select className="form-select" value={filterDestination} onChange={(e) => setFilterDestination(e.target.value)}>
+                  <option value="">Destinations</option>
+                  {uniqueDestinations.map((dest) => (
+                    <option key={dest} value={dest}>{dest}</option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterOppStatus1}
+                  onChange={(e) => {
+                    setFilterOppStatus1(e.target.value);
+                    setFilterOppStatus2(""); // Reset secondary filter when primary changes
+                  }}
+                >
+                  <option value="">Primary Status</option>
+                  {dropdownOptions.primary.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterOppStatus2}
+                  onChange={(e) => setFilterOppStatus2(e.target.value)}
+                >
+                  <option value="">Secondary Status</option>
+                  {dropdownOptions.secondary[filterOppStatus1]?.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select className="form-select" value={filterAssignee} onChange={(e) => setFilterAssignee(e.target.value)}>
+                  <option value="">Associates</option>
+                  {employees.map((employee) => (
+                    <option key={employee.id} value={employee.name}>{employee.name}</option>
+                  ))}
+                </select>
+              </Col>
+            </Row>
+            <DataTable columns={columns} data={filteredData} />
           </div>
         </div>
       </div>

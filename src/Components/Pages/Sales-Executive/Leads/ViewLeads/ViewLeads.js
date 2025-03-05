@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import DataTable from "./../../../../Layout/Table/TableLayout";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaCopy } from "react-icons/fa";
+import DataTable from "./../../../../Layout/Table/TableLayoutOpp";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
 import { Button, Row, Col } from "react-bootstrap";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./ViewLeads.css";
@@ -12,12 +12,24 @@ import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { webhookUrl } from "../../../../Apiservices/Api";
 
 const ViewLeads = () => {
-  const { authToken, userRole, userId } = useContext(AuthContext);
+  const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState('');
   const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
+
+  // Filtering states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterDestination, setFilterDestination] = useState("");
+  const [filterOppStatus1, setFilterOppStatus1] = useState('');
+  const [filterOppStatus2, setFilterOppStatus2] = useState('');
+  const [showDateRange, setShowDateRange] = useState(false);
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState('');
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState('');
 
   const generateWhatsAppLink = (phoneNumber) => {
     return `https://wa.me/${phoneNumber}`;
@@ -37,10 +49,16 @@ const ViewLeads = () => {
     navigate('/add-lead');
   };
 
+  const handleViewLeads = (lead) => {
+    navigate(`/view-lead/${lead.leadid}`, {
+      state: { leadid: lead.leadid },
+    });
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      setMessage("Copied to clipboard!"); // Optional: Show a message
-      setTimeout(() => setMessage(""), 1000); // Clear message after 3 seconds
+      setMessage("Copied to clipboard!");
+      setTimeout(() => setMessage(""), 1000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
@@ -65,12 +83,12 @@ const ViewLeads = () => {
           ? {
             ...row,
             primaryStatus: value,
-            secondaryStatus: "", // Reset secondary status when primary changes
+            secondaryStatus: "",
           }
           : row
       )
     );
-    updateLeadStatus(rowId, value, ""); // Update without secondary status
+    updateLeadStatus(rowId, value, "");
   };
 
   const handleSecondaryStatusChange = (value, rowId) => {
@@ -91,9 +109,8 @@ const ViewLeads = () => {
     console.log(JSON.stringify(body, null, 2));
     try {
       const response = await axios.put(`${baseURL}/api/leads/status/${leadId}`, body);
-
       if (response.status === 200) {
-        setMessage(response.data.message); // Use the message from the response
+        setMessage(response.data.message);
         setTimeout(() => setMessage(""), 3000);
         console.log('Status updated:', response.data);
       } else {
@@ -103,7 +120,7 @@ const ViewLeads = () => {
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      setMessage('An error occurred while updating the status. Please try again.');
+      setMessage(' An error occurred while updating the status. Please try again.');
       setTimeout(() => setMessage(""), 3000);
     }
   };
@@ -139,6 +156,7 @@ const ViewLeads = () => {
       socket.disconnect();
     };
   }, []);
+
   useEffect(() => {
     const fetchEnquiries = async () => {
       // console.log("userid=",userId) 
@@ -150,12 +168,10 @@ const ViewLeads = () => {
       try {
         const response = await fetch(`${webhookUrl}/api/enquiries`, {
           headers: {
-            Authorization: `Bearer ${authToken}`, // Use authToken for secure API calls
+            Authorization: `Bearer ${authToken}`,
           },
         });
         const data = await response.json();
-        // console.log("data=", data.length);
-
         const filteredData = data.filter(
           (enquiry) => enquiry.assignedSalesId == userId && enquiry.status == 'lead'
         );
@@ -169,22 +185,52 @@ const ViewLeads = () => {
     fetchEnquiries();
   }, [userId, authToken]);
 
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      const matchesSearchTerm =
+        !searchTerm ||
+        Object.values(item).some(
+          (val) =>
+            val &&
+            val.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
+      const matchesPrimaryStatus =
+        !filterOppStatus1 || (item.primaryStatus && item.primaryStatus.toLowerCase() === filterOppStatus1.toLowerCase());
+      const matchesSecondaryStatus =
+        !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() === filterOppStatus2.toLowerCase());
+      const matchesDestination = !filterDestination || (item.destination && item.destination.toLowerCase() == filterDestination.toLowerCase());
+      const matchesDateRange = (() => {
+        if (appliedFilterStartDate && appliedFilterEndDate) {
+          const start = new Date(appliedFilterStartDate);
+          const end = new Date(appliedFilterEndDate);
+          const createdAt = new Date(item.created_at);
+          return createdAt >= start && createdAt <= end;
+        }
+        return true;
+      })();
 
-
-  const handleViewLeads = (lead) => {
-    navigate(`/view-lead/${lead.leadid}`, {
-      state: { leadid: lead.leadid },
+      return matchesSearchTerm && matchesPrimaryStatus && matchesDestination && matchesSecondaryStatus && matchesDateRange;
     });
-  };
+  }, [searchTerm, filterOppStatus1, filterOppStatus2, filterDestination, appliedFilterStartDate, appliedFilterEndDate, data]);
+
+  const uniqueDestinations = useMemo(() => {
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+  }, [data]);
 
   const columns = useMemo(
     () => [
-
       {
         Header: "Lead Id",
         accessor: "leadid",
-
       },
       {
         Header: "Name",
@@ -193,14 +239,13 @@ const ViewLeads = () => {
           <div>
             <div
               style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}
-              onClick={() => handleViewLeads(row.original)} // Navigate on click
+              onClick={() => handleViewLeads(row.original)}
             >
               {row.original.name}
             </div>
           </div>
         ),
       },
-      // Phone Number Column
       {
         Header: "Mobile",
         accessor: "phone_number",
@@ -231,9 +276,9 @@ const ViewLeads = () => {
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between", // Push copy button to the right
+              justifyContent: "space-between",
               width: "100%",
-              maxWidth: "200px", // Adjust width as needed
+              maxWidth: "200px",
             }}
           >
             <div
@@ -243,7 +288,7 @@ const ViewLeads = () => {
                 textOverflow: "ellipsis",
                 maxWidth: "150px",
               }}
-              title={row.original.email} // Show full email on hover
+              title={row.original.email}
             >
               {row.original.email}
             </div>
@@ -255,7 +300,6 @@ const ViewLeads = () => {
           </div>
         ),
       },
-
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
@@ -299,20 +343,14 @@ const ViewLeads = () => {
           );
         },
       },
-
       {
         Header: "Source",
         accessor: "sources",
       },
-      // Customer Status Column
       {
         Header: "Customer Status",
         accessor: "customer_status",
-
-
       },
-
-
       {
         Header: "Actions",
         Cell: ({ row }) => (
@@ -329,14 +367,13 @@ const ViewLeads = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleAddUser(row.original)}
             />
-             <FaComment
-                          style={{ color: "#ff9966", cursor: "pointer" }}
-                          onClick={() => navigate(`/comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
-                        />
+            <FaComment
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() => navigate(`/comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
+            />
           </div>
         ),
       }
-
     ],
     [data]
   );
@@ -350,12 +387,108 @@ const ViewLeads = () => {
             <Row className="mb-3">
               <Col className="d-flex justify-content-between align-items-center">
                 <h3>Lead Details</h3>
-
                 {message && <div className="alert alert-info">{message}</div>}
                 <Button onClick={handleAddLead}>Add Leads</Button>
               </Col>
             </Row>
-            <DataTable columns={columns} data={data} />
+            <Row className="mb-3 align-items-center">
+              <Col md={6} className="d-flex align-items-center gap-2">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Free Text Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {showDateRange ? (
+                  <FaTimes
+                    onClick={() => {
+                      setShowDateRange(false);
+                      setFilterStartDate("");
+                      setFilterEndDate("");
+                      setAppliedFilterStartDate("");
+                      setAppliedFilterEndDate("");
+                    }}
+                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                    title="Hide Date Range"
+                  />
+                ) : (
+                  <FaCalendarAlt
+                    onClick={() => setShowDateRange(true)}
+                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
+                    title="Show Date Range"
+                  />
+                )}
+                {showDateRange && (
+                  <div className="d-flex align-items-center gap-2">
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={filterStartDate}
+                      onChange={(e) => setFilterStartDate(e.target.value)}
+                    />
+                    <span>to</span>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={filterEndDate}
+                      onChange={(e) => setFilterEndDate(e.target.value)}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        setAppliedFilterStartDate(filterStartDate);
+                        setAppliedFilterEndDate(filterEndDate);
+                      }}
+                    >
+                      OK
+                    </button>
+                  </div>
+                )}
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={3}>
+                <select className="form-select" value={filterDestination} onChange={(e) => setFilterDestination(e.target.value)}>
+                  <option value="">Destinations</option>
+                  {uniqueDestinations.map((dest) => (
+                    <option key={dest} value={dest}>{dest}</option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterOppStatus1}
+                  onChange={(e) => {
+                    setFilterOppStatus1(e.target.value);
+                    setFilterOppStatus2(""); // Reset secondary filter when primary changes
+                  }}
+                >
+                  <option value="">Primary Status</option>
+                  {dropdownOptions.primary.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+              <Col md={3}>
+                <select
+                  className="form-select"
+                  value={filterOppStatus2}
+                  onChange={(e) => setFilterOppStatus2(e.target.value)}
+                >
+                  <option value="">Secondary Status</option>
+                  {dropdownOptions.secondary[filterOppStatus1]?.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </Col>
+            </Row>
+            <DataTable columns={columns} data={filteredData} />
           </div>
         </div>
       </div>

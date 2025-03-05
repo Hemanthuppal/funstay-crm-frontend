@@ -10,13 +10,13 @@ import './PotentialLeads.css';
 import axios from 'axios';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 
-const Potentialleads = () => {
+const Potentialleads = () => { 
   const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState(""); 
   const [filterDestination, setFilterDestination] = useState("");
   const [filterOppStatus1, setFilterOppStatus1] = useState("");
   const [filterOppStatus2, setFilterOppStatus2] = useState("");

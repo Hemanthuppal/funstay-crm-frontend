@@ -102,38 +102,44 @@ function FollowUp() {
   
     // Create dynamic schedule data based on filtered leads and selected day
     const dynamicSchedule = travelOpportunity
-      .filter((opportunity) => {
-        if (!opportunity.leadid || !opportunity.reminder_setting) return false; // Prevent errors
-  
-        // Convert reminder_setting to a valid date object
-        const reminderDate = new Date(opportunity.reminder_setting);
-        if (isNaN(reminderDate)) return false; // Skip invalid dates
-  
-        const reminderDay = weekdays[reminderDate.getDay()];
-        const reminderYear = reminderDate.getFullYear();
-        const currentYear = new Date().getFullYear(); // Get current year
-  
-        return (
-          reminderDay == selectedDay &&
-          reminderYear == currentYear &&
-          leadsLookup[opportunity.leadid]
-        );
-      })
-      .map((opportunity) => {
-        const lead = leadsLookup[opportunity.leadid];
-  
-        console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
-  
-        return {
-          time: new Date(opportunity.reminder_setting).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }), // Dynamic time format
-          title: opportunity.notes || "N/A",
-          color: "Sales-badge-orange",
-          lead: lead ? lead.name : "Unknown Lead",
-          leadid: opportunity.leadid,
-        };
-      });
-  
-    setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
+  .filter((opportunity) => {
+    if (!opportunity.leadid || !opportunity.reminder_setting) return false;
+
+    const reminderDate = new Date(opportunity.reminder_setting);
+    if (isNaN(reminderDate)) return false;
+
+    const reminderDay = weekdays[reminderDate.getDay()];
+    const reminderYear = reminderDate.getFullYear();
+    const currentYear = new Date().getFullYear();
+
+    return (
+      reminderDay === selectedDay &&
+      reminderYear === currentYear &&
+      leadsLookup[opportunity.leadid]
+    );
+  })
+  .map((opportunity) => {
+    const lead = leadsLookup[opportunity.leadid];
+
+    return {
+      time: new Date(opportunity.reminder_setting), // Keep time as Date object
+      title: opportunity.notes || "N/A",
+      color: "Sales-badge-orange",
+      lead: lead ? lead.name : "Unknown Lead",
+      leadid: opportunity.leadid,
+    };
+  })
+  .sort((a, b) => a.time - b.time) // Sorting by Date object
+  .map((opportunity) => ({
+    time: opportunity.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }),
+    title: opportunity.title,
+    color: opportunity.color,
+    lead: opportunity.lead,
+    leadid: opportunity.leadid,
+  }));
+
+setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
+
   }, [selectedDay, travelOpportunity, leads, userId, loading]);
   
 

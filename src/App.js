@@ -82,6 +82,15 @@ import M_viewallleads from "./Components/Pages/Manager/Viewallleads/InDetailView
 import S_viewallleads from "./Components/Pages/Sales-Executive/Viewallleads/InDetailViewLeads";
 import Destinations from "./Components/Pages/Admin/Destinations/Destinations";
 
+import Archive from "./Components/Pages/Admin/Archieve/Archive";
+import Email from "./Components/Pages/Admin/Potentialleads/Email/Email";
+import A_myopp from "./Components/Pages/Admin/Leads/Myleads/Myleads";
+import A_MyOpplead from "./Components/Pages/Admin/Potentialleads/MyOpp/Myopp";
+import A_MyLeadDetailss from "./Components/Pages/Admin/Potentialleads/MyOppView";
+import A_MyCreateCustomerOpportunity from "./Components/Pages/Admin/Leads/MyCreateCustomerOpportinity/CreateandOpportunity";
+import NotFound from "./Components/Shared/NotFound/NotFound";
+import EmailChat from "./Email";
+import Tags from "./Components/Pages/Admin/Tags/Tag";
 
 function App() {
     return (
@@ -226,6 +235,44 @@ function App() {
                 <Route path="/a-comments/:leadid" element={<A_CommentsPage />} />
 
                 <Route path="/a-destinations" element={<Destinations />} />
+
+
+                <Route path="/a-archivedata" element={<Archive />} />
+
+
+
+                <Route path="/a-email/:leadId" element={<Email />} />
+
+
+
+
+
+
+                <Route path="/a-myleads" element={<A_myopp />} />
+                <Route path="/a-myview-lead/:leadid" element={<A_InDetailViewLeads />} />
+                <Route path="/a-myedit-lead/:leadid" element={<A_EditLead />} />
+                <Route path="/a-mycreate-customer-opportunity/:leadid" element={<A_MyCreateCustomerOpportunity />} />
+                <Route path="/a-mycomments/:leadid" element={<A_CommentsPage />} />
+
+
+
+
+                <Route path="/a-myopp" element={<A_MyOpplead />} />
+                <Route path="/a-myedit-opportunity/:leadid" element={<A_EditOppLead />} />
+                <Route path="/a-mydetails/:leadid" element={<A_MyLeadDetailss />} />
+
+                
+                <Route path="/a-myopportunity-comments/:leadid" element={<A_CommentsPage />} />
+
+
+
+                <Route path="*" element={<NotFound />} />
+
+
+
+                <Route path="/emailchat" element={<EmailChat />} />
+
+                <Route path="/a-tags" element={<Tags/>} />
 
 
                 </Route>

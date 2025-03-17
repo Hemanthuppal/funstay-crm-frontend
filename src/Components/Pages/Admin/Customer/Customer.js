@@ -11,90 +11,116 @@ const AdminCustomer = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
   const navigate = useNavigate();
-  const { authToken, userId } = useContext(AuthContext);
+  const { authToken } = useContext(AuthContext);
   const [message, setMessage] = useState(null);
+  
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
-      setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
+      setTimeout(() => setMessage(""), 1000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
+  };
 
+  const [tags, setTags] = useState([]);
+  const [selectedTag, setSelectedTag] = useState('');
 
+  // Function to fetch all customers
+  const fetchCustomers = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/api/customers`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const existingCustomers = response.data
+          .filter(customer => customer.customer_status === "existing")
+          .map(customer => ({
+            ...customer,
+            formattedId: `CUS${String(customer.id).padStart(4, '0')}`
+          }));
+
+        setData(existingCustomers);
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      alert("Failed to fetch customers.");
+    }
   };
 
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fetchTags = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/customers`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-
-        if (response.status === 200) {
-          const existingCustomers = response.data
-            .filter(customer => customer.customer_status == "existing")
-            .map(customer => ({
-              ...customer,
-              formattedId: `CUS${String(customer.id).padStart(4, '0')}`
-            }));
-
-          setData(existingCustomers);
-        } else {
-          console.error("Error fetching customers:", response.statusText);
-        }
+        const response = await axios.get(`${baseURL}/api/tags`);
+        setTags(response.data);
       } catch (error) {
-        console.error("Error fetching customers:", error);
-        alert("Failed to fetch customers.");
+        console.error("Error fetching tags:", error);
       }
     };
+    fetchTags();
+  }, []);
 
-    fetchCustomers();
+  useEffect(() => {
+    fetchCustomers(); // Fetch all customers on component mount
   }, [authToken]);
 
+  // Fetch filtered customers based on selected tag
+  useEffect(() => {
+    const fetchFilteredCustomers = async () => {
+      if (selectedTag) {
+        try {
+          const response = await axios.get(`${baseURL}/api/tagfilter`, {
+            params: { tag: selectedTag },
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
 
-
-
-
+          if (response.status === 200) {
+            setData(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching filtered customers:", error);
+          alert("Failed to fetch filtered customers.");
+        }
+      } else {
+        // If no tag is selected, fetch all customers again
+        fetchCustomers();
+      }
+    };
+    fetchFilteredCustomers();
+  }, [selectedTag, authToken]);
+  console.log(`${baseURL}/api/tagfilter?tag=${selectedTag}`);
   const navigateToCustomerDetails = (id) => {
-    navigate(`/a-customerdetails/${id}`, {
-      state: { id: id },
-    });
+    navigate(`/a-customerdetails/${id}`, { state: { id } });
   };
-
 
   const navigateToEditLead = (id) => {
-    navigate(`/a-editcustomerdetails/${id}`, {
-      state: { id: id },
-    });
+    navigate(`/a-editcustomerdetails/${id}`, { state: { id } });
   };
 
-
   const handleDeleteCustomer = async (customerId) => {
-
     try {
-      const response = await axios.delete(`${baseURL}/api/customers/${customerId}`);
-      setMessage(response.data.message);
+      await axios.delete(`${baseURL}/api/customers/${customerId}`);
+      setData(prev => prev.filter(customer => customer.id !== customerId));
+      setMessage("Customer deleted successfully");
       setTimeout(() => setMessage(""), 3000);
-
-      setData((prevCustomers) => prevCustomers.filter(customer => customer.id !== customerId));
-
     } catch (error) {
       console.error("Error deleting customer:", error);
-      setMessage("Failed to delete customer. Please try again.");
+      setMessage("Failed to delete customer");
       setTimeout(() => setMessage(""), 3000);
     }
   };
 
-
   const columns = React.useMemo(
     () => [
-      {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,
-      },
+      // {
+      //   Header: "S.No",
+      //   accessor: (row, index) => index + 1,
+      // },
       {
         Header: "Customer ID",
         accessor: "id",
@@ -166,7 +192,11 @@ const AdminCustomer = () => {
           </div>
         ),
       },
+      {
+        Header: "Origin City",
+        accessor: "origincity",
 
+      },
 
 
       {
@@ -201,9 +231,28 @@ const AdminCustomer = () => {
       <div className={`AdminCustomer ${collapsed ? "collapsed" : ""}`}>
         <div className="AdminCustomer-container mb-5">
           <div className="AdminCustomer-table-container">
-            <h3 className="d-flex justify-content-between align-items-center">Customer Details</h3>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3>Customer Details</h3>
+              <select 
+                className="form-select w-25"
+                value={selectedTag}
+                onChange={(e) => setSelectedTag(e.target.value)}
+              >
+                <option value="">All Tags</option>
+                {tags.map(tag => (
+                  <option key={tag.id} value={tag.value}>
+                    {tag.value}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
             {message && <div className="alert alert-success">{message}</div>}
-            <DataTable columns={columns} data={data} />
+            {data.length === 0 ? (
+              <div className="alert alert-info">No customers found for the selected tag.</div>
+            ) : (
+              <DataTable columns={columns} data={data} />
+            )}
           </div>
         </div>
       </div>

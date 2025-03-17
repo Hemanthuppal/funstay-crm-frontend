@@ -10,21 +10,22 @@ import './PotentialLeads.css';
 import axios from 'axios';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 
-const Potentialleads = () => { 
+const Potentialleads = () => {
   const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState(""); 
-  const [filterDestination, setFilterDestination] = useState("");
-  const [filterOppStatus1, setFilterOppStatus1] = useState("");
-  const [filterOppStatus2, setFilterOppStatus2] = useState("");
-  const [filterAssignee, setFilterAssignee] = useState(""); // New state for assignee filter
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
-  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState("");
-  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState("");
+  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "");
+  const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus") || "");
+  const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "");
+  const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2") || "");
+ 
+  const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee") || "");
+  const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate") || "");
+  const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate") || "");
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate") || "");
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate") || "");
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]); // State for employees
@@ -78,7 +79,6 @@ const Potentialleads = () => {
       "In Progress": [
         "Understood Requirement",
         "Sent first quote",
-        "Amendment Requested",
         "Sent amended quote",
         "Negotiation Process",
         "Verbally Confirmed-Awaiting token amount",
@@ -196,6 +196,38 @@ const Potentialleads = () => {
     }
   };
 
+  useEffect(() => {
+    localStorage.setItem("searchTerm", searchTerm);
+    localStorage.setItem("filterStatus", filterStatus);
+    localStorage.setItem("filterDestination", filterDestination);
+    localStorage.setItem("filterOppStatus1", filterOppStatus1);
+    localStorage.setItem("filterOppStatus2", filterOppStatus2);
+   
+    localStorage.setItem("filterAssignee", filterAssignee);
+    localStorage.setItem("filterStartDate", filterStartDate);
+    localStorage.setItem("filterEndDate", filterEndDate);
+    localStorage.setItem("appliedFilterStartDate", appliedFilterStartDate);
+    localStorage.setItem("appliedFilterEndDate", appliedFilterEndDate);
+  }, [
+    searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
+    filterAssignee, filterStartDate, filterEndDate,
+    appliedFilterStartDate, appliedFilterEndDate
+  ]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFilterStatus("");
+    setFilterDestination("");
+    setFilterOppStatus1("");
+    setFilterOppStatus2("");
+    
+    setFilterAssignee("");
+    setFilterStartDate("");
+    setFilterEndDate("");
+    setAppliedFilterStartDate("");
+    setAppliedFilterEndDate("");
+    localStorage.removeItem("potentialLeadsFilters");
+  };
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -319,16 +351,11 @@ const Potentialleads = () => {
           <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} />
           <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
           <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} />
+          <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
         </div>
       ),
     },
-    {
-      Header: "Comments",
-      accessor: "comments",
-      Cell: ({ row }) => (
-        <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-      ),
-    },
+   
   ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
@@ -377,6 +404,8 @@ const Potentialleads = () => {
                 </div>
               )}
             </Col>
+            <Col md={6} className="d-flex justify-content-end">
+                    <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>

@@ -58,6 +58,11 @@ function FollowUp() {
   
         return reminderDay === selectedDay && reminderYear === currentYear;
       })
+      .sort((a, b) => {
+        const timeA = new Date(a.reminder_setting).getTime();
+        const timeB = new Date(b.reminder_setting).getTime();
+        return timeA - timeB; // Sort by time in ascending order
+      })
       .map((opportunity) => {
         const lead = leadsLookup[opportunity.leadid];
         console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);

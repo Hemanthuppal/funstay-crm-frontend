@@ -4,9 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/ManagerNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
-import { FaCopy } from "react-icons/fa";
+import { FaCopy,FaCheck } from "react-icons/fa";
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { adminMail } from '../../../Apiservices/Api';
+import axios from 'axios';
 
 const LeadOppView = () => {
     const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
@@ -18,6 +19,7 @@ const LeadOppView = () => {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
+    const [tagChanged, setTagChanged] = useState(false);
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
             setMessage("Copied to clipboard!");
@@ -29,16 +31,64 @@ const LeadOppView = () => {
 
     };
 
+    const [tags, setTags] = useState([]);
+    const [selectedTag, setSelectedTag] = useState("");
+    const [isUpdating, setIsUpdating] = useState(false); // Track update status
+    // For single selection
+
+    useEffect(() => {
+        fetchTags();
+    }, []);
+
+    const fetchTags = async () => {
+        try {
+            const response = await axios.get(`${baseURL}/api/tags`);
+            setTags(response.data);
+        } catch (error) {
+            console.error("Error fetching tags:", error);
+        }
+    };
+
+  
+
+    const handleTagChange = (event) => {
+        setSelectedTag(event.target.value);
+        setTagChanged(true); // Set tag changed to true
+    };
+
+    const applyTag = async () => {
+        if (!selectedTag) return;
+
+        setIsUpdating(true);
+        setMessage("");
+
+        try {
+            await axios.put(`${baseURL}/api/travel_opportunity/${lead.travelOpportunities[0].id}`, {
+                tag: selectedTag
+            });
+            setMessage("Tag updated successfully!");
+            setTagChanged(false); // Reset tag changed after successful update
+        } catch (error) {
+            console.error("Error updating tag:", error);
+            setMessage("Failed to update tag.");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+
     useEffect(() => {
         const fetchLeadDetails = async () => {
             try {
                 const response = await fetch(`${baseURL}/api/leadsoppcomment/${leadid}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
-                console.log(data); // Log the data to see its structure
                 setLead(data);
+        
+                // Set the selectedTag to the existing tag if available
+                if (data.travelOpportunities && data.travelOpportunities.length > 0) {
+                    setSelectedTag(data.travelOpportunities[0].tag || ""); // Set existing tag or empty string
+                }
             } catch (error) {
                 console.error('Error fetching lead details:', error);
             }
@@ -165,6 +215,23 @@ const LeadOppView = () => {
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
                                             <p><strong>Origin City:</strong> {lead.travelOpportunities[0].origincity || 'N/A'}</p>
+                                            <p style={{ display: "flex", alignItems: "center", gap: "10px" }}><strong>Tag:</strong>
+                                                <select value={selectedTag} onChange={handleTagChange} style={{ width: "50%", padding: "5px" }}>
+                                                    <option value="">Select a tag</option>
+                                                    {tags.map(tag => (
+                                                        <option key={tag.id} value={tag.value}>
+                                                            {tag.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                {tagChanged && (
+                                                    <FaCheck 
+                                                        onClick={applyTag} 
+                                                        style={{ cursor: "pointer", color: "green", fontSize: "20px" }} 
+                                                        title="Apply Tag"
+                                                    />
+                                                )}
+                                            </p>
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
                                             <p>
                                                 <strong>Start Date:</strong>{" "}
@@ -204,6 +271,14 @@ const LeadOppView = () => {
 
                                 <Col md={6}>
                                     <h5>Additional Details</h5>
+                                    <p><strong>Description:</strong></p>
+                                    <div className="s-Opp-Commentsection">
+                                        {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                            <>
+                                                <p>{lead.travelOpportunities[0].description || 'N/A'}</p>
+                                            </>
+                                        )}
+                                    </div>
                                     <p><strong>Notes:</strong></p>
                                     <div className="s-Opp-Commentsection">
                                         {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (

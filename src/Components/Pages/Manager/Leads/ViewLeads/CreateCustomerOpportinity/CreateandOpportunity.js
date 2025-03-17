@@ -175,7 +175,7 @@ const CreateCustomerOpportunity = () => {
           ...prev, destination: LeadData.destination
             ? LeadData.destination.split(", ").map((item) => ({ value: item, label: item }))
             : [],
-          notes: response.data.description || "",
+          notes: response.data.notes || "",
           description: response.data.description || "",
           origincity: response.data.origincity || "",
         }));
@@ -270,6 +270,7 @@ const CreateCustomerOpportunity = () => {
       child_ages: childrenAges.join(","),
       approx_budget: formData.approx_budget,
       notes: formData.notes,
+      description: formData.description,
       reminder_setting: formData.reminder_setting,
     };
 
@@ -549,6 +550,15 @@ const CreateCustomerOpportunity = () => {
                   value={formData.reminder_setting}
                   onChange={handleChange}
                   required
+                />
+              </div>
+              <div className="createcustomer-input-group full-width">
+                <label>Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+
                 />
               </div>
             </div>

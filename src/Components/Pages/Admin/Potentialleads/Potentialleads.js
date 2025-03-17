@@ -9,23 +9,24 @@ import { baseURL } from "../../../Apiservices/Api";
 import "./PotentialLeads.css";
 import axios from "axios";
 import { AuthContext } from "../../../AuthContext/AuthContext";
+import { HiOutlinePaperClip } from "react-icons/hi";
 
 const Potentialleads = () => {
   const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterDestination, setFilterDestination] = useState("");
-  const [filterOppStatus1, setFilterOppStatus1] = useState("");
-  const [filterOppStatus2, setFilterOppStatus2] = useState("");
-  const [filterManager, setFilterManager] = useState("");
-  const [filterAssignee, setFilterAssignee] = useState("");
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
-  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState("");
-  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState("");
+  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "");
+  const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus") || "");
+  const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "");
+  const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2") || "");
+  const [filterManager, setFilterManager] = useState(localStorage.getItem("filterManager") || "");
+  const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee") || "");
+  const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate") || "");
+  const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate") || "");
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate") || "");
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate") || "");
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
   const [managers, setManagers] = useState([]);
@@ -43,7 +44,7 @@ const Potentialleads = () => {
     try {
       const response = await axios.get(`${baseURL}/api/fetch-data`);
       if (response.status == 200) {
-        const filteredLeads = response.data.filter((enquiry) => enquiry.status == "opportunity");
+        const filteredLeads = response.data.filter((enquiry) => enquiry.adminAssign !== 'admin' && enquiry.status == "opportunity");
         setData(filteredLeads);
       }
     } catch (error) {
@@ -155,6 +156,25 @@ const Potentialleads = () => {
   const handleEdit = (rowId) => {
     navigate(`/a-edit-opportunity/${rowId}`, { state: { leadid: rowId } });
   };
+  const handleArchive = async (leadid) => {
+    try {
+      const response = await fetch(`${baseURL}/api/archiveByLeadId/${leadid}`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        setData((prevData) => prevData.filter((item) => item.leadid !== leadid)); // Remove from active list
+        setMessage('The Opportunity has been archived successfully.');
+      } else {
+        setMessage('Failed to archive the lead. Please try again later.');
+      }
+      setTimeout(() => setMessage(""), 1000);
+    } catch (error) {
+      console.error("Error:", error);
+      setMessage('An unexpected error occurred while archiving the lead.');
+      setTimeout(() => setMessage(""), 1000);
+    }
+  };
 
   const handleDelete = async (leadid) => {
     try {
@@ -182,6 +202,38 @@ const Potentialleads = () => {
         setMessage('');
       }, 1000);
     }
+  };
+  useEffect(() => {
+    localStorage.setItem("searchTerm", searchTerm);
+    localStorage.setItem("filterStatus", filterStatus);
+    localStorage.setItem("filterDestination", filterDestination);
+    localStorage.setItem("filterOppStatus1", filterOppStatus1);
+    localStorage.setItem("filterOppStatus2", filterOppStatus2);
+    localStorage.setItem("filterManager", filterManager);
+    localStorage.setItem("filterAssignee", filterAssignee);
+    localStorage.setItem("filterStartDate", filterStartDate);
+    localStorage.setItem("filterEndDate", filterEndDate);
+    localStorage.setItem("appliedFilterStartDate", appliedFilterStartDate);
+    localStorage.setItem("appliedFilterEndDate", appliedFilterEndDate);
+  }, [
+    searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
+    filterManager, filterAssignee, filterStartDate, filterEndDate,
+    appliedFilterStartDate, appliedFilterEndDate
+  ]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFilterStatus("");
+    setFilterDestination("");
+    setFilterOppStatus1("");
+    setFilterOppStatus2("");
+    setFilterManager("");
+    setFilterAssignee("");
+    setFilterStartDate("");
+    setFilterEndDate("");
+    setAppliedFilterStartDate("");
+    setAppliedFilterEndDate("");
+    localStorage.removeItem("potentialLeadsFilters");
   };
 
 
@@ -302,6 +354,92 @@ const Potentialleads = () => {
         );
       },
     },
+    // {
+    //   Header: "Quotations",
+    //   accessor: "quotation_id",
+    //   Cell: ({ row }) => {
+    //     const [selectedFile, setSelectedFile] = useState(null);
+    //     const [showIcon, setShowIcon] = useState(false);
+    //     const [uploading, setUploading] = useState(false);
+    //     const [message, setMessage] = useState("");
+
+    //     const quotationId = row.original.quotation_id; // Get quotation_id from row
+    //     const leadId = row.original.leadid; // Get lead ID for email chat link
+
+    //     const handleFileChange = (e) => {
+    //       const file = e.target.files[0];
+    //       if (file && (file.type === "application/pdf" || file.type.includes("word"))) {
+    //         setSelectedFile(file);
+    //         setShowIcon(true);
+    //         setMessage("");
+    //       } else {
+    //         setMessage("Only PDF or DOCX files allowed.");
+    //         setSelectedFile(null);
+    //         setShowIcon(false);
+    //       }
+    //     };
+
+    //     const handleUpload = async () => {
+    //       if (!selectedFile) return;
+    //       setUploading(true);
+    //       const formData = new FormData();
+    //       formData.append("quotation", selectedFile);
+    //       formData.append("leadid", leadId);
+    //       formData.append("email", row.original.email);
+    //       formData.append("name", row.original.name);
+
+    //       try {
+    //         const response = await axios.post(
+    //           `${baseURL}/api/quotations/upload`,
+    //           formData,
+    //           { headers: { "Content-Type": "multipart/form-data" } }
+    //         );
+
+    //         setMessage(response.data.message);
+    //         setSelectedFile(null);
+    //         setShowIcon(false);
+    //       } catch (error) {
+    //         setMessage("Error uploading file.");
+    //       }
+    //       setUploading(false);
+    //     };
+
+    //     return (
+    //       <div className="d-flex align-items-center">
+    //         {quotationId ? (
+    //           <a
+    //             href={`a-email/${leadId}`} // Fetch chat via API
+    //             target="_blank"
+    //             rel="noopener noreferrer"
+    //             style={{ color: "#007bff", textDecoration: "underline", cursor: "pointer" }}
+    //           >
+    //             View Email Chat (ID: {quotationId})
+    //           </a>
+    //         ) : (
+    //           <>
+    //             <input
+    //               type="file"
+    //               accept=".pdf,.docx"
+    //               className="form-control me-2"
+    //               onChange={handleFileChange}
+    //               style={{ maxWidth: "200px" }}
+    //             />
+
+    //             {showIcon && (
+    //               <HiOutlinePaperClip
+    //                 style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
+    //                 onClick={handleUpload}
+    //               />
+    //             )}
+    //           </>
+    //         )}
+
+    //         {uploading && <span>Uploading...</span>}
+    //         {message && <p style={{ color: "green", fontSize: "12px" }}>{message}</p>}
+    //       </div>
+    //     );
+    //   },
+    // },
     { Header: "Manager", accessor: "assign_to_manager" },
     { Header: "Associate", accessor: "assignedSalesName" },
     {
@@ -310,17 +448,12 @@ const Potentialleads = () => {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} />
           <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/a-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-          <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} />
+          <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleArchive(row.original.leadid)} />
+          <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/a-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
         </div>
       ),
     },
-    {
-      Header: "Comments",
-      accessor: "comments",
-      Cell: ({ row }) => (
-        <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/a-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-      ),
-    },
+
   ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
@@ -374,6 +507,8 @@ const Potentialleads = () => {
                 </div>
               )}
             </Col>
+            <Col md={6} className="d-flex justify-content-end">
+              <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>

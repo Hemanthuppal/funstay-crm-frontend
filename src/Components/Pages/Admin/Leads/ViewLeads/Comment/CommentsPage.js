@@ -7,6 +7,8 @@ import './CommentsPage.css';
 import Navbar from '../../../../../Shared/Navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
 import { baseURL } from '../../../../../Apiservices/Api';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const CommentsPage = () => {
   const { leadid } = useParams();
@@ -55,6 +57,7 @@ const CommentsPage = () => {
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     const trimmedComment = newComment.trim();
+    
     const commentName = "Admin";
 
     const comment = {
@@ -96,72 +99,72 @@ const CommentsPage = () => {
 
   return (
     <div className="salesViewLeadsContainer">
-      <Navbar onToggleSidebar={setCollapsed} />
-      <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
-        <div className="comment-form-container">
-          <h3 className='comment-form-header'>Comments</h3>
+    <Navbar onToggleSidebar={setCollapsed} />
+    <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
+    <div className="comment-form-container">
+    <h3 className='comment-form-header'>Comments</h3>
 
-          <div className="mb-3 opp-modal-footer">
-            <Form.Group>
-              <Form.Label>Add a New Comment</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
+   
+    <div className="mb-3 opp-modal-footer">
+        <Form.Group>
+            <Form.Label>Add a New Comment</Form.Label>
+            <Form.Control
+             as ="textarea"
+             rows={4}
                 type="text"
                 placeholder="Write your comment here..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 autoFocus
-              />
-              <Button
+            />
+            <Button
                 className="mt-2 opp-comment-btn-primary"
                 onClick={handleAddComment}
                 disabled={!newComment.trim()}
-              >
+            >
                 Add Comment
-              </Button>
-            </Form.Group>
-          </div>
-
-
-          <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
-            {[...comments]
-              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-              .map((comment, index) => (
-                <div key={index} className="mb-3">
-
-                  <p style={{ fontSize: "13px", color: "gray" }}>
-                    {new Date(comment.timestamp).toLocaleString("en-IN", {
-                      timeZone: "Asia/Kolkata",
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                      hour12: true,
-                    })}
-                  </p>
-
-
-                  <p>
-
-                    <strong>{comment.name}</strong>: {comment.text}
-                  </p>
-
-
-                </div>
-              ))}
-          </div>
-
-
-          <div className="mt-3">
-            <Button className="comment-close-btn comment-btn" onClick={() => navigate(-1)}>
-              Back
             </Button>
-          </div>
-        </div>
+        </Form.Group>
+    </div>
+
+   
+    <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
+  {[...comments]
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) 
+    .map((comment, index) => (
+      <div key={index} className="mb-3">
+        
+         <p style={{ fontSize: "13px", color: "gray" }}>
+  {new Date(comment.timestamp).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  })}
+</p>
+
+      
+        <p>
+         
+          <strong>{comment.name}</strong>: {comment.text}
+        </p>
+       
+       
       </div>
+    ))}
+</div>
+
+    <div className="mt-3">
+        <Button className="comment-close-btn comment-btn" onClick={() => navigate(-1)}>
+            Back
+        </Button>
+    </div>
+</div>
+    </div>
     </div>
   );
 };

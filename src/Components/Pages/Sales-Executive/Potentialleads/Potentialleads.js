@@ -1,64 +1,90 @@
-import React, { useState, useMemo, useEffect, useContext, useRef } from "react";
+import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
-import "./PotentialLeads.css";
-import axios from "axios";
-import { AuthContext } from "../../../AuthContext/AuthContext";
+import './PotentialLeads.css';
+import axios from 'axios';
+import { AuthContext } from '../../../AuthContext/AuthContext';
 
 const Potentialleads = () => {
-  const { authToken, userRole, userId } = useContext(AuthContext);
+  const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
-  const [data, setData] = useState([]);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [isPrimaryChanged, setIsPrimaryChanged] = useState(false);
-  const [isSecondaryChanged, setIsSecondaryChanged] = useState(false);
-  // const [dropdownOptions] = useState({
-  //   primary: ["In Progress", "Confirmed", "Lost", "Duplicate", "Cancelled"],
-  //   secondary: {
-  //     "In Progress": [
-  //       "Understood Requirement",
-  //       "Sent first quote",
-  //       "Sent amended quote",
-  //       "Negotiation Process",
-  //       "Verbally Confirmed-Awaiting token amount",
-  //     ],
-  //     Confirmed: ["Upcoming Trip", "Ongoing Trip", "Trip Completed"],
-  //     Lost: [
-  //       "Plan Cancelled",
-  //       "Plan Postponed",
-  //       "High Quote",
-  //       "Low Budget",
-  //       "No response",
-  //       "Options not available",
-  //       "just checking price",
-  //       "Booked from other source",
-  //       "Delay in quote",
-  //       "Concern about reliability/trust",
-  //       "Did not like payment terms",
-  //       "Did not like cancellation policy",
-  //       "Booked different option from us",
-  //     ],
-  //     Duplicate: ["Duplicate"],
-  //     Cancelled: ["Force Majeure", "Medical Urgency", "Personal Reason"],
-  //   },
-  // });
+  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "");
+  const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus") || "");
+  const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "");
+  const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2") || "");
+ 
+  const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee") || "");
+  const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate") || "");
+  const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate") || "");
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate") || "");
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate") || "");
+  const [showDateRange, setShowDateRange] = useState(false);
+  const [data, setData] = useState([]);
+  const [employees, setEmployees] = useState([]); // State for employees
 
 
 
-  const [dropdownOptions] = useState({
+  const fetchLeads = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/api/fetch-data`);
+      if (response.status == 200) {
+        const leads = response.data;
+        const filteredLeads = leads.filter(
+          (enquiry) =>
+            enquiry.assignedSalesId == userId && enquiry.status == "opportunity"
+        );
+        console.log("opportunity data :", filteredLeads);
+        setData(filteredLeads);
+      }
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setMessage("Copied to clipboard!");
+      setTimeout(() => setMessage(""), 1000);  // Optional: Show a message
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+
+
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/employeesassign`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      setEmployees(response.data);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeads();
+    fetchEmployees(); // Fetch employees when the component mounts
+  }, [userId]);
+
+  const dropdownOptions = {
     primary: ["In Progress", "Confirmed", "Lost", "Duplicate"],
     secondary: {
       "In Progress": [
         "Understood Requirement",
         "Sent first quote",
-        "Amendment Requested",
         "Sent amended quote",
         "Negotiation Process",
         "Verbally Confirmed-Awaiting token amount",
@@ -80,23 +106,8 @@ const Potentialleads = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-
     },
-  });
-
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterDestination, setFilterDestination] = useState("");
-  const [filterOppStatus1, setFilterOppStatus1] = useState("");
-  const [filterOppStatus2, setFilterOppStatus2] = useState("");
-
-  // Date filter states for input and applied values
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
-  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState("");
-  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState("");
-  const [showDateRange, setShowDateRange] = useState(false);
+  };
 
   const handlePrimaryStatusChange = (value, rowId) => {
     setData((prevData) => {
@@ -106,7 +117,6 @@ const Potentialleads = () => {
           : row
       );
       handleUpdateStatus(rowId, value, "");
-      setIsPrimaryChanged(true);
       return updatedData;
     });
   };
@@ -116,10 +126,8 @@ const Potentialleads = () => {
       const updatedData = prevData.map((row) =>
         row.leadid == rowId ? { ...row, opportunity_status2: value } : row
       );
-      const primaryStatus = updatedData.find((row) => row.leadid == rowId)
-        .opportunity_status1;
+      const primaryStatus = updatedData.find((row) => row.leadid == rowId).opportunity_status1;
       handleUpdateStatus(rowId, primaryStatus, value);
-      setIsSecondaryChanged(true);
       return updatedData;
     });
   };
@@ -161,14 +169,6 @@ const Potentialleads = () => {
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setMessage("Copied to clipboard!"); // Optional: Show a message
-      setTimeout(() => setMessage(""), 1000); // Clear message after 3 seconds
-    }).catch(err => {
-      console.error('Failed to copy: ', err);
-    });
-  };
 
   const navigateToLead = (leadId) => {
     navigate(`/details/${leadId}`, {
@@ -182,102 +182,179 @@ const Potentialleads = () => {
     });
   };
 
-  const [leadIds, setLeadIds] = useState([]);
-
-  const fetchLeads = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/api/fetch-data`);
-      if (response.status == 200) {
-        const leads = response.data;
-        const filteredLeads = leads.filter(
-          (enquiry) =>
-            enquiry.assignedSalesId == userId && enquiry.status == "opportunity"
-        );
-        console.log("opportunity data :", filteredLeads);
-        setData(filteredLeads);
-      }
-    } catch (error) {
-      console.error("Error fetching leads:", error);
-
-    }
-  };
+  
 
   useEffect(() => {
-    if (data.length > 0) {
-      const ids = data.map((lead) => lead.leadid);
-      setLeadIds(ids);
-      console.log("Lead IDs:", ids);
-    }
-  }, [data]);
+    localStorage.setItem("searchTerm", searchTerm);
+    localStorage.setItem("filterStatus", filterStatus);
+    localStorage.setItem("filterDestination", filterDestination);
+    localStorage.setItem("filterOppStatus1", filterOppStatus1);
+    localStorage.setItem("filterOppStatus2", filterOppStatus2);
+   
+    localStorage.setItem("filterAssignee", filterAssignee);
+    localStorage.setItem("filterStartDate", filterStartDate);
+    localStorage.setItem("filterEndDate", filterEndDate);
+    localStorage.setItem("appliedFilterStartDate", appliedFilterStartDate);
+    localStorage.setItem("appliedFilterEndDate", appliedFilterEndDate);
+  }, [
+    searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
+    filterAssignee, filterStartDate, filterEndDate,
+    appliedFilterStartDate, appliedFilterEndDate
+  ]);
 
-  useEffect(() => {
-    fetchLeads();
-  }, []);
-
-  const [customerIdMap, setCustomerIdMap] = useState({});
-  const opportunityIdRef = useRef(null);
-  const [opportunityIdMap, setOpportunityIdMap] = useState({});
-
-  const fetchCustomerData = async (leadid) => {
-    try {
-      const response = await axios.get(`${baseURL}/api/customers/by-lead/${leadid}`);
-      if (response.status == 200) {
-        const customerData = response.data;
-        setCustomerIdMap((prev) => ({
-          ...prev,
-          [leadid]: {
-            customerId: customerData.id || "N/A",
-          },
-        }));
-      }
-    } catch (error) {
-      console.error("Error fetching customer data:", error);
-    }
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFilterStatus("");
+    setFilterDestination("");
+    setFilterOppStatus1("");
+    setFilterOppStatus2("");
+    
+    setFilterAssignee("");
+    setFilterStartDate("");
+    setFilterEndDate("");
+    setAppliedFilterStartDate("");
+    setAppliedFilterEndDate("");
+    localStorage.removeItem("potentialLeadsFilters");
   };
 
-  const fetchOpportunityData = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/travel-opportunity`);
-      if (response.status == 200) {
-        const mapping = response.data.reduce((acc, opportunity) => {
-          acc[opportunity.leadid] = {
-            opportunityId: opportunity.id || "N/A",
-          };
-          return acc;
-        }, {});
-        setOpportunityIdMap(mapping);
-      }
-    } catch (error) {
-      console.error("Error fetching travel opportunities:", error);
-    }
-  };
+  const filteredData = useMemo(() => {
+    return data.filter((item) => {
+      const matchesFreeText = !searchTerm || Object.values(item).some(val => val && val.toString().toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesStatus = !filterStatus || (item.status && item.status.toLowerCase() == filterStatus.toLowerCase());
+      const matchesDestination = !filterDestination || (item.travel_destination && item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
+      const matchesOppStatus1 = !filterOppStatus1 || (item.opportunity_status1 && item.opportunity_status1.toLowerCase() == filterOppStatus1.toLowerCase());
+      const matchesOppStatus2 = !filterOppStatus2 || (item.opportunity_status2 && item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
+      const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
+      const matchesDateRange = (() => {
+        if (appliedFilterStartDate && appliedFilterEndDate) {
+          const start = new Date(appliedFilterStartDate);
+          const end = new Date(appliedFilterEndDate);
+          const createdAt = new Date(item.created_at);
+          return createdAt >= start && createdAt <= end;
+        }
+        return true;
+      })();
 
-  const formattedData = useMemo(() => {
-    return data.map((item) => {
-      const customerData = customerIdMap[item.leadid] || { customerId: "N/A" };
-      const opportunityData = opportunityIdMap[item.leadid] || { opportunityId: "N/A" };
-      return {
-        ...item,
-        formattedOppId:
-          opportunityData.opportunityId !== "N/A"
-            ? `OPP${String(opportunityData.opportunityId).padStart(4, "0")}`
-            : "N/A",
-        formattedCustomerId:
-          customerData.customerId !== "N/A"
-            ? `CUS${String(customerData.customerId).padStart(4, "0")}`
-            : "N/A",
-      };
+      return matchesFreeText && matchesStatus && matchesDestination && matchesOppStatus1 && matchesOppStatus2 && matchesAssignee && matchesDateRange;
     });
-  }, [data, customerIdMap, opportunityIdMap]);
+  }, [searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2, filterAssignee, appliedFilterStartDate, appliedFilterEndDate, data]);
 
+  const columns = useMemo(() => [
+    { Header: "Opp Id", accessor: "leadid" },
+    {
+      Header: "Name",
+      accessor: "name",
+      Cell: ({ row }) => (
+        <div style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }} onClick={() => navigate(`/details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}>
+          {row.original.name}
+        </div>
+      ),
+    },
+    {
+      Header: "Mobile",
+      accessor: "phone_number",
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <a
+            href={`https://wa.me/${row.original.phone_number}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
+            title="Chat on WhatsApp"
+          >
+            {row.original.phone_number}
+          </a>
+          <FaCopy
+            style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(row.original.phone_number)}
+            title="Copy Phone Number"
+          />
+        </div>
+      ),
+    },
+    {
+      Header: "Email",
+      accessor: "email",
+      Cell: ({ row }) => (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between", // Push copy button to the right
+            width: "100%",
+            maxWidth: "200px", // Adjust width as needed
+          }}
+        >
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "150px",
+            }}
+            title={row.original.email} // Show full email on hover
+          >
+            {row.original.email}
+          </div>
+          <FaCopy
+            style={{ cursor: "pointer", color: "#ff9966" }}
+            onClick={() => copyToClipboard(row.original.email)}
+            title="Copy Email"
+          />
+        </div>
+      ),
+    },
+    {
+      Header: "Opportunity Status",
+      accessor: "opportunityStatus",
+      Cell: ({ row }) => {
+        const primaryStatus = row.original.opportunity_status1;
+        const secondaryStatus = row.original.opportunity_status2;
+        const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
+        const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
 
-
-  // const uniqueDestinations = useMemo(() => {
-  //   const destinations = formattedData
-  //     .map((item) => item.travel_destination)
-  //     .filter((dest) => dest && dest.trim() !== "");
-  //   return Array.from(new Set(destinations));
-  // }, [formattedData]);
+        return (
+          <div className="d-flex align-items-center gap-2">
+            <select value={primaryStatus} onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)} className="form-select">
+              <option value="">Select Primary Status</option>
+              {dropdownOptions.primary.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+            <select value={secondaryStatus} onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)} className="form-select" disabled={isSecondaryDisabled}>
+              <option value="">Select Secondary Status</option>
+              {secondaryOptions.map((option) => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
+          </div>
+        );
+      },
+    },
+ 
+    {
+           Header: "Action",
+           Cell: ({ row }) => (
+             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+               <FaEdit
+                 style={{ color: "#ff9966", cursor: "pointer" }}
+                 onClick={() => handleEdit(row.original.leadid)}
+               />
+               <FaEye
+                 style={{ color: "#ff9966", cursor: "pointer" }}
+                 onClick={() => navigateToLead(row.original.leadid)}
+               />
+               <FaComment
+                 style={{ color: "#ff9966", cursor: "pointer" }}
+                 onClick={() => {
+                   navigate(`/opportunity-comments/${row.original.leadid}`);
+                 }}
+               />
+             </div>
+           ),
+         },
+        
+  ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
     // Normalize the destinations by trimming spaces and converting to lowercase
@@ -288,255 +365,7 @@ const Potentialleads = () => {
 
     // Map back to the original format (if needed)
     return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
-  }, [formattedData]);
-
-
-  const staticOppStatus2Options = useMemo(() => {
-    if (filterOppStatus1) {
-      return dropdownOptions.secondary[filterOppStatus1] || [];
-    }
-    const allSecondary = Object.values(dropdownOptions.secondary).flat();
-    return Array.from(new Set(allSecondary));
-  }, [filterOppStatus1, dropdownOptions]);
-
-  // Use appliedFilterStartDate and appliedFilterEndDate for filtering by date.
-  const filteredData = useMemo(() => {
-    return formattedData.filter((item) => {
-      const matchesFreeText =
-        !searchTerm ||
-        Object.values(item).some(
-          (val) =>
-            val &&
-            val
-              .toString()
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
-        );
-
-      const matchesStatus =
-        !filterStatus ||
-        (item.status &&
-          item.status.toLowerCase() == filterStatus.toLowerCase());
-      const matchesDestination =
-        !filterDestination ||
-        (item.travel_destination &&
-          item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
-      const matchesOppStatus1 =
-        !filterOppStatus1 ||
-        (item.opportunity_status1 &&
-          item.opportunity_status1.toLowerCase() == filterOppStatus1.toLowerCase());
-      const matchesOppStatus2 =
-        !filterOppStatus2 ||
-        (item.opportunity_status2 &&
-          item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
-
-      const matchesDateRange = (() => {
-        if (appliedFilterStartDate && appliedFilterEndDate) {
-          const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
-          return createdAt >= start && createdAt <= end;
-        } else if (appliedFilterStartDate) {
-          const start = new Date(appliedFilterStartDate);
-          const createdAt = new Date(item.created_at);
-          return createdAt >= start;
-        } else if (appliedFilterEndDate) {
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
-          return createdAt <= end;
-        }
-        return true;
-      })();
-
-      return (
-        matchesFreeText &&
-        matchesStatus &&
-        matchesDestination &&
-        matchesOppStatus1 &&
-        matchesOppStatus2 &&
-        matchesDateRange
-      );
-    });
-  }, [
-    searchTerm,
-    filterStatus,
-    filterDestination,
-    filterOppStatus1,
-    filterOppStatus2,
-    appliedFilterStartDate,
-    appliedFilterEndDate,
-    formattedData,
-  ]);
-
-  useEffect(() => {
-    const leadIds = data.map((item) => item.leadid);
-    leadIds.forEach((leadid) => {
-      fetchCustomerData(leadid);
-    });
-    fetchOpportunityData();
   }, [data]);
-
-  const columns = useMemo(
-    () => [
-      {
-        Header: "Opp Id",
-        accessor: "leadid",
-      },
-      // {
-      //   Header: "Customer Id",
-      //   accessor: "customerid",
-      // },
-      {
-        Header: "Name",
-        accessor: "name",
-        Cell: ({ row }) => (
-          <div
-            style={{
-              cursor: "pointer",
-              color: "blue",
-              textDecoration: "underline",
-            }}
-            onClick={() => navigateToLead(row.original.leadid)}
-          >
-            {row.original.name}
-          </div>
-        ),
-      },
-      {
-        Header: "Mobile",
-        accessor: "phone_number",
-        Cell: ({ row }) => (
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <a
-              href={`https://wa.me/${row.original.phone_number}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: "none", color: "blue", cursor: "pointer" }}
-              title="Chat on WhatsApp"
-            >
-              {row.original.phone_number}
-            </a>
-            <FaCopy
-              style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-              onClick={() => copyToClipboard(row.original.phone_number)}
-              title="Copy Phone Number"
-            />
-          </div>
-        ),
-      },
-      {
-        Header: "Email",
-        accessor: "email",
-        Cell: ({ row }) => (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between", // Push copy button to the right
-              width: "100%",
-              maxWidth: "200px", // Adjust width as needed
-            }}
-          >
-            <div
-              style={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: "150px",
-              }}
-              title={row.original.email} // Show full email on hover
-            >
-              {row.original.email}
-            </div>
-            <FaCopy
-              style={{ cursor: "pointer", color: "#ff9966" }}
-              onClick={() => copyToClipboard(row.original.email)}
-              title="Copy Email"
-            />
-          </div>
-        ),
-      },
-      {
-        Header: "Opportunity Status",
-        accessor: "opportunityStatus",
-        Cell: ({ row }) => {
-          const primaryStatus = row.original.opportunity_status1;
-          const secondaryStatus = row.original.opportunity_status2;
-          const secondaryOptions =
-            dropdownOptions.secondary[primaryStatus] || [];
-          const isSecondaryDisabled =
-            !primaryStatus || secondaryOptions.length == 0;
-          return (
-            <div className="d-flex align-items-center gap-2">
-              <select
-                value={primaryStatus}
-                onChange={(e) =>
-                  handlePrimaryStatusChange(e.target.value, row.original.leadid)
-                }
-                className="form-select fixed-select opp-dropdown"
-              >
-                {!primaryStatus && (
-                  <option value="">Select Primary Status</option>
-                )}
-                {dropdownOptions.primary.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={secondaryStatus}
-                onChange={(e) =>
-                  handleSecondaryStatusChange(e.target.value, row.original.leadid)
-                }
-                className="form-select fixed-select"
-                disabled={isSecondaryDisabled}
-              >
-                {!secondaryStatus && (
-                  <option value="">Select Secondary Status</option>
-                )}
-                {secondaryOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-          );
-        },
-      },
-      {
-        Header: "Action",
-        Cell: ({ row }) => (
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <FaEdit
-              style={{ color: "#ff9966", cursor: "pointer" }}
-              onClick={() => handleEdit(row.original.leadid)}
-            />
-            <FaEye
-              style={{ color: "#ff9966", cursor: "pointer" }}
-              onClick={() => navigateToLead(row.original.leadid)}
-            />
-          </div>
-        ),
-      },
-      {
-        Header: "Comments",
-        accessor: "comments",
-        Cell: ({ row }) => (
-          <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-            <FaComment
-              style={{ color: "#ff9966", cursor: "pointer" }}
-              onClick={() => {
-                navigate(`/opportunity-comments/${row.original.leadid}`);
-              }}
-            />
-          </div>
-        ),
-      },
-    ],
-    [dropdownOptions]
-  );
 
   return (
     <div className="salesOpportunitycontainer">
@@ -549,122 +378,62 @@ const Potentialleads = () => {
               {message && <div className="alert alert-info">{message}</div>}
             </Col>
           </Row>
-          <div>
-            {/* Free text search and calendar toggle */}
-            <Row className="mb-3 align-items-center">
-              <Col md={6} className="d-flex align-items-center gap-2">
-                {/* Free text search input */}
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Free Text Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-
-                {/* Calendar/X toggle */}
-                {showDateRange ? (
-                  <FaTimes
+          <Row className="mb-3 align-items-center">
+            <Col md={6} className="d-flex align-items-center gap-2">
+              <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              {showDateRange ? (
+                <FaTimes
                   onClick={() => {
                     setShowDateRange(false);
                     setFilterStartDate("");
                     setFilterEndDate("");
                     setAppliedFilterStartDate("");
                     setAppliedFilterEndDate("");
-                  }}
-                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                    title="Hide Date Range"
-                  />
-                ) : (
-                  <FaCalendarAlt
-                    onClick={() => setShowDateRange(true)}
-                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                    title="Show Date Range"
-                  />
-                )}
-
-                {/* Date range inputs */}
-                {showDateRange && (
-                  <div className="d-flex align-items-center gap-2">
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={filterStartDate}
-                      onChange={(e) => setFilterStartDate(e.target.value)}
-                    />
-                    <span>to</span>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={filterEndDate}
-                      onChange={(e) => setFilterEndDate(e.target.value)}
-                    />
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => {
-                        setAppliedFilterStartDate(filterStartDate);
-                        setAppliedFilterEndDate(filterEndDate);
-                      }}
-                    >
-                      OK
-                    </button>
-                  </div>
-                )}
-              </Col>
-            </Row>
-
-            {/* Other filters */}
-            <Row className="mb-3">
-              <Col md={3}>
-                <select
-                  className="form-select"
-                  value={filterDestination}
-                  onChange={(e) => setFilterDestination(e.target.value)}
-                >
-                  <option value="">Destinations</option>
-                  {uniqueDestinations.map((dest) => (
-                    <option key={dest} value={dest}>
-                      {dest}
-                    </option>
-                  ))}
-                </select>
-              </Col>
-              <Col md={3}>
-                <select
-                  className="form-select"
-                  value={filterOppStatus1}
-                  onChange={(e) => {
-                    setFilterOppStatus1(e.target.value);
-                    // Reset secondary filter when primary changes
-                    setFilterOppStatus2("");
-                  }}
-                >
-                  <option value="">Primary Status</option>
-                  {dropdownOptions.primary.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </Col>
-              <Col md={3}>
-                <select
-                  className="form-select"
-                  value={filterOppStatus2}
-                  onChange={(e) => setFilterOppStatus2(e.target.value)}
-                >
-                  <option value="">Secondary Status</option>
-                  {staticOppStatus2Options.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </Col>
-            </Row>
-          </div>
-          {loading ? (
-            <div>Loading...</div>
+                  }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
+              ) : (
+                <FaCalendarAlt onClick={() => setShowDateRange(true)} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
+              )}
+              {showDateRange && (
+                <div className="d-flex align-items-center gap-2">
+                  <input type="date" className="form-control" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} />
+                  <span>to</span>
+                  <input type="date" className="form-control" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} />
+                  <button className="btn btn-primary" onClick={() => { setAppliedFilterStartDate(filterStartDate); setAppliedFilterEndDate(filterEndDate); }}>OK</button>
+                </div>
+              )}
+            </Col>
+            <Col md={6} className="d-flex justify-content-end">
+                    <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+          </Row>
+          <Row className="mb-3">
+            <Col md={3}>
+              <select className="form-select" value={filterDestination} onChange={(e) => setFilterDestination(e.target.value)}>
+                <option value="">Destinations</option>
+                {uniqueDestinations.map((dest) => (
+                  <option key={dest} value={dest}>{dest}</option>
+                ))}
+              </select>
+            </Col>
+            <Col md={3}>
+              <select className="form-select" value={filterOppStatus1} onChange={(e) => { setFilterOppStatus1(e.target.value); setFilterOppStatus2(""); }}>
+                <option value="">Primary Status</option>
+                {dropdownOptions.primary.map((status) => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </Col>
+            <Col md={3}>
+              <select className="form-select" value={filterOppStatus2} onChange={(e) => setFilterOppStatus2(e.target.value)}>
+                <option value="">Secondary Status</option>
+                {dropdownOptions.secondary[filterOppStatus1]?.map((status) => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </Col>
+            
+          </Row>
+          {data.length == 0 ? (
+            <div>No data available</div>
           ) : (
             <DataTable columns={columns} data={filteredData} />
           )}

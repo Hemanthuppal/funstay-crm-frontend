@@ -16,18 +16,20 @@ const ViewLeads = () => {
   const { authToken, userId, managerId, userName } = useContext(AuthContext);
   const [data, setData] = useState([]);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
-  const [filterOppStatus1, setFilterOppStatus1] = useState('');
-  const [filterOppStatus2, setFilterOppStatus2] = useState('');
-  const [filterAssignee, setFilterAssignee] = useState("");
-  const [showDateRange, setShowDateRange] = useState(false);
-  const [filterStartDate, setFilterStartDate] = useState('');
-  const [filterEndDate, setFilterEndDate] = useState('');
-  const [filterDestination, setFilterDestination] = useState("");
-  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState('');
-  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState('');
 
+
+   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
+    const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
+    const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
+    const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "");
+    const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
+   
+    const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
+    const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-1") || "");
+    const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-1") || "");
+    const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-1") || "");
+    const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-1") || "");
+    const [showDateRange, setShowDateRange] = useState(false);
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -204,6 +206,41 @@ const ViewLeads = () => {
       console.error("Error assigning lead:", error);
     }
   };
+
+  
+    useEffect(() => {
+      localStorage.setItem("searchTerm-1", searchTerm);
+      localStorage.setItem("filterStatus-1", filterStatus);
+      localStorage.setItem("filterDestination-1", filterDestination);
+      localStorage.setItem("filterOppStatus1-1", filterOppStatus1);
+      localStorage.setItem("filterOppStatus2-1", filterOppStatus2);
+     
+      localStorage.setItem("filterAssignee-1", filterAssignee);
+      localStorage.setItem("filterStartDate-1", filterStartDate);
+      localStorage.setItem("filterEndDate-1", filterEndDate);
+      localStorage.setItem("appliedFilterStartDate-1", appliedFilterStartDate);
+      localStorage.setItem("appliedFilterEndDate-1", appliedFilterEndDate);
+    }, [
+      searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
+      filterAssignee, filterStartDate, filterEndDate,
+      appliedFilterStartDate, appliedFilterEndDate
+    ]);
+  
+    const clearFilters = () => {
+      setSearchTerm("");
+      setFilterStatus("");
+      setFilterDestination("");
+      setFilterOppStatus1("");
+      setFilterOppStatus2("");
+      
+      setFilterAssignee("");
+      setFilterStartDate("");
+      setFilterEndDate("");
+      setAppliedFilterStartDate("");
+      setAppliedFilterEndDate("");
+      localStorage.removeItem("potentialLeadsFilters");
+    };
+  
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -497,6 +534,8 @@ const ViewLeads = () => {
                   </div>
                 )}
               </Col>
+               <Col md={6} className="d-flex justify-content-end">
+                                  <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
             </Row>
             <Row className="mb-3">
               <Col md={3}>

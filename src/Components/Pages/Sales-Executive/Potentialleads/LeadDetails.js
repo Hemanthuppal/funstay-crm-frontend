@@ -4,9 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
-import { FaCopy } from "react-icons/fa";
+import { FaCopy, FaCheck } from "react-icons/fa";
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { adminMail } from '../../../Apiservices/Api';
+import axios from "axios";
 
 const LeadOppView = () => {
     const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
@@ -26,16 +27,64 @@ const LeadOppView = () => {
         });
     };
 
+    const [tags, setTags] = useState([]);
+    const [selectedTag, setSelectedTag] = useState("");
+    const [tagChanged, setTagChanged] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false); // Track update status
+    // For single selection
+
+    useEffect(() => {
+        fetchTags();
+    }, []);
+
+    const fetchTags = async () => {
+        try {
+            const response = await axios.get(`${baseURL}/api/tags`);
+            setTags(response.data);
+        } catch (error) {
+            console.error("Error fetching tags:", error);
+        }
+    };
+
+   
+
+    const handleTagChange = (event) => {
+        setSelectedTag(event.target.value);
+        setTagChanged(true); // Set tag changed to true
+    };
+
+    const applyTag = async () => {
+        if (!selectedTag) return;
+
+        setIsUpdating(true);
+        setMessage("");
+
+        try {
+            await axios.put(`${baseURL}/api/travel_opportunity/${lead.travelOpportunities[0].id}`, {
+                tag: selectedTag
+            });
+            setMessage("Tag updated successfully!");
+            setTagChanged(false); // Reset tag changed after successful update
+        } catch (error) {
+            console.error("Error updating tag:", error);
+            setMessage("Failed to update tag.");
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     useEffect(() => {
         const fetchLeadDetails = async () => {
             try {
                 const response = await fetch(`${baseURL}/api/leadsoppcomment/${leadid}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
+                if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
-                console.log(data); // Log the data to see its structure
                 setLead(data);
+    
+                // Set the selectedTag to the existing tag if available
+                if (data.travelOpportunities && data.travelOpportunities.length > 0) {
+                    setSelectedTag(data.travelOpportunities[0].tag || ""); // Set existing tag or empty string
+                }
             } catch (error) {
                 console.error('Error fetching lead details:', error);
             }
@@ -52,44 +101,44 @@ const LeadOppView = () => {
         if (!newComment.trim()) return;
         const trimmedComment = newComment.trim();
         const commentName = `${userName} (Sales)`;
-        
+
         const comment = {
-          name: commentName,
-          leadid: leadid,
-          timestamp: new Date().toISOString(),
-          text: trimmedComment,
-          notificationmessage: `${commentName} :${trimmedComment}  `,
-          // notificationmessage: `${commentName} :${trimmedComment}  ${leadid}`,
-          // userId, // Uncomment if needed
-          managerId: managerId,
-          email: `${adminMail}`
+            name: commentName,
+            leadid: leadid,
+            timestamp: new Date().toISOString(),
+            text: trimmedComment,
+            notificationmessage: `${commentName} :${trimmedComment}  `,
+            // notificationmessage: `${commentName} :${trimmedComment}  ${leadid}`,
+            // userId, // Uncomment if needed
+            managerId: managerId,
+            email: `${adminMail}`
         };
         console.log(JSON.stringify(comment, null, 2));
         try {
-          const response = await fetch(`${baseURL}/comments/add`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(comment),
-          });
-    
-          if (!response.ok) {
-            throw new Error("Failed to add comment");
-          }
-    
-          const savedComment = await response.json();
-    
-          // Update the state to display the new comment
-          setLead((prevLead) => ({
-            ...prevLead,
-            comments: [...prevLead.comments, savedComment]
-          }));
-    
-          setNewComment(''); // Clear input after submission
+            const response = await fetch(`${baseURL}/comments/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(comment),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add comment");
+            }
+
+            const savedComment = await response.json();
+
+            // Update the state to display the new comment
+            setLead((prevLead) => ({
+                ...prevLead,
+                comments: [...prevLead.comments, savedComment]
+            }));
+
+            setNewComment(''); // Clear input after submission
         } catch (error) {
-          console.error('Error adding comment:', error);
+            console.error('Error adding comment:', error);
         }
-      };
-    
+    };
+
 
     const handleEdit = (leadId) => {
         navigate(`/edit-opportunity/${leadId}`, {
@@ -162,6 +211,23 @@ const LeadOppView = () => {
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
                                             <p><strong>Origin City:</strong> {lead.travelOpportunities[0].origincity || 'N/A'}</p>
+                                            <p style={{ display: "flex", alignItems: "center", gap: "10px" }}><strong>Tag:</strong>
+                                                <select value={selectedTag} onChange={handleTagChange} style={{ width: "50%", padding: "5px" }}>
+                                                    <option value="">Select a tag</option>
+                                                    {tags.map(tag => (
+                                                        <option key={tag.id} value={tag.value}>
+                                                            {tag.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                {tagChanged && (
+                                                    <FaCheck
+                                                        onClick={applyTag}
+                                                        style={{ cursor: "pointer", color: "green", fontSize: "20px" }}
+                                                        title="Apply Tag"
+                                                    />
+                                                )}
+                                            </p>
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
                                             <p>
                                                 <strong>Start Date:</strong>{" "}
@@ -202,6 +268,14 @@ const LeadOppView = () => {
 
                                 <Col md={6}>
                                     <h5>Additional Details</h5>
+                                    <p><strong>Description:</strong></p>
+                                    <div className="s-Opp-Commentsection">
+                                        {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
+                                            <>
+                                                <p>{lead.travelOpportunities[0].description || 'N/A'}</p>
+                                            </>
+                                        )}
+                                    </div>
                                     <p><strong>Notes:</strong></p>
                                     <div className="s-Opp-Commentsection">
                                         {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
@@ -236,7 +310,7 @@ const LeadOppView = () => {
                                         </div>
 
                                         {/* Display Comments */}
-                                        <div className="comment-list" style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px", marginTop:"15px",backgroundColor:"#f1f7ff" }}>
+                                        <div className="comment-list" style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px", marginTop: "15px", backgroundColor: "#f1f7ff" }}>
                                             {sortedComments.length > 0 ? (
                                                 sortedComments.map((comment) => (
                                                     <div key={comment.id} className="comment-item">

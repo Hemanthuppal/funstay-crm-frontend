@@ -4,92 +4,22 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaCalendarAlt, FaTimes } from "react-icons/fa";
 import './TableLayout.css'
 
-// Global Search Filter Component
-function GlobalFilter({ globalFilter, setGlobalFilter, handleDateFilter }) {
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
-  const [showDateFilters, setShowDateFilters] = useState(false);
 
-  const applyDateFilter = () => {
-    handleDateFilter(fromDate, toDate);
-  };
 
-  const clearDateFilter = () => {
-    setFromDate('');
-    setToDate('');
-    handleDateFilter('', ''); // Clear the date filter
-    setShowDateFilters(false); // Hide the date filters
-  };
-
-  return (
-    <div className="dataTable_search mb-3 d-flex align-items-center gap-2">
-    {/* <input
-      value={globalFilter || ''}
-      onChange={(e) => setGlobalFilter(e.target.value)}
-      className="form-control search-input"
-      placeholder="Search..."
-    /> */}
-    {/* {showDateFilters || fromDate || toDate ? (
-      <button className="btn btn-light clear-btn" onClick={clearDateFilter}>
-        <FaTimes color="#ff5e62" size={20} />
-      </button>
-    ) : (
-      <button className="btn btn-light calendar-btn" onClick={() => setShowDateFilters(!showDateFilters)}>
-        <FaCalendarAlt color="#ff5e62" size={20} />
-      </button>
-    )}
-    {showDateFilters && (
-      <div className="date-filters d-flex gap-2 align-items-center">
-        <input
-          type="date"
-          value={fromDate}
-          onChange={(e) => {
-            setFromDate(e.target.value);
-            if (toDate && e.target.value > toDate) {
-              setToDate(''); // Reset "To" date if it's earlier than the new "From" date
-            }
-          }}
-          className="form-control date-input"
-        />
-        <input
-          type="date"
-          value={toDate}
-          onChange={(e) => setToDate(e.target.value)}
-          className="form-control date-input"
-          min={fromDate}
-        />
-        <button onClick={applyDateFilter} className="btn btn-primary apply-btn">
-          OK
-        </button>
-      </div>
-    )} */}
-  </div>
-  
-
-  );
-}
-
-// Reusable DataTable Component
 export default function DataTable({ columns, data, initialSearchValue }) {
-  const [filteredData, setFilteredData] = useState(data);
-  useEffect(() => {
-    setFilteredData(data); // Sync filteredData with data whenever data changes
-  }, [data]);
+  const [currentPageIndex, setCurrentPageIndex] = React.useState(0);
+  const [filteredData, setFilteredData] = React.useState(data);
+  const [previousDataLength, setPreviousDataLength] = React.useState(data.length);
 
-  const handleDateFilter = (fromDate, toDate) => {
-    if (fromDate || toDate) {
-      const filtered = data.filter((item) => {
-        const itemDate = new Date(item.updated_at).setHours(0, 0, 0, 0); // Normalize to midnight for accurate comparison
-        const from = fromDate ? new Date(fromDate).setHours(0, 0, 0, 0) : null;
-        const to = toDate ? new Date(toDate).setHours(0, 0, 0, 0) : null;
 
-        return (!from || itemDate >= from) && (!to || itemDate <= to);
-      });
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(data); // Reset to original data if no date filters
+  React.useEffect(() => {
+    setFilteredData(data);
+    // Only reset page index when the data length changes (indicating a filter was applied)
+    if (data.length !== previousDataLength) {
+      setCurrentPageIndex(0);
+      setPreviousDataLength(data.length);
     }
-  };
+  }, [data, previousDataLength]);
 
   const {
     getTableProps,
@@ -104,42 +34,45 @@ export default function DataTable({ columns, data, initialSearchValue }) {
     previousPage,
     setPageSize,
     setGlobalFilter,
+    gotoPage,
     state: { pageIndex, pageSize, globalFilter },
   } = useTable(
     {
       columns,
       data: filteredData,
-      initialState: {  pageIndex: 0, pageSize: 20, globalFilter: initialSearchValue  },
- // Set initial global filter
+      initialState: { 
+        pageIndex: currentPageIndex, 
+        pageSize: 20,
+        globalFilter: initialSearchValue 
+      },
     },
     useGlobalFilter,
     useSortBy,
     usePagination
   );
 
+  React.useEffect(() => {
+    setCurrentPageIndex(pageIndex);
+  }, [pageIndex]);
+  
   return (
     <div className="dataTable_wrapper container-fluid">
-      {/* Page Size Selector and Global Search Filter */}
+      {/* Page Size Selector */}
       <div className="d-flex align-items-center justify-content-between mb-3">
-        {/* Page Size Selector */}
         <div>
           <select
             className="form-select form-select-sm filter-div"
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
-           // Optional: Adjust width
           >
-            {[20,50,100].map((size) => (
+            {[20, 50, 100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>
             ))}
           </select>
-          <span className="fw-bold">Total Records: {filteredData.length}</span>
+          <span className="fw-bold">Total Records: {data.length}</span>
         </div>
-
-        {/* Global Search Filter */}
-        <GlobalFilter globalFilter={globalFilter} setGlobalFilter={setGlobalFilter} handleDateFilter={handleDateFilter}/>
       </div>
 
       {/* Table */}
@@ -153,7 +86,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
                     {...column.getHeaderProps(column.getSortByToggleProps())}
                     className="dataTable_headerCell"
                     style={{
-                      backgroundColor: '#f7941e', // Updated background color
+                      backgroundColor: '#f7941e',
                       color: 'white',
                       border: '2px solid',
                       borderImage: 'linear-gradient(to right, #ff9966, #ff5e62) 1',

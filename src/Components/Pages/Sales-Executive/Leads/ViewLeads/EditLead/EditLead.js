@@ -17,6 +17,7 @@ const EditOppLead = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+   const [invalidDestinations, setInvalidDestinations] = useState([]); 
 
 
   useEffect(() => {
@@ -125,7 +126,53 @@ const EditOppLead = () => {
       destination: selectedOptions || [], // ✅ Always an array, never undefined
     }));
   };
+  useEffect(() => {
+    const fetchLeadData = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
+        const leadData = response.data;
+  
+        // Convert stored destinations to select format
+        const initialDestinations = leadData.destination 
+          ? leadData.destination.split(", ").map(item => ({ value: item, label: item }))
+          : [];
+  
+        // Check for invalid destinations after options are loaded
+        if (destinationOptions.length > 0 && initialDestinations.length > 0) {
+          const invalid = initialDestinations
+            .filter(dest => 
+              !destinationOptions.some(option => option.value === dest.value)
+            )
+            .map(dest => dest.value);
+          
+          setInvalidDestinations(invalid);
+        }
+  
+        setFormData(prev => ({
+          ...prev,
+          // ... other form fields
+          destination: initialDestinations,
+        }));
+  
+      } catch (err) {
+        console.error("Error fetching lead data:", err);
+        setError("Failed to fetch lead data.");
+      }
+    };
+  
+    fetchLeadData();
+  }, [leadid, destinationOptions]);
 
+  useEffect(() => {
+    // Check destinations when either destinations or options change
+    const invalid = formData.destination
+      .filter(dest => 
+        !destinationOptions.some(option => option.value === dest.value)
+      )
+      .map(dest => dest.value);
+    
+    setInvalidDestinations(invalid);
+  }, [formData.destination, destinationOptions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -401,17 +448,23 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Destination</Form.Label>
-                    <Select
-                      isMulti
-                      name="destination"
-                      options={destinationOptions} // ✅ Use fetched options
-                      value={formData.destination}
-                      onChange={handleMultiSelectChange}
-                    />
-                  </Form.Group>
-                </Col>
+  <Form.Group className="mb-3">
+    <Form.Label>Destination</Form.Label>
+    <Select
+      isMulti
+      name="destination"
+      options={destinationOptions}
+      value={formData.destination}
+      onChange={handleMultiSelectChange}
+    />
+    {invalidDestinations.length > 0 && (
+      <div className="text-danger mt-2 small">
+        Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
+        Please verify or update them.
+      </div>
+    )}
+  </Form.Group>
+</Col>
                 {/* <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Another Name</Form.Label>

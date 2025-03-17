@@ -13,9 +13,13 @@ const SalesCustomer = () => {
   const [data, setData] = useState([]); // State for storing matched customer data
   const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState('');
+    const [tags, setTags] = useState([]);
+    const [selectedTag, setSelectedTag] = useState('');
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchCustomersAndLeads = async () => {
+
+  
+  
+    const fetchCustomers = async () => {
       try {
         // Fetch all leads
         const leadsResponse = await axios.get(`${baseURL}/api/allleads`, {
@@ -65,10 +69,51 @@ const SalesCustomer = () => {
       }
     };
 
-    fetchCustomersAndLeads();
-  }, [authToken, userId]);
+    
+  
 
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/api/tags`);
+        setTags(response.data);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchTags();
+  }, []);
 
+  useEffect(() => {
+    fetchCustomers(); // Fetch all customers on component mount
+  }, [authToken]);
+
+  // Fetch filtered customers based on selected tag
+  useEffect(() => {
+    const fetchFilteredCustomers = async () => {
+      if (selectedTag) {
+        try {
+          const response = await axios.get(`${baseURL}/api/tagfilter`, {
+            params: { tag: selectedTag },
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+
+          if (response.status === 200) {
+            setData(response.data);
+          }
+        } catch (error) {
+          console.error("Error fetching filtered customers:", error);
+          alert("Failed to fetch filtered customers.");
+        }
+      } else {
+        // If no tag is selected, fetch all customers again
+        fetchCustomers();
+      }
+    };
+    fetchFilteredCustomers();
+  }, [selectedTag, authToken]);
   // const navigateToLead = (leadId) => {
   //   navigate(`/sales-details/${leadId}`, {
   //     state: { leadid: leadId },
@@ -99,10 +144,7 @@ const SalesCustomer = () => {
   // Columns for DataTable component
   const columns = React.useMemo(
     () => [
-      {
-        Header: "S.No",
-        accessor: (row, index) => index + 1,  // This will generate the serial number based on the row index
-      },
+      
       {
         Header: "Customer ID",
         accessor: "id", // This is the key in your customer data
@@ -174,7 +216,11 @@ const SalesCustomer = () => {
           </div>
         ),
       },
+      {
+        Header: "Origin City",
+        accessor: "origincity", // This is the key in your customer data
 
+      },
 
 
       {
@@ -202,15 +248,33 @@ const SalesCustomer = () => {
       <div className={`SaleCustomer ${collapsed ? "collapsed" : ""}`}>
         <div className="SaleCustomer-container mb-5">
           <div className="SaleCustomer-table-container">
-            <h3 className="d-flex justify-content-between align-items-center">
-              Customer Details
-            </h3>
-            {message && <div className="alert alert-info">{message}</div>}
-            <DataTable columns={columns} data={data} />
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                         <h3>Customer Details</h3>
+                         <select 
+                           className="form-select w-25"
+                           value={selectedTag}
+                           onChange={(e) => setSelectedTag(e.target.value)}
+                         >
+                           <option value="">All Tags</option>
+                           {tags.map(tag => (
+                             <option key={tag.id} value={tag.value}>
+                               {tag.value}
+                             </option>
+                           ))}
+                         </select>
+                       </div>
+                       
+                       {message && <div className="alert alert-success">{message}</div>}
+                       {data.length === 0 ? (
+                         <div className="alert alert-info">No customers found for the selected tag.</div>
+                       ) : (
+                         <DataTable columns={columns} data={data} />
+                       )}
+                     </div>
           </div>
         </div>
       </div>
-    </div>
+   
   );
 };
 

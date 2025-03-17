@@ -67,10 +67,12 @@ function GlobalFilter({ globalFilter, setGlobalFilter, handleDateFilter }) {
   );
 }
 
-// Reusable DataTable Component
+
 export default function DataTable({ columns, data }) {
   const [filteredData, setFilteredData] = useState(data);
   const [searchInput, setSearchInput] = useState('');
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   useEffect(() => {
     applyGlobalSearch(searchInput);
@@ -80,6 +82,7 @@ export default function DataTable({ columns, data }) {
   const applyGlobalSearch = (searchValue) => {
     if (!searchValue) {
       setFilteredData(data);
+      setIsFiltered(false);
       return;
     }
 
@@ -91,7 +94,11 @@ export default function DataTable({ columns, data }) {
     });
 
     setFilteredData(filtered);
+    setIsFiltered(true);
   };
+
+  // const { themeColor } = useContext(ThemeContext);
+  // const { fontSize, setFontSize } = useContext(FontSizeContext);
 
   // Date Filter Logic
   const handleDateFilter = (fromDate, toDate) => {
@@ -104,8 +111,10 @@ export default function DataTable({ columns, data }) {
         return (!from || itemDate >= from) && (!to || itemDate <= to);
       });
       setFilteredData(filtered);
+      setIsFiltered(true);
     } else {
       setFilteredData(data);
+      setIsFiltered(false);
     }
   };
 
@@ -122,15 +131,29 @@ export default function DataTable({ columns, data }) {
     previousPage,
     setPageSize,
     state: { pageIndex, pageSize },
+    gotoPage,
   } = useTable(
     {
       columns,
       data: filteredData,
-      initialState: { pageIndex: 0, pageSize: 20 },
+      initialState: { pageIndex: currentPageIndex, pageSize: 20 },
+      autoResetPage: false,
     },
     useSortBy,
     usePagination
   );
+
+  useEffect(() => {
+    if (isFiltered) {
+      gotoPage(0);
+      setIsFiltered(false);
+    }
+  }, [filteredData, isFiltered, gotoPage]);
+
+  useEffect(() => {
+    setCurrentPageIndex(pageIndex);
+  }, [pageIndex]);
+
 
   return (
     <div className="dataTable_wrapper container-fluid">

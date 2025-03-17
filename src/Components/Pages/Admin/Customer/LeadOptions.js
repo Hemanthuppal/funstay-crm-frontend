@@ -119,22 +119,22 @@ const LeadOppView = () => {
                                                                                         </Row>
                                                                                         <Row>
                                                                                                 <Col md={6}>
-                                                                                                <p>
-  <strong><FaPhone /> Phone:</strong> 
-  <a 
-    href={`https://wa.me/${customer.country_code || "91"}${customer.phone_number || ""}`} 
-    target="_blank" 
-    rel="noopener noreferrer"
-    style={{ textDecoration: "none", color: "blue",  marginLeft: "5px" }}
-  >
-    {customer.country_code || "+91"} {customer.phone_number || "N/A"}
-  </a>
-  <FaCopy
-    style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
-    onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
-    title="Copy Phone Number"
-  />
-</p>
+                                                                                                        <p>
+                                                                                                                <strong><FaPhone /> Phone:</strong>
+                                                                                                                <a
+                                                                                                                        href={`https://wa.me/${customer.country_code || "91"}${customer.phone_number || ""}`}
+                                                                                                                        target="_blank"
+                                                                                                                        rel="noopener noreferrer"
+                                                                                                                        style={{ textDecoration: "none", color: "blue", marginLeft: "5px" }}
+                                                                                                                >
+                                                                                                                        {customer.country_code || "+91"} {customer.phone_number || "N/A"}
+                                                                                                                </a>
+                                                                                                                <FaCopy
+                                                                                                                        style={{ marginLeft: "8px", cursor: "pointer", color: "#ff9966" }}
+                                                                                                                        onClick={() => copyToClipboard(`${customer.country_code || "+91"}${customer.phone_number || ""}`)}
+                                                                                                                        title="Copy Phone Number"
+                                                                                                                />
+                                                                                                        </p>
 
                                                                                                 </Col>
                                                                                                 <Col md={6}>
@@ -167,7 +167,14 @@ const LeadOppView = () => {
                                                                                         {travelOpportunity.map((trip, index) => (
                                                                                                 <Accordion.Item eventKey={index.toString()} key={index}>
                                                                                                         <Accordion.Header>
-                                                                                                                InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                                                                                <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                                                                                                                        <span>
+                                                                                                                                InProgress to {trip.destination} on {new Date(trip.start_date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                                                                                                                        </span>
+                                                                                                                        <span style={{ fontWeight: "bold", color: "blue", marginLeft: "10px" }}>
+                                                                                                                                {trip.tag}
+                                                                                                                        </span>
+                                                                                                                </div>
                                                                                                         </Accordion.Header>
                                                                                                         <Accordion.Body>
                                                                                                                 <Row>

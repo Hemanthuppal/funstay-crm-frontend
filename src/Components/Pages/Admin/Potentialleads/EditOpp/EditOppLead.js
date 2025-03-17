@@ -148,7 +148,48 @@ const EditOppLead = () => {
   }, [leadid]);
 
  const [destinationOptions, setDestinationOptions] = useState([]);
-
+ const [invalidDestinations, setInvalidDestinations] = useState([]);
+ 
+ // Update your existing useEffect that fetches opportunity data
+ useEffect(() => {
+   const fetchOpportunityData = async () => {
+     try {
+       const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
+       const opportunityData = response.data;
+       
+       // Convert stored destinations to select format
+       const initialDestinations = opportunityData.destination 
+         ? opportunityData.destination.split(", ").map(item => ({ value: item, label: item }))
+         : [];
+ 
+       // Check for invalid destinations after options are loaded
+       if (destinationOptions.length > 0 && initialDestinations.length > 0) {
+         const invalid = initialDestinations.filter(dest => 
+           !destinationOptions.some(option => option.value === dest.value)
+         ).map(dest => dest.value);
+         
+         setInvalidDestinations(invalid);
+       }
+ 
+       // Rest of your existing data setting...
+     } catch (err) {
+       console.error("Error fetching opportunity data:", err);
+       setError("Failed to fetch opportunity data.");
+     }
+   };
+ 
+   fetchOpportunityData();
+ }, [leadid, destinationOptions]);
+useEffect(() => {
+    // Check destinations when either destinations or options change
+    const invalid = formData.destination
+      .filter(dest => 
+        !destinationOptions.some(option => option.value === dest.value)
+      )
+      .map(dest => dest.value);
+    
+    setInvalidDestinations(invalid);
+  }, [formData.destination, destinationOptions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -339,6 +380,7 @@ const EditOppLead = () => {
       approx_budget: formData.approx_budget,
 
       notes: formData.notes,
+      description: formData.description,
       comments: formData.comments,
       reminder_setting: formData.reminder_setting,
     };
@@ -571,18 +613,24 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Destination</Form.Label>
-                    <Select
-                      isMulti
-                      name="destination"
-                      options={destinationOptions} // ✅ Use fetched options
-                      value={formData.destination}
-                      onChange={handleMultiSelectChange}
-                    />
-                  </Form.Group>
-                </Col>
+                 <Col md={4}>
+                               <Form.Group className="mb-3">
+                 <Form.Label>Destination</Form.Label>
+                 <Select
+                   isMulti
+                   name="destination"
+                   options={destinationOptions}
+                   value={formData.destination}
+                   onChange={handleMultiSelectChange}
+                 />
+                 {invalidDestinations.length > 0 && (
+                   <div className="text-danger mt-2">
+                     Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
+                     Please verify or update them.
+                   </div>
+                 )}
+               </Form.Group>
+                               </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Start Date</Form.Label>
@@ -742,6 +790,19 @@ const EditOppLead = () => {
                       as="textarea"
                       name="notes"
                       value={formData.notes}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      name="description"
+                      value={formData.description}
                       onChange={handleChange}
                     />
                   </Form.Group>

@@ -88,29 +88,23 @@ function FollowUp() {
   // }, [selectedDay, travelOpportunity, leads, userId]); 
   
   useEffect(() => {
-    // Prevent processing if still loading or userId is missing
-  
-    // Filter leads based on assignedSalesId matching the current userId
     const filteredLeads = leads.filter((lead) => lead.managerid == userId);
   
-    // Create a lookup object for filtered leads where leadid is the key
     const leadsLookup = filteredLeads.reduce((acc, lead) => {
       acc[lead.leadid] = lead;
       return acc;
     }, {});
   
-    // Create dynamic schedule data based on filtered leads and selected day
     const dynamicSchedule = travelOpportunity
       .filter((opportunity) => {
-        if (!opportunity.leadid || !opportunity.reminder_setting) return false; // Prevent errors
+        if (!opportunity.leadid || !opportunity.reminder_setting) return false;
   
-        // Convert reminder_setting to a valid date object
         const reminderDate = new Date(opportunity.reminder_setting);
-        if (isNaN(reminderDate)) return false; // Skip invalid dates
+        if (isNaN(reminderDate)) return false;
   
         const reminderDay = weekdays[reminderDate.getDay()];
         const reminderYear = reminderDate.getFullYear();
-        const currentYear = new Date().getFullYear(); // Get current year
+        const currentYear = new Date().getFullYear();
   
         return (
           reminderDay == selectedDay &&
@@ -121,19 +115,19 @@ function FollowUp() {
       .map((opportunity) => {
         const lead = leadsLookup[opportunity.leadid];
   
-        console.log("Matching Lead for opportunity:", opportunity.leadid, "is", lead);
-  
         return {
-          time: new Date(opportunity.reminder_setting).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }), // Dynamic time format
+          time: new Date(opportunity.reminder_setting).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true }),
           title: opportunity.notes || "N/A",
           color: "Sales-badge-orange",
           lead: lead ? lead.name : "Unknown Lead",
           leadid: opportunity.leadid,
         };
-      });
+      })
+      .sort((a, b) => a.time.localeCompare(b.time)); // Sort by time in ascending order
   
     setScheduleData([{ day: selectedDay, schedules: dynamicSchedule }]);
   }, [selectedDay, travelOpportunity, leads, userId]);
+  
   
   
 

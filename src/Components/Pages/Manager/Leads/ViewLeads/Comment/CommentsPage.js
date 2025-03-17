@@ -147,10 +147,11 @@ const navigate = useNavigate();
 </p>
 
       
-        <p>
-         
-          <strong>{comment.name}</strong>: {comment.text}
-        </p>
+<p className="comment-text">
+  <strong>{comment.name}</strong>:  
+  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+</p>
+
        
        
       </div>

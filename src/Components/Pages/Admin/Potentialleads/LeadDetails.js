@@ -274,7 +274,7 @@ const LeadOppView = () => {
                                     <div className="s-Opp-Commentsection">
                                         {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                             <>
-                                                <p>{lead.travelOpportunities[0].description || 'N/A'}</p>
+                                                <p style={{ whiteSpace: "pre-line" }}>{lead.travelOpportunities[0].description || 'N/A'}</p>
                                             </>
                                         )}
                                     </div>
@@ -282,7 +282,7 @@ const LeadOppView = () => {
                                     <div className="s-Opp-Commentsection">
                                         {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                             <>
-                                                <p>{lead.travelOpportunities[0].notes || 'N/A'}</p>
+                                                <p style={{ whiteSpace: "pre-line" }}>{lead.travelOpportunities[0].notes || 'N/A'}</p>
                                             </>
                                         )}
                                     </div>
@@ -330,8 +330,10 @@ const LeadOppView = () => {
                                                             })}
                                                         </p>
                                                         <p className="comment-text">
-                                                            <strong>{comment.name}</strong>: {comment.text}
-                                                        </p>
+  <strong>{comment.name}</strong>:  
+  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+</p>
+
                                                         <hr />
                                                     </div>
                                                 ))

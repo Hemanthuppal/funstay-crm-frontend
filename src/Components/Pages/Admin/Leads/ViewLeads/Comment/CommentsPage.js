@@ -148,10 +148,11 @@ const CommentsPage = () => {
 </p>
 
       
-        <p>
-         
-          <strong>{comment.name}</strong>: {comment.text}
-        </p>
+<p>
+  <strong>{comment.name}</strong>:  
+  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+</p>
+
        
        
       </div>

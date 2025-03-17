@@ -693,7 +693,7 @@ const EditLeadOppView = () => {
                                                                     })}
                                                                     )
                                                                 </p>
-                                                                <p>{comment.text}</p>
+                                                                <p  style={{ whiteSpace: "pre-line" }}>{comment.text}</p>
                                                             </div>
                                                         ))
                                                     ) : (

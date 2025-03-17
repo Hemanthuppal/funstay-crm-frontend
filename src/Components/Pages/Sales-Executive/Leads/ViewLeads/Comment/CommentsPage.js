@@ -155,10 +155,11 @@ const CommentsPage = () => {
 </p>
 
       
-        <p>
-          {/* Wrap the name in <strong> to bold it */}
-          <strong>{comment.name}</strong>: {comment.text}
-        </p>
+<p className="comment-text">
+  <strong>{comment.name}</strong>:  
+  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+</p>
+
         {/* Display formatted timestamp */}
        
       </div>

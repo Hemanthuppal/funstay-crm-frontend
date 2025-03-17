@@ -376,8 +376,10 @@ const InDetailViewLeads = () => {
                       })}
                     </p>
                     <p className="comment-text">
-                      <strong>{comment.name}</strong>: {comment.text}
-                    </p>
+  <strong>{comment.name}</strong>:  
+  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+</p>
+
                     <hr />
                   </div>
                 ))
@@ -391,7 +393,7 @@ const InDetailViewLeads = () => {
                       <span className="fw-bold me-2" style={{ minWidth: "150px" }}>
                         Description:
                       </span>
-                      <span>{formData.description}</span>
+                      <span style={{ whiteSpace: "pre-line" }}>{formData.description}</span>
                     </div>
                 </div>
               ) : (

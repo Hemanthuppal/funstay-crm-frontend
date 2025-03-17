@@ -231,7 +231,7 @@ const LeadOppView = () => {
                                         <h5>Customer Interaction Log</h5>
                                         <p><strong>Notes:</strong></p>
                                         <div className="s-Opp-Commentsection">
-                                            <p>{travelOpportunity[activeKey]?.notes || "No notes available"}</p>
+                                            <p  style={{ whiteSpace: "pre-line" }}>{travelOpportunity[activeKey]?.notes || "No notes available"}</p>
                                         </div>
                                         <p><strong>Comments:</strong></p>
                                         <div className="s-Opp-Commentsection">
@@ -251,7 +251,7 @@ const LeadOppView = () => {
                                                             })}
                                                             )
                                                         </p>
-                                                        <p>{comment.text}</p>
+                                                        <p  style={{ whiteSpace: "pre-line" }}>{comment.text}</p>
                                                     </div>
                                                 ))
                                             ) : (

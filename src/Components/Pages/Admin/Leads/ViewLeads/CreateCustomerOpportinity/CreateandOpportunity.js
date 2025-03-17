@@ -182,6 +182,7 @@ const CreateCustomerOpportunity = () => {
 
       } catch (err) {
         console.error("Error fetching lead data:", err);
+        navigate('/not-found');
         setError("Error fetching lead data.");
       } finally {
         setLoading(false);

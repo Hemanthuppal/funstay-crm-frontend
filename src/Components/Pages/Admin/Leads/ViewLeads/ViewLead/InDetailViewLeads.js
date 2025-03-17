@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/Navbar/Navbar";
 import "./InDetailViewLeads.css";
 import axios from "axios";
@@ -11,7 +11,8 @@ import { FaCopy } from "react-icons/fa";
 const InDetailViewLeads = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { leadid } = location.state;
+  // const { leadid } = location.state;
+  const { leadid } = useParams();
   const [collapsed, setCollapsed] = useState(false);
   const [newComment, setNewComment] = useState('');
    const [assignedSalesId, setAssignedSalesId] = useState(null);
@@ -81,14 +82,18 @@ const InDetailViewLeads = () => {
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
-        setError("Failed to fetch lead data.");
+        if (err.response && err.response.status === 404) {
+          navigate("/not-found");
+        } else {
+          setError("Failed to fetch lead data.");
+        }
       }
     };
-
+  
     if (leadid) {
       fetchLeadData();
     }
-  }, [leadid]);
+  }, [leadid, navigate]);
 
   useEffect(() => {
     const fetchLeadDetails = async () => {

@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Navbar from "./../../../../Shared/Sales-ExecutiveNavbar/Navbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditOppLead.css';
 import Select from "react-select";
 import { useLocation } from "react-router-dom";
+import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
 const EditOppLead = () => { 
   const location = useLocation();
-  const { leadid } = location.state;
+  // const { leadid } = location.state;
+  const { leadid } = useParams();
+  const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
@@ -65,6 +68,28 @@ const EditOppLead = () => {
   });
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
+
+   useEffect(() => {
+          const checkDataExists = async () => {
+              try {
+                  const response = await fetch(`${baseURL}/api/sales-leadid/leads/${leadid}/${userId}`);
+                  const data = await response.json();
+  
+                  if (response.ok) {
+                      console.log(data.message); // Should print "Exists"
+                  } else {
+                      console.error(data.error);
+                      navigate('/not-found');
+                  }
+              } catch (error) {
+                  console.error("Error checking data:", error);
+              }
+          };
+  
+          if (leadid && userId) { // Ensure values are defined before making the request
+              checkDataExists();
+          }
+      }, [leadid, userId]);
 
   useEffect(() => {
     const fetchLeadData = async () => {

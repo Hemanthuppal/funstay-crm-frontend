@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/Navbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
@@ -8,10 +8,11 @@ import { FaCopy ,FaCheck} from "react-icons/fa";
 import axios from "axios";
 
 const LeadOppView = () => {
+    const { leadid } = useParams();
     const [collapsed, setCollapsed] = useState(false);
     const [lead, setLead] = useState(null);
     const location = useLocation();
-    const { leadid } = location.state;
+    // const { leadid } = location.state;
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
@@ -89,6 +90,7 @@ const LeadOppView = () => {
                 }
             } catch (error) {
                 console.error('Error fetching lead details:', error);
+                navigate('/not-found');
             }
         };
 

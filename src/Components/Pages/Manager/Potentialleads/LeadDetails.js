@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/ManagerNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
@@ -15,7 +15,8 @@ const LeadOppView = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [lead, setLead] = useState(null);
     const location = useLocation();
-    const { leadid } = location.state;
+    // const { leadid } = location.state;
+    const { leadid } = useParams();
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
@@ -76,6 +77,27 @@ const LeadOppView = () => {
         }
     };
 
+    useEffect(() => {
+              const checkDataExists = async () => {
+                try {
+                  const response = await fetch(`${baseURL}/api/manager-leadid/leads/${leadid}/${userId}`);
+                  const data = await response.json();
+          
+                  if (response.ok) {
+                    console.log(data.message); // Should print "Exists"
+                  } else {
+                    console.error(data.error);
+                    navigate('/not-found');
+                  }
+                } catch (error) {
+                  console.error("Error checking data:", error);
+                }
+              };
+          
+              if (leadid && userId) { // Ensure values are defined before making the request
+                checkDataExists();
+              }
+            }, [leadid, userId]);
 
     useEffect(() => {
         const fetchLeadDetails = async () => {

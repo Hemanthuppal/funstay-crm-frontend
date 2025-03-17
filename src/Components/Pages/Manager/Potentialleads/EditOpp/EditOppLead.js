@@ -1,31 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Select from "react-select";
 import Navbar from "./../../../../Shared/ManagerNavbar/Navbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditOppLead.css';
+import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
-const EditOppLead = () => { 
+const EditOppLead = () => {
   const location = useLocation();
-  const { leadid } = location.state;
+  // const { leadid } = location.state;
+  const { userId } = useContext(AuthContext);
+  const { leadid } = useParams();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
-  
+
   useEffect(() => {
-   
+
     const countries = getCountries();
     const callingCodes = countries.map(
       (country) => `+${getCountryCallingCode(country)}`
     );
-    const uniqueCodes = [...new Set(callingCodes)]; 
+    const uniqueCodes = [...new Set(callingCodes)];
 
- 
+
     uniqueCodes.sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
 
     setCountryCodeOptions(uniqueCodes);
@@ -45,7 +48,7 @@ const EditOppLead = () => {
     primaryStatus: '',
     secondaryStatus: '',
     origincity: '',
-    destination: [], 
+    destination: [],
     start_date: '',
     end_date: '',
     duration: '',
@@ -66,11 +69,33 @@ const EditOppLead = () => {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    const checkDataExists = async () => {
+      try {
+        const response = await fetch(`${baseURL}/api/manager-leadid/leads/${leadid}/${userId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log(data.message); // Should print "Exists"
+        } else {
+          console.error(data.error);
+          navigate('/not-found');
+        }
+      } catch (error) {
+        console.error("Error checking data:", error);
+      }
+    };
+
+    if (leadid && userId) { // Ensure values are defined before making the request
+      checkDataExists();
+    }
+  }, [leadid, userId]);
+
+  useEffect(() => {
     const fetchLeadData = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         const leadData = response.data;
-        console.log("data",leadData);
+        console.log("data", leadData);
         console.log("Fetched secondarysource:", leadData.secondarysource);
         console.log("Fetched primarySource:", leadData.primarySource);
         setFormData((prev) => ({
@@ -105,7 +130,7 @@ const EditOppLead = () => {
         const opportunityData = response.data;
         const formattedStartDate = opportunityData.start_date ? new Date(opportunityData.start_date).toISOString().split('T')[0] : '';
         const formattedEndDate = opportunityData.end_date ? new Date(opportunityData.end_date).toISOString().split('T')[0] : '';
-        const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().slice(0, 16) : ''; 
+        const reminder = opportunityData.reminder_setting ? new Date(opportunityData.reminder_setting).toISOString().slice(0, 16) : '';
         setFormData((prev) => ({
           ...prev,
           origincity: opportunityData.origincity || '',
@@ -148,47 +173,47 @@ const EditOppLead = () => {
 
   const [destinationOptions, setDestinationOptions] = useState([]);
   const [invalidDestinations, setInvalidDestinations] = useState([]);
- 
+
   // Update your existing useEffect that fetches opportunity data
   useEffect(() => {
     const fetchOpportunityData = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
         const opportunityData = response.data;
-        
+
         // Convert stored destinations to select format
-        const initialDestinations = opportunityData.destination 
+        const initialDestinations = opportunityData.destination
           ? opportunityData.destination.split(", ").map(item => ({ value: item, label: item }))
           : [];
-  
+
         // Check for invalid destinations after options are loaded
         if (destinationOptions.length > 0 && initialDestinations.length > 0) {
-          const invalid = initialDestinations.filter(dest => 
+          const invalid = initialDestinations.filter(dest =>
             !destinationOptions.some(option => option.value === dest.value)
           ).map(dest => dest.value);
-          
+
           setInvalidDestinations(invalid);
         }
-  
+
         // Rest of your existing data setting...
       } catch (err) {
         console.error("Error fetching opportunity data:", err);
         setError("Failed to fetch opportunity data.");
       }
     };
-  
+
     fetchOpportunityData();
   }, [leadid, destinationOptions]);
- useEffect(() => {
-     // Check destinations when either destinations or options change
-     const invalid = formData.destination
-       .filter(dest => 
-         !destinationOptions.some(option => option.value === dest.value)
-       )
-       .map(dest => dest.value);
-     
-     setInvalidDestinations(invalid);
-   }, [formData.destination, destinationOptions]);
+  useEffect(() => {
+    // Check destinations when either destinations or options change
+    const invalid = formData.destination
+      .filter(dest =>
+        !destinationOptions.some(option => option.value === dest.value)
+      )
+      .map(dest => dest.value);
+
+    setInvalidDestinations(invalid);
+  }, [formData.destination, destinationOptions]);
   const handleMultiSelectChange = (selectedOptions) => {
     setFormData((prev) => ({
       ...prev,
@@ -206,40 +231,40 @@ const EditOppLead = () => {
     },
   });
 
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === "start_date") {
       const newStartDate = new Date(value);
       const today = new Date();
-  
+
       if (newStartDate <= today) {
         setError("Start date must be a future date.");
         return;
       } else {
-        setError(null); 
+        setError(null);
       }
-  
-     
+
+
       setFormData((prev) => ({
         ...prev,
         start_date: value,
-        end_date: value, 
+        end_date: value,
         duration: '0',
       }));
     } else if (name === "end_date") {
       const newEndDate = new Date(value);
       const startDate = new Date(formData.start_date);
-  
+
 
       if (newEndDate < startDate) {
         setError("End date must be after start date.");
         return;
       } else {
-        setError(null); 
+        setError(null);
       }
-  
+
       setFormData((prev) => ({
         ...prev,
         end_date: value,
@@ -248,15 +273,15 @@ const EditOppLead = () => {
     } else if (name === "reminder_setting") {
       const reminderDate = new Date(value);
       const startDate = new Date(formData.start_date);
-  
-      
+
+
       if (reminderDate > startDate) {
         setError("Reminder setting must be before the start date.");
         return;
       } else {
-        setError(null); 
+        setError(null);
       }
-  
+
       setFormData((prev) => ({
         ...prev,
         reminder_setting: value,
@@ -264,55 +289,55 @@ const EditOppLead = () => {
     } else {
       setFormData({ ...formData, [name]: value });
     }
-  
+
     if (name === "primaryStatus") {
       setFormData({ ...formData, [name]: value, secondaryStatus: "" });
     }
-  
+
     if (name === "opportunity_status1") {
       setFormData({ ...formData, [name]: value, opportunity_status2: "" });
     }
   };
 
   useEffect(() => {
-        const loadScript = (url, callback) => {
-          let script = document.createElement("script");
-          script.src = url;
-          script.async = true;
-          script.defer = true;
-          script.onload = callback;
-          document.body.appendChild(script);
-        };
-    
-        loadScript(
-          "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
-          () => {
-            if (window.google) {
-              const autocomplete = new window.google.maps.places.Autocomplete(
-                document.getElementById("origincity"),
-                { types: ["(cities)"] }
-              );
-    
-              autocomplete.addListener("place_changed", () => {
-                const place = autocomplete.getPlace();
-                if (place && place.address_components) {
-                  let city = "", state = "", country = "";
-                  place.address_components.forEach((component) => {
-                    if (component.types.includes("locality")) {
-                      city = component.long_name;
-                    } else if (component.types.includes("administrative_area_level_1")) {
-                      state = component.long_name;
-                    } else if (component.types.includes("country")) {
-                      country = component.long_name;
-                    }
-                  });
-                  handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
+    const loadScript = (url, callback) => {
+      let script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.defer = true;
+      script.onload = callback;
+      document.body.appendChild(script);
+    };
+
+    loadScript(
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+      () => {
+        if (window.google) {
+          const autocomplete = new window.google.maps.places.Autocomplete(
+            document.getElementById("origincity"),
+            { types: ["(cities)"] }
+          );
+
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.address_components) {
+              let city = "", state = "", country = "";
+              place.address_components.forEach((component) => {
+                if (component.types.includes("locality")) {
+                  city = component.long_name;
+                } else if (component.types.includes("administrative_area_level_1")) {
+                  state = component.long_name;
+                } else if (component.types.includes("country")) {
+                  country = component.long_name;
                 }
               });
+              handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
             }
-          }
-        );
-      }, [handleChange]);
+          });
+        }
+      }
+    );
+  }, [handleChange]);
 
   const handleChildrenCountChange = (e) => {
     const { value } = e.target;
@@ -353,7 +378,7 @@ const EditOppLead = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     const leadData = {
       lead_type: formData.lead_type,
       name: formData.name,
@@ -406,19 +431,19 @@ const EditOppLead = () => {
   };
 
   const [loading, setLoading] = useState(false);
-        const handleSubmitAndClose = async (e) => {
-          e.preventDefault(); // Prevent default form submission
-          setLoading(true);
-      
-          try {
-            await handleSubmit(e); // Call the original handleSubmit function
-            navigate("/m-potential-leads"); // Redirect to leads list page after saving
-          } catch (error) {
-            console.error("Error submitting form:", error);
-          } finally {
-            setLoading(false);
-          }
-        };
+  const handleSubmitAndClose = async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    setLoading(true);
+
+    try {
+      await handleSubmit(e); // Call the original handleSubmit function
+      navigate("/m-potential-leads"); // Redirect to leads list page after saving
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const [dropdownOptions] = useState({
     primary: ["In Progress", "Confirmed", "Lost", "Duplicate"],
@@ -448,7 +473,7 @@ const EditOppLead = () => {
         "Booked different option from us",
       ],
       Duplicate: ["Duplicate"],
-     
+
     },
   });
 
@@ -463,7 +488,7 @@ const EditOppLead = () => {
               <h5>Customer Details</h5>
               {message && <div className="alert alert-info">{message}</div>}
               <Row>
-              
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Name</Form.Label>
@@ -476,57 +501,57 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>
-      Phone Number
-    </Form.Label>
-    <div style={{ display: "flex", alignItems: "center" }}>
-      
-      <Form.Select
-        name="country_code"
-        value={formData.country_code || "+91"} 
-        onChange={handleChange}
-        style={{
-          width: "80px",
-          marginRight: "10px",
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      >
-        {countryCodeOptions.map((code) => (
-          <option key={code} value={code}>
-            {code}
-          </option>
-        ))}
-      </Form.Select>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      Phone Number
+                    </Form.Label>
+                    <div style={{ display: "flex", alignItems: "center" }}>
 
-     
-      <Form.Control
-        type="text"
-        name="phone_number"
-        placeholder="Enter Phone Number"
-        value={formData.phone_number || ""} 
-        onChange={(e) => {
-          const value = e.target.value;
-          if (/^\d*$/.test(value)) {
-            handleChange(e);
-          }
-        }}
-       
-        style={{
-          flex: 1,
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-        required
-      />
-    </div>
+                      <Form.Select
+                        name="country_code"
+                        value={formData.country_code || "+91"}
+                        onChange={handleChange}
+                        style={{
+                          width: "80px",
+                          marginRight: "10px",
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {countryCodeOptions.map((code) => (
+                          <option key={code} value={code}>
+                            {code}
+                          </option>
+                        ))}
+                      </Form.Select>
 
-    
-  </Form.Group>
-</Col>
+
+                      <Form.Control
+                        type="text"
+                        name="phone_number"
+                        placeholder="Enter Phone Number"
+                        value={formData.phone_number || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d*$/.test(value)) {
+                            handleChange(e);
+                          }
+                        }}
+
+                        style={{
+                          flex: 1,
+                          padding: "5px",
+                          border: "1px solid #ccc",
+                          borderRadius: "4px",
+                        }}
+                        required
+                      />
+                    </div>
+
+
+                  </Form.Group>
+                </Col>
 
                 <Col md={4}>
                   <Form.Group className="mb-3">
@@ -581,7 +606,7 @@ const EditOppLead = () => {
                   </Col>
                 )}
 
-           
+
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Secondary Email</Form.Label>
@@ -604,12 +629,12 @@ const EditOppLead = () => {
                     />
                   </Form.Group>
                 </Col>
-               
+
               </Row>
               <hr />
               <h5>Opportunity Details</h5>
               <Row>
-              <Col md={4}>
+                <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Origin City</Form.Label>
                     <Form.Control
@@ -622,23 +647,23 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-                               <Form.Group className="mb-3">
-                 <Form.Label>Destination</Form.Label>
-                 <Select
-                   isMulti
-                   name="destination"
-                   options={destinationOptions}
-                   value={formData.destination}
-                   onChange={handleMultiSelectChange}
-                 />
-                 {invalidDestinations.length > 0 && (
-                   <div className="text-danger mt-2">
-                     Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
-                     Please verify or update them.
-                   </div>
-                 )}
-               </Form.Group>
-                               </Col>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Destination</Form.Label>
+                    <Select
+                      isMulti
+                      name="destination"
+                      options={destinationOptions}
+                      value={formData.destination}
+                      onChange={handleMultiSelectChange}
+                    />
+                    {invalidDestinations.length > 0 && (
+                      <div className="text-danger mt-2">
+                        Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
+                        Please verify or update them.
+                      </div>
+                    )}
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Start Date</Form.Label>
@@ -647,7 +672,7 @@ const EditOppLead = () => {
                       name="start_date"
                       value={formData.start_date}
                       onChange={handleChange}
-                      min={new Date().toISOString().split("T")[0]} 
+                      min={new Date().toISOString().split("T")[0]}
                     />
                   </Form.Group>
                 </Col>
@@ -659,30 +684,30 @@ const EditOppLead = () => {
                       name="end_date"
                       value={formData.end_date}
                       onChange={handleChange}
-                      min={formData.start_date} 
+                      min={formData.start_date}
                     />
                   </Form.Group>
                 </Col>
-            
 
-<Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Duration (Nights)</Form.Label>
-    <Form.Control
-      type="number"
-      name="duration"
-      value={formData.duration}
-      onChange={(e) => {
-        const newDuration = parseInt(e.target.value) || 0;
-        setFormData((prev) => ({
-          ...prev,
-          duration: newDuration,
-          end_date: new Date(new Date(formData.start_date).getTime() + newDuration * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
-        }));
-      }}
-    />
-  </Form.Group>
-</Col>
+
+                <Col md={4}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Duration (Nights)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      name="duration"
+                      value={formData.duration}
+                      onChange={(e) => {
+                        const newDuration = parseInt(e.target.value) || 0;
+                        setFormData((prev) => ({
+                          ...prev,
+                          duration: newDuration,
+                          end_date: new Date(new Date(formData.start_date).getTime() + newDuration * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                        }));
+                      }}
+                    />
+                  </Form.Group>
+                </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>No of Adults</Form.Label>
@@ -744,7 +769,7 @@ const EditOppLead = () => {
                       value={formData.reminder_setting}
                       onChange={handleChange}
                       min={new Date().toISOString().slice(0, 16)}
-                      max={formData.start_date ? new Date(formData.start_date).toISOString().slice(0, 16) : ""} 
+                      max={formData.start_date ? new Date(formData.start_date).toISOString().slice(0, 16) : ""}
                     />
                   </Form.Group>
                 </Col>

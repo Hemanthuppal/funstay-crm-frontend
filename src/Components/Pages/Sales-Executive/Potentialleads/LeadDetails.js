@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
@@ -14,7 +14,8 @@ const LeadOppView = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [lead, setLead] = useState(null);
     const location = useLocation();
-    const { leadid } = location.state;
+    // const { leadid } = location.state;
+    const { leadid } = useParams();
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
@@ -46,7 +47,7 @@ const LeadOppView = () => {
         }
     };
 
-   
+
 
     const handleTagChange = (event) => {
         setSelectedTag(event.target.value);
@@ -74,13 +75,35 @@ const LeadOppView = () => {
     };
 
     useEffect(() => {
+        const checkDataExists = async () => {
+            try {
+                const response = await fetch(`${baseURL}/api/sales-leadid/leads/${leadid}/${userId}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    console.log(data.message); // Should print "Exists"
+                } else {
+                    console.error(data.error);
+                    navigate('/not-found');
+                }
+            } catch (error) {
+                console.error("Error checking data:", error);
+            }
+        };
+
+        if (leadid && userId) { // Ensure values are defined before making the request
+            checkDataExists();
+        }
+    }, [leadid, userId]);
+
+    useEffect(() => {
         const fetchLeadDetails = async () => {
             try {
                 const response = await fetch(`${baseURL}/api/leadsoppcomment/${leadid}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 setLead(data);
-    
+
                 // Set the selectedTag to the existing tag if available
                 if (data.travelOpportunities && data.travelOpportunities.length > 0) {
                     setSelectedTag(data.travelOpportunities[0].tag || ""); // Set existing tag or empty string
@@ -327,9 +350,9 @@ const LeadOppView = () => {
                                                             })}
                                                         </p>
                                                         <p className="comment-text">
-  <strong>{comment.name}</strong>:  
-  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
-</p>
+                                                            <strong>{comment.name}</strong>:
+                                                            <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+                                                        </p>
 
                                                         <hr />
                                                     </div>

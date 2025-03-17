@@ -18,6 +18,28 @@ const CommentsPage = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
 
+   useEffect(() => {
+          const checkDataExists = async () => {
+            try {
+              const response = await fetch(`${baseURL}/api/sales-leadid/leads/${leadid}/${userId}`);
+              const data = await response.json();
+      
+              if (response.ok) {
+                console.log(data.message); // Should print "Exists"
+              } else {
+                console.error(data.error);
+                navigate('/not-found');
+              }
+            } catch (error) {
+              console.error("Error checking data:", error);
+            }
+          };
+      
+          if (leadid && userId) { // Ensure values are defined before making the request
+            checkDataExists();
+          }
+        }, [leadid, userId]);
+
   useEffect(() => {
     // Fetch comments based on lead ID when the component mounts
     const fetchComments = async () => {

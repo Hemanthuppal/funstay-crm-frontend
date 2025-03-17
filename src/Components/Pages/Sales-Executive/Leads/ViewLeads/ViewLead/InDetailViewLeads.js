@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./InDetailViewLeads.css";
 import axios from "axios"; // Import axios
@@ -14,7 +14,8 @@ const InDetailViewLeads = () => {
   const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const { leadid } = location.state; // Get leadid from location state
+  // const { leadid } = location.state; // Get leadid from location state
+  const { leadid } = useParams();
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const [newComment, setNewComment] = useState('');
@@ -49,6 +50,29 @@ const InDetailViewLeads = () => {
       console.error('Failed to copy: ', err);
     });
   };
+
+  useEffect(() => {
+    const checkDataExists = async () => {
+      try {
+        const response = await fetch(`${baseURL}/api/sales-leadid/leads/${leadid}/${userId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log(data.message); // Should print "Exists"
+        } else {
+          console.error(data.error);
+          navigate('/not-found');
+        }
+      } catch (error) {
+        console.error("Error checking data:", error);
+      }
+    };
+
+    if (leadid && userId) { // Ensure values are defined before making the request
+      checkDataExists();
+    }
+  }, [leadid, userId]);
+  
   useEffect(() => {
     const fetchLeadData = async () => {
       try {

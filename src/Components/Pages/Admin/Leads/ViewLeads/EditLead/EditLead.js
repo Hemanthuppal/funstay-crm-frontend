@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Select from "react-select";
 import Navbar from "../../../../../Shared/Navbar/Navbar";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditLead.css';
 import { baseURL } from "../../../../../Apiservices/Api";
@@ -12,13 +12,14 @@ import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
 
 const EditOppLead = () => {
   const location = useLocation();
-  const { leadid } = location.state;
+  // const { leadid } = location.state;
+  const { leadid } = useParams();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const { themeColor } = useContext(ThemeContext);
   const [message, setMessage] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
-  const [invalidDestinations, setInvalidDestinations] = useState([]); 
+  const [invalidDestinations, setInvalidDestinations] = useState([]);
 
 
   useEffect(() => {
@@ -99,7 +100,12 @@ const EditOppLead = () => {
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
-        setError("Failed to fetch lead data.");
+        // If 404 error, navigate to Not Found page
+        if (err.response && err.response.status === 404) {
+          navigate("/not-found");
+        } else {
+          setError("Failed to fetch lead data.");
+        }
       }
     };
 
@@ -125,46 +131,46 @@ const EditOppLead = () => {
       try {
         const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         const leadData = response.data;
-  
+
         // Convert stored destinations to select format
-        const initialDestinations = leadData.destination 
+        const initialDestinations = leadData.destination
           ? leadData.destination.split(", ").map(item => ({ value: item, label: item }))
           : [];
-  
+
         // Check for invalid destinations after options are loaded
         if (destinationOptions.length > 0 && initialDestinations.length > 0) {
           const invalid = initialDestinations
-            .filter(dest => 
+            .filter(dest =>
               !destinationOptions.some(option => option.value === dest.value)
             )
             .map(dest => dest.value);
-          
+
           setInvalidDestinations(invalid);
         }
-  
+
         setFormData(prev => ({
           ...prev,
           // ... other form fields
           destination: initialDestinations,
         }));
-  
+
       } catch (err) {
         console.error("Error fetching lead data:", err);
         setError("Failed to fetch lead data.");
       }
     };
-  
+
     fetchLeadData();
   }, [leadid, destinationOptions]);
 
   useEffect(() => {
     // Check destinations when either destinations or options change
     const invalid = formData.destination
-      .filter(dest => 
+      .filter(dest =>
         !destinationOptions.some(option => option.value === dest.value)
       )
       .map(dest => dest.value);
-    
+
     setInvalidDestinations(invalid);
   }, [formData.destination, destinationOptions]);
 
@@ -433,23 +439,23 @@ const EditOppLead = () => {
                   </Form.Group>
                 </Col>
                 <Col md={4}>
-  <Form.Group className="mb-3">
-    <Form.Label>Destination</Form.Label>
-    <Select
-      isMulti
-      name="destination"
-      options={destinationOptions}
-      value={formData.destination}
-      onChange={handleMultiSelectChange}
-    />
-    {invalidDestinations.length > 0 && (
-      <div className="text-danger mt-2 small">
-        Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
-        Please verify or update them.
-      </div>
-    )}
-  </Form.Group>
-</Col>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Destination</Form.Label>
+                    <Select
+                      isMulti
+                      name="destination"
+                      options={destinationOptions}
+                      value={formData.destination}
+                      onChange={handleMultiSelectChange}
+                    />
+                    {invalidDestinations.length > 0 && (
+                      <div className="text-danger mt-2 small">
+                        Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
+                        Please verify or update them.
+                      </div>
+                    )}
+                  </Form.Group>
+                </Col>
 
                 <Col md={4}>
                   <Form.Group className="mb-3">

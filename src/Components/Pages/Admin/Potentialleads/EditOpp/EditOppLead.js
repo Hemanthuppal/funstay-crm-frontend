@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Select from "react-select";
 import Navbar from "./../../../../Shared/Navbar/Navbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Form, Row, Col } from 'react-bootstrap';
 import './EditOppLead.css';
 import { useLocation } from "react-router-dom";
@@ -13,7 +13,8 @@ import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 
 const EditOppLead = () => {
   const location = useLocation();
-  const { leadid } = location.state;
+  // const { leadid } = location.state;
+  const { leadid } = useParams();
   const navigate = useNavigate();
   const { themeColor } = useContext(ThemeContext);
   const [collapsed, setCollapsed] = useState(false);
@@ -98,6 +99,7 @@ const EditOppLead = () => {
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
+        navigate('/not-found');
         setError("Failed to fetch lead data.");
       }
     };

@@ -7,11 +7,13 @@ import Select from "react-select";
 import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
+import { AuthContext } from '../../../../../AuthContext/AuthContext';
 
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
   const { leadid } = useParams();
+  const { userId } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("customer");
   const { themeColor } = useContext(ThemeContext);
   const [startDate, setStartDate] = useState("");
@@ -161,6 +163,28 @@ const CreateCustomerOpportunity = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+          const checkDataExists = async () => {
+            try {
+              const response = await fetch(`${baseURL}/api/manager-leadid/leads/${leadid}/${userId}`);
+              const data = await response.json();
+      
+              if (response.ok) {
+                console.log(data.message); // Should print "Exists"
+              } else {
+                console.error(data.error);
+                navigate('/not-found');
+              }
+            } catch (error) {
+              console.error("Error checking data:", error);
+            }
+          };
+      
+          if (leadid && userId) { // Ensure values are defined before making the request
+            checkDataExists();
+          }
+        }, [leadid, userId]);
 
   useEffect(() => {
     const fetchLeadData = async () => {

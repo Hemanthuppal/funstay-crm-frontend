@@ -304,12 +304,7 @@ const Manager = ({ onToggleSidebar }) => {
     </Link>
   </li>
 
-  <li className={`manager-nav-item ${location.pathname.startsWith("/m-business") ? "active" : ""}`}>
-    <Link className="nav-link" to="/m-business" onClick={handleNavItemClick}>
-      <FaBusinessTime className="manager-nav-icon" />
-      {!collapsed && <span className="link_text">Business Insights</span>}
-    </Link>
-  </li>
+ 
 </ul>
           </div>
         </div>

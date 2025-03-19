@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import "./CreateandOpportunity.css";
 import axios from 'axios';
 import Select from "react-select";
@@ -6,10 +6,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
+import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
   const { leadid } = useParams();
+  const { themeColor } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("customer"); // Default to "customer"
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -314,7 +316,7 @@ const CreateCustomerOpportunity = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="createcustomer-form-container">
-          <h2 className="createcustomer-form-header">
+          <h2 className="createcustomer-form-header" style={{ "--theme-color": themeColor }}>
             {customerData.customer_status === "existing" ? "Customer and Opportunity" : "Create Customer and Opportunity"}
           </h2>
           {message && <div className="alert alert-info">{message}</div>}

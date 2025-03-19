@@ -1,5 +1,5 @@
 // CommentsPage.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState ,useContext} from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { baseURL } from '../../../../../Apiservices/Api';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { ThemeContext } from '../../../../../Shared/Themes/ThemeContext';
 
 const CommentsPage = () => {
   const { leadid } = useParams();
@@ -16,6 +17,7 @@ const CommentsPage = () => {
   const [newComment, setNewComment] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [assignedSalesId, setAssignedSalesId] = useState(null);
+  const { themeColor } = useContext(ThemeContext);
   const [managerid, setManagerId] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
@@ -102,7 +104,7 @@ const CommentsPage = () => {
     <Navbar onToggleSidebar={setCollapsed} />
     <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
     <div className="comment-form-container">
-    <h3 className='comment-form-header'>Comments</h3>
+    <h3 className='comment-form-header' style={{ "--theme-color": themeColor }}>Comments</h3>
 
    
     <div className="mb-3 opp-modal-footer">

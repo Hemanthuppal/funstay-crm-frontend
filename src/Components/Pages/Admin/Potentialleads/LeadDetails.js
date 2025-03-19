@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './LeadDetails.css';
@@ -6,6 +6,7 @@ import Navbar from '../../../Shared/Navbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
 import { FaCopy ,FaCheck} from "react-icons/fa";
 import axios from "axios";
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 const LeadOppView = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -16,6 +17,7 @@ const LeadOppView = () => {
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
      const [assignedSalesId, setAssignedSalesId] = useState(null);
+     const { themeColor } = useContext(ThemeContext);
         const [managerid, setManagerId] = useState(null);
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -161,7 +163,7 @@ const LeadOppView = () => {
             <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
                 <div className="lead-opportunity-view">
                     <Card className="mb-4">
-                        <Card.Header className='s-LeadOppView-modal-header'>
+                        <Card.Header className='s-LeadOppView-modal-header' style={{ "--theme-color": themeColor }}>
                             <h2> Customer and Opportunity Details</h2>
                         </Card.Header>
                         <Card.Body>

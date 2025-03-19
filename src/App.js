@@ -91,10 +91,15 @@ import A_MyCreateCustomerOpportunity from "./Components/Pages/Admin/Leads/MyCrea
 import NotFound from "./Components/Shared/NotFound/NotFound";
 import EmailChat from "./Email";
 import Tags from "./Components/Pages/Admin/Tags/Tag";
+import ThemeProvider from "./Components/Shared/Themes/ThemeContext";
+import { FontSizeProvider } from "./Components/Shared/Font/FontContext";
+import Themes from "./Components/Shared/Themes/Themes";
 
 function App() {
     return (
         <AuthProvider>
+            <ThemeProvider>
+            <FontSizeProvider>
         <Router>
             <Routes>
                 <Route path="/login" element={<Login />} />
@@ -273,6 +278,7 @@ function App() {
                 <Route path="/emailchat" element={<EmailChat />} />
 
                 <Route path="/a-tags" element={<Tags/>} />
+                <Route path="/themes" element={<Themes />} />
 
 
                 </Route>
@@ -281,6 +287,8 @@ function App() {
          
  
         </Router>
+        </FontSizeProvider>
+        </ThemeProvider>
         </AuthProvider>
     );
 }

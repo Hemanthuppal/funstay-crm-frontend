@@ -7,6 +7,7 @@ import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 import { AuthContext } from "../../../../AuthContext/AuthContext";
+import { FontSizeContext } from '../../../../Shared/Font/FontContext';
 
 import { HiUserGroup } from "react-icons/hi"; // Import icon
 
@@ -487,20 +488,21 @@ const AdminViewLeads = () => {
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
+          const { fontSize } = useContext(FontSizeContext);
           const primaryStatus = row.original.primaryStatus;
           const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
 
           return (
-            <div className="d-flex align-items-center"
+            <div className="d-flex align-items-center"style={{ fontSize: fontSize }}
             >
               <select
                 value={primaryStatus}
                 onChange={(e) =>
                   handlePrimaryStatusChange(e.target.value, row.original.leadid)
                 }
-                className="form-select me-2"
+                className="form-select me-2" style={{ fontSize: fontSize }}
               >
                 {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
@@ -514,7 +516,7 @@ const AdminViewLeads = () => {
                 onChange={(e) =>
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
-                className="form-select"
+                className="form-select" style={{ fontSize: fontSize }}
                 disabled={isSecondaryDisabled}
               >
                 {!secondaryStatus && <option value="">Select Secondary Status</option>}
@@ -544,6 +546,7 @@ const AdminViewLeads = () => {
       {
         Header: "Manager ",
         Cell: ({ row }) => {
+          const { fontSize } = useContext(FontSizeContext);
           const assignedManagerId = row.original.managerid || "";
           const assignedManagerName = row.original.assign_to_manager || "";
 
@@ -589,12 +592,12 @@ const AdminViewLeads = () => {
           };
 
           return (
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
               <select
                 value={selectedManager}
                 onChange={handleChange}
-                className="form-select me-2"
-                style={{ maxWidth: "150px" }}
+                className="form-select me-2" 
+                style={{ maxWidth: "150px",fontSize: fontSize }}
               >
                 <option value="">Select Assignee</option>
                 <option value="self">Self</option>
@@ -618,6 +621,7 @@ const AdminViewLeads = () => {
       {
         Header: "Associate",
         Cell: ({ row }) => {
+          const { fontSize } = useContext(FontSizeContext);
           const initialAssociateValue = row.original.assignedSalesId
             ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
             : "";
@@ -652,11 +656,11 @@ const AdminViewLeads = () => {
           };
       
           return (
-            <div className="d-flex align-items-center" >
+            <div className="d-flex align-items-center"style={{fontSize: fontSize}} >
               <select
                 value={selectedAssociate}
                 onChange={handleChange}
-                className="form-select me-2"
+                className="form-select me-2" style={{fontSize: fontSize}}
                
               >
                 <option value="">Select Associate</option>

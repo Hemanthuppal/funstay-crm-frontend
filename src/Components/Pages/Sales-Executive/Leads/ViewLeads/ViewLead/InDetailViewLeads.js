@@ -9,6 +9,7 @@ import { baseURL } from "../../../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
 import { AuthContext } from '../../../../../AuthContext/AuthContext';
 import { adminMail } from '../../../../../Apiservices/Api';
+import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
 
 const InDetailViewLeads = () => {
   const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
@@ -16,6 +17,7 @@ const InDetailViewLeads = () => {
   const location = useLocation();
   const { leadid } = location.state; // Get leadid from location state
   const [collapsed, setCollapsed] = useState(false);
+  const { themeColor } = useContext(ThemeContext);
   const [message, setMessage] = useState("");
   const [newComment, setNewComment] = useState('');
   const [lead, setLead] = useState({ comments: [] });
@@ -207,7 +209,7 @@ const InDetailViewLeads = () => {
         <div className="indetail-container">
           <div className="card mt-4">
             <div className="card-body">
-              <h2 className="lead-details-header">Lead Details</h2>
+              <h2 className="lead-details-header" style={{ "--theme-color": themeColor }}>Lead Details</h2>
               {message && <div className="alert alert-info">{message}</div>}
               {leadid ? (
                 <div className="row">

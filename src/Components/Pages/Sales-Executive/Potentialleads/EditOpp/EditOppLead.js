@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Navbar from "./../../../../Shared/Sales-ExecutiveNavbar/Navbar";
@@ -9,11 +9,13 @@ import Select from "react-select";
 import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
+import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 
 const EditOppLead = () => { 
   const location = useLocation();
   const { leadid } = location.state;
   const navigate = useNavigate();
+  const { themeColor } = useContext(ThemeContext);
   const [collapsed, setCollapsed] = useState(false);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
 
@@ -490,7 +492,7 @@ const EditOppLead = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="editleads-form-container">
-          <h2 className="editleads-form-header">Edit Customer and Opportunity Details</h2>
+          <h2 className="editleads-form-header"style={{ "--theme-color": themeColor }}>Edit Customer and Opportunity Details</h2>
           <form className="editleads-form" onSubmit={handleSubmit}>
             <div className="s-edit-opp-lead-FormLable">
               <h5>Customer Details</h5>

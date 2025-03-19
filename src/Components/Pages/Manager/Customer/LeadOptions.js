@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
@@ -7,10 +7,12 @@ import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
 
 import { baseURL } from "../../../Apiservices/Api";
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 const LeadOppView = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [customer, setCustomer] = useState(null);
+    const { themeColor } = useContext(ThemeContext);
     const [travelOpportunity, setTravelOpportunity] = useState([]);
     const [loading, setLoading] = useState(true);
     const [travelLoading, setTravelLoading] = useState(true);
@@ -90,7 +92,7 @@ const LeadOppView = () => {
             <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
                 <div className="lead-opportunity-view">
                     <Card className="mb-4">
-                        <Card.Header className="s-LeadOppView-modal-header">
+                        <Card.Header className="s-LeadOppView-modal-header"style={{ "--theme-color": themeColor }}>
                             <h2> Customer Details</h2>
                         </Card.Header>
                         <Card.Body>

@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
 import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
+import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 
 const DynamicForm = () => {
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
@@ -25,6 +26,7 @@ const DynamicForm = () => {
     setCountryCodeOptions(uniqueCodes);
   }, []);
   const { userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
+  const { themeColor } = useContext(ThemeContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
     name: '',
@@ -460,7 +462,7 @@ const DynamicForm = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="addleads-form-container">
-          <h2 className="addleads-form-header">Add Leads</h2>
+          <h2 className="addleads-form-header"style={{ "--theme-color": themeColor }}>Add Leads</h2>
           {error && <div className="alert alert-danger">{error}</div>}
           {message && <div className="alert alert-info">{message}</div>}{/* Display message */}
           <form onSubmit={handleSubmit} className="addleads-form">

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Navbar/Navbar";
 import "./AddEmployeeModal.css";
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Import eye icons
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 
 
@@ -11,6 +12,7 @@ const AddEmployeeModal = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const { themeColor } = useContext(ThemeContext);
   const [message, setMessage] = useState("");
   const [newEmployee, setNewEmployee] = useState({
     name: "",
@@ -114,7 +116,7 @@ const AddEmployeeModal = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="addleads-form-container">
-          <h2 className="addleads-form-header">Add New Employee</h2>
+          <h2 className="addleads-form-header" style={{ "--theme-color": themeColor }}>Add New Employee</h2>
 
           {message && <div className="alert alert-success">{message}</div>}
           {error && <div className="alert alert-danger">{error}</div>}

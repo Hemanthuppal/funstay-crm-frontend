@@ -91,6 +91,9 @@ import A_MyCreateCustomerOpportunity from "./Components/Pages/Admin/Leads/MyCrea
 import NotFound from "./Components/Shared/NotFound/NotFound";
 import EmailChat from "./Email";
 import Tags from "./Components/Pages/Admin/Tags/Tag";
+import M_Myoppleads from "./Components/Pages/Manager/Potentialleads/MyOpp/MyOpplead";
+import M_Myleads from "./Components/Pages/Manager/Leads/Myleads/Myleads";
+import M_MYCreateCustomerOpportunity from "./Components/Pages/Manager/Leads/Myleads/CreateCustomerOpportinity/CreateandOpportunity"
 
 function App() {
     return (
@@ -273,6 +276,21 @@ function App() {
                 <Route path="/emailchat" element={<EmailChat />} />
 
                 <Route path="/a-tags" element={<Tags/>} />
+
+
+
+                <Route path="/m-myoppleads" element={<M_Myoppleads/>} />
+                <Route path="/m-myleads" element={<M_Myleads/>} />
+
+
+
+                <Route path="/m-myedit-lead/:leadid" element={<M_EditLead />} />
+                <Route path="/m-myview-lead/:leadid" element={<M_InDetailViewLeads />} />
+                <Route path="/m-mycomments/:leadid" element={<M_CommentsPage />} />
+                <Route path="/m-myedit-opportunity/:leadid" element={<M_EditOppLead />} />
+                <Route path="/m-mydetails/:leadid" element={<M_LeadDetailss />} />
+                <Route path="/m-mycreate-customer-opportunity/:leadid" element={<M_MYCreateCustomerOpportunity />} />
+                <Route path="/m-myopportunity-comments/:leadid" element={<M_CommentsPage />} />
 
 
                 </Route>

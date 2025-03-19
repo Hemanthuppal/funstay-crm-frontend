@@ -205,7 +205,7 @@ const DynamicForm = () => {
     const formattedDestinations = formData.destination.map((dest) => dest.label);
 
     try {
-      const response = await axios.post(`${baseURL}/api/leads`, {
+      const response = await axios.post(`${baseURL}/api/managerleads`, {
         ...formData,
         dataToSubmit,
         destination: formattedDestinations, // ✅ Send only labels to the backend

@@ -5,7 +5,7 @@ import { Button, Row, Col, Form } from "react-bootstrap";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
 import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaSyncAlt, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
-import "./ViewLeads.css";
+import "./Myleads.css";
 import axios from "axios";
 import { AuthContext } from "../../../../AuthContext/AuthContext";
 import { baseURL } from "../../../../Apiservices/Api";
@@ -47,7 +47,7 @@ const ViewLeads = () => {
       try {
         const response = await fetch(`${webhookUrl}/api/enquiries`);
         const data = await response.json();
-        const filteredData = data.filter((enquiry) => enquiry.managerAssign !== userId && enquiry.managerid == userId && enquiry.status == "lead");
+        const filteredData = data.filter((enquiry) => enquiry.managerAssign == userId && enquiry.managerid == userId && enquiry.status == "lead");
         setData(filteredData);
       } catch (error) {
         console.error("Error fetching enquiries:", error);
@@ -73,13 +73,13 @@ const ViewLeads = () => {
   }, [authToken, userId]);
 
   const handleEdit = (leadId) => {
-    navigate(`/m-edit-lead/${leadId}`, {
+    navigate(`/m-myedit-lead/${leadId}`, {
       state: { leadid: leadId },
     });
   };
 
   const handleAddUser = (lead) => {
-    navigate(`/m-create-customer-opportunity/${lead.leadid}`);
+    navigate(`/m-mycreate-customer-opportunity/${lead.leadid}`);
   };
   const handleAddLead = () => {
     navigate('/m-add-leads');
@@ -87,7 +87,7 @@ const ViewLeads = () => {
 
 
   const handleViewLeads = (lead) => {
-    navigate(`/m-view-lead/${lead.leadid}`, {
+    navigate(`/m-myview-lead/${lead.leadid}`, {
       state: { leadid: lead.leadid },
     });
   };
@@ -176,67 +176,7 @@ const ViewLeads = () => {
   };
 
 
-  const handleAssignLead = async (leadid, employeeId,status) => {
-      const selectedEmp = employees.find((emp) => emp.id === parseInt(employeeId));
-      const employeeName = selectedEmp ? selectedEmp.name : "";
   
-      if (!employeeName) {
-        setMessage("Please select a valid employee.");
-        setTimeout(() => setMessage(""), 3000);
-        return;
-      }
-      console.log(leadid, employeeId, employeeName, userName,status);
-      try {
-        const response = await axios.post(`${baseURL}/api/assign-lead`, {
-          leadid,
-          employeeId,
-  
-          employeeName,
-          status,
-          userId,
-          userName
-        });
-        setMessage(response.data.message);
-        setTimeout(() => setMessage(""), 3000);
-  
-        setData((prevData) =>
-          prevData.map((lead) =>
-            lead.leadid === leadid ? { ...lead, assignedSalesName: employeeName } : lead
-          )
-        );
-      } catch (error) {
-        console.error("Error assigning lead:", error);
-      }
-    };
-
-   const handleSelfAssign = async (leadid) => {
-      try {
-        const response = await axios.post(`${baseURL}/api/assign-manager`, {
-          leadid,
-          userId, // Use the userId from context
-        });
-    
-        if (response.status === 200) {
-          setMessage(response.data.message);
-          setTimeout(() => setMessage(""), 3000);
-          window.location.reload();
-    
-          // Update the local state to reflect the assignment
-          setData((prevData) =>
-            prevData.map((lead) =>
-              lead.leadid === leadid ? { ...lead, managerAssign: userId } : lead
-            )
-          );
-        } else {
-          setMessage('Failed to assign the lead. Please try again.');
-          setTimeout(() => setMessage(""), 3000);
-        }
-      } catch (error) {
-        console.error("Error assigning lead:", error);
-        setMessage('An error occurred while assigning the lead. Please try again.');
-        setTimeout(() => setMessage(""), 3000);
-      }
-    };
 
   
     useEffect(() => {
@@ -446,60 +386,7 @@ const ViewLeads = () => {
 
 
 
-       {
-            Header: "Assign",
-            accessor: "id",
-            Cell: ({ cell: { row } }) => {
-              const assignedSalesId = row.original.assignedSalesId || "";
-              const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
-              const [showIcon, setShowIcon] = useState(false);
-          
-              const handleChange = (e) => {
-                const newValue = e.target.value;
-                setSelectedEmployee(newValue);
-                setShowIcon(newValue !== assignedSalesId); 
-              };
-          
-              const handleAssignClick = async () => {
-                if (selectedEmployee) {
-                  if (selectedEmployee === "self") {
-                    // Call the new API for self assignment
-                    await handleSelfAssign(row.original.leadid);
-                  } else {
-                    handleAssignLead(row.original.leadid, selectedEmployee,row.original.status);
-                  }
-                  setShowIcon(false); // Hide icon after assignment
-                } else {
-                  setMessage("Please select an employee to assign the lead.");
-                  setTimeout(() => setMessage(""), 3000);
-                }
-              };
-          
-              return (
-                <div className="d-flex align-items-center">
-                  <Form.Select
-                    value={selectedEmployee}
-                    onChange={handleChange}
-                    className="me-2"
-                  >
-                    <option value="">Select Employee</option>
-                    <option value="self">Self</option> {/* Add Self option */}
-                    {employees.map((employee) => (
-                      <option key={employee.id} value={employee.id}>
-                        {employee.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  {showIcon && (
-                    <HiUserGroup
-                      style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
-                      onClick={handleAssignClick}
-                    />
-                  )}
-                </div>
-              );
-            },
-          },
+      
 
 
 
@@ -525,7 +412,7 @@ const ViewLeads = () => {
             />
             <FaComment
               style={{ color: "#ff9966", cursor: "pointer" }}
-              onClick={() => navigate(`/m-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
+              onClick={() => navigate(`/m-mycomments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
             />
           </div>
         ),
@@ -545,7 +432,7 @@ const ViewLeads = () => {
               <Col className="d-flex justify-content-between align-items-center">
                 <h3>Lead Details</h3>
                 {message && <div className="alert alert-info">{message}</div>}
-                <Button onClick={handleAddLead}>Add Leads</Button>
+                {/* <Button onClick={handleAddLead}>Add Leads</Button> */}
               </Col>
             </Row>
             <Row className="mb-3 align-items-center">
@@ -618,14 +505,7 @@ const ViewLeads = () => {
                   ))}
                 </select>
               </Col>
-              <Col md={3}>
-                <select className="form-select" value={filterAssignee} onChange={(e) => setFilterAssignee(e.target.value)}>
-                  <option value="">Associates</option>
-                  {employees.map((employee) => (
-                    <option key={employee.id} value={employee.name}>{employee.name}</option>
-                  ))}
-                </select>
-              </Col>
+              
             </Row>
             <DataTable columns={columns} data={filteredData} />
           </div>

@@ -44,7 +44,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
       data: filteredData,
       initialState: { 
         pageIndex: currentPageIndex, 
-        pageSize: 5,
+        pageSize: 20,
         globalFilter: initialSearchValue 
       },
     },
@@ -67,7 +67,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
           >
-            {[5, 50, 100].map((size) => (
+            {[20, 50, 100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>

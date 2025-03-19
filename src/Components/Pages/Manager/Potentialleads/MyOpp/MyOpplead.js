@@ -1,15 +1,15 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../../Shared/ManagerNavbar/Navbar";
+import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col ,Form} from "react-bootstrap";
 import { HiUserGroup } from "react-icons/hi";
-import DataTable from "../../../Layout/Table/TableLayoutOpp";
-import { baseURL } from "../../../Apiservices/Api";
-import './PotentialLeads.css';
+import DataTable from "../../../../Layout/Table/TableLayoutOpp";
+import { baseURL } from "../../../../Apiservices/Api";
+import './MyOppleads.css';
 import axios from 'axios';
-import { AuthContext } from '../../../AuthContext/AuthContext';
+import { AuthContext } from '../../../../AuthContext/AuthContext';
 
 const Potentialleads = () => { 
   const { authToken, userId,userName } = useContext(AuthContext);
@@ -36,7 +36,7 @@ const Potentialleads = () => {
       const response = await axios.get(`${baseURL}/api/fetch-data`);
       if (response.status == 200) {
         const filteredLeads = response.data.filter(
-          (enquiry) =>enquiry.managerAssign !== userId && enquiry.managerid == userId && enquiry.status == "opportunity"
+          (enquiry) => enquiry.managerAssign == userId && enquiry.managerid == userId && enquiry.status == "opportunity"
         );
         setData(filteredLeads);
       }
@@ -166,7 +166,7 @@ const Potentialleads = () => {
 
 
   const handleEdit = (rowId) => {
-    navigate(`/m-edit-opportunity/${rowId}`, { state: { leadid: rowId } });
+    navigate(`/m-myedit-opportunity/${rowId}`, { state: { leadid: rowId } });
   };
 
   const handleDelete = async (leadid) => {
@@ -197,73 +197,7 @@ const Potentialleads = () => {
     }
   };
 
-  const handleAssignLead = async (leadid, employeeId, status) => {
-    const selectedEmp = employees.find((emp) => emp.id === parseInt(employeeId));
-    const employeeName = selectedEmp ? selectedEmp.name : "";
   
-    if (!employeeName) {
-      setMessage("Please select a valid employee.");
-      setTimeout(() => setMessage(""), 3000);
-      return;
-    }
-  
-    try {
-      const response = await axios.post(`${baseURL}/api/assign-lead`, {
-        leadid,
-        employeeId,
-        employeeName,
-        status,
-        userId,
-        userName,
-      });
-  
-      if (response.status === 200) {
-        // Update the local state immediately
-        setData((prevData) =>
-          prevData.map((lead) =>
-            lead.leadid === leadid
-              ? { ...lead, assignedSalesName: employeeName, assignedSalesId: employeeId }
-              : lead
-          )
-        );
-        setMessage(response.data.message);
-        setTimeout(() => setMessage(""), 1000);
-      }
-    } catch (error) {
-      console.error("Error assigning lead:", error);
-      setMessage("An error occurred while assigning the lead.");
-      setTimeout(() => setMessage(""), 1000);
-    }
-  };
-
-   const handleSelfAssign = async (leadid) => {
-      try {
-        const response = await axios.post(`${baseURL}/api/assign-manager`, {
-          leadid,
-          userId, // Use the userId from context
-        });
-    
-        if (response.status === 200) {
-          setMessage(response.data.message);
-          setTimeout(() => setMessage(""), 3000);
-          window.location.reload();
-    
-          // Update the local state to reflect the assignment
-          setData((prevData) =>
-            prevData.map((lead) =>
-              lead.leadid === leadid ? { ...lead, managerAssign: userId } : lead
-            )
-          );
-        } else {
-          setMessage('Failed to assign the lead. Please try again.');
-          setTimeout(() => setMessage(""), 3000);
-        }
-      } catch (error) {
-        console.error("Error assigning lead:", error);
-        setMessage('An error occurred while assigning the lead. Please try again.');
-        setTimeout(() => setMessage(""), 3000);
-      }
-    };
 
   useEffect(() => {
     localStorage.setItem("searchTerm", searchTerm);
@@ -328,7 +262,7 @@ const Potentialleads = () => {
       Header: "Name",
       accessor: "name",
       Cell: ({ row }) => (
-        <div style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }} onClick={() => navigate(`/m-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}>
+        <div style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }} onClick={() => navigate(`/m-mydetails/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}>
           {row.original.name}
         </div>
       ),
@@ -414,68 +348,15 @@ const Potentialleads = () => {
         );
       },
     },
-     {
-              Header: "Assign",
-              accessor: "id",
-              Cell: ({ cell: { row } }) => {
-                const assignedSalesId = row.original.assignedSalesId || "";
-                const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
-                const [showIcon, setShowIcon] = useState(false);
-            
-                const handleChange = (e) => {
-                  const newValue = e.target.value;
-                  setSelectedEmployee(newValue);
-                  setShowIcon(newValue !== assignedSalesId); 
-                };
-            
-                const handleAssignClick = async () => {
-                  if (selectedEmployee) {
-                    if (selectedEmployee === "self") {
-                      // Call the new API for self assignment
-                      await handleSelfAssign(row.original.leadid);
-                    } else {
-                      handleAssignLead(row.original.leadid, selectedEmployee,row.original.status);
-                    }
-                    setShowIcon(false); // Hide icon after assignment
-                  } else {
-                    setMessage("Please select an employee to assign the lead.");
-                    setTimeout(() => setMessage(""), 3000);
-                  }
-                };
-            
-                return (
-                  <div className="d-flex align-items-center">
-                    <Form.Select
-                      value={selectedEmployee}
-                      onChange={handleChange}
-                      className="me-2"
-                    >
-                      <option value="">Select Employee</option>
-                      <option value="self">Self</option> {/* Add Self option */}
-                      {employees.map((employee) => (
-                        <option key={employee.id} value={employee.id}>
-                          {employee.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                    {showIcon && (
-                      <HiUserGroup
-                        style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
-                        onClick={handleAssignClick}
-                      />
-                    )}
-                  </div>
-                );
-              },
-            },
+   
     {
       Header: "Action",
       Cell: ({ row }) => (
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} />
-          <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
+          <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-mydetails/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
           <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} />
-          <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
+          <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-myopportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
         </div>
       ),
     },
@@ -556,14 +437,7 @@ const Potentialleads = () => {
                 ))}
               </select>
             </Col>
-            <Col md={3}>
-              <select className="form-select" value={filterAssignee} onChange={(e) => setFilterAssignee(e.target.value)}>
-                <option value="">Associates</option>
-                {employees.map((employee) => (
-                  <option key={employee.id} value={employee.name}>{employee.name}</option>
-                ))}
-              </select>
-            </Col>
+           
           </Row>
           {data.length == 0 ? (
             <div>No data available</div>

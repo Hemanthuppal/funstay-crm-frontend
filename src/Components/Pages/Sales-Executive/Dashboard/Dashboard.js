@@ -2,16 +2,20 @@ import React, { useState, useEffect, useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Dashboard.css";
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { FaFileDownload } from "react-icons/fa"; // Import download icon
 import { AuthContext } from "../../../AuthContext/AuthContext";
 import Navbar from '../../../Shared/Sales-ExecutiveNavbar/Navbar';
 import FollowUp from "./FollowUp";
 import { baseURL } from "../../../Apiservices/Api";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from 'xlsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { userId } = useContext(AuthContext); // Get userId from context
+  const [data, setData] = useState([]);
+  const webhookUrl = "http://localhost:4000";
+  const { authToken, userId } = useContext(AuthContext); // Get userId from context
   const [collapsed, setCollapsed] = useState(false);
   const [selectedDay, setSelectedDay] = useState("Tue");
   const [counts, setCounts] = useState({
@@ -32,63 +36,138 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const endpoints = [
-            `${baseURL}/lead/today/${userId}`,
-            `${baseURL}/lead/confirmed/${userId}`,
-            `${baseURL}/lead/in-progress/${userId}`,
-            `${baseURL}/lead/yesterday/${userId}`,
-            `${baseURL}/lead/confirmed/yesterday/${userId}`,
-            `${baseURL}/lead/in-progress/yesterday/${userId}`,
-            // `${baseURL}/lead/meta-ads/${userId}`,
-            // `${baseURL}/lead/not-meta-ads/${userId}`
-            `${baseURL}/lead/facebook/${userId}`,
-            `${baseURL}/lead/referral/${userId}`,
-            `${baseURL}/lead/campaign/${userId}`,
-            `${baseURL}/lead/google/${userId}`,
-            `${baseURL}/lead/others/${userId}`,
-          ];
-  
-          const responses = await Promise.all(
-            endpoints.map(url => axios.get(url))
-          );
-  
-          console.log("API Responses:", responses); // Log the responses
-  
-          setCounts({
-            leadsToday: responses[0].data.count,
-            confirmedToday: responses[1].data.count,
-            inProgressToday: responses[2].data.count,
-            leadsYesterday: responses[3].data.count,
-            confirmedYesterday: responses[4].data.count,
-            inProgressYesterday: responses[5].data.count,
-            // metaAdsCount: responses[6].data.count,
-            // notMetaAdsCount: responses[7].data.count
-            facebookCount: responses[6].data.count,
-            referralCount: responses[7].data.count,
-            campaignCount: responses[8].data.count,
-            googleCount: responses[9].data.count,
-            othersCount: responses[10].data.count,
-          });
-          setLoading(false);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          setError("Failed to load dashboard data");
-          setLoading(false);
-        }
-      };
-      fetchData();
-    }, [userId]);
-  
-    const totalLeads = counts.facebookCount + counts.referralCount + counts.campaignCount + counts.googleCount + counts.othersCount;
-  
-    const facebookWidth = totalLeads > 0 ? (counts.facebookCount / totalLeads) * 100 : 0;
-    const referralWidth = totalLeads > 0 ? (counts.referralCount / totalLeads) * 100 : 0;
-    const campaignWidth = totalLeads > 0 ? (counts.campaignCount / totalLeads) * 100 : 0;
-    const googleWidth = totalLeads > 0 ? (counts.googleCount / totalLeads) * 100 : 0;
-    const othersWidth = totalLeads > 0 ? (counts.othersCount / totalLeads) * 100 : 0;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const endpoints = [
+          `${baseURL}/lead/today/${userId}`,
+          `${baseURL}/lead/confirmed/${userId}`,
+          `${baseURL}/lead/in-progress/${userId}`,
+          `${baseURL}/lead/yesterday/${userId}`,
+          `${baseURL}/lead/confirmed/yesterday/${userId}`,
+          `${baseURL}/lead/in-progress/yesterday/${userId}`,
+          // `${baseURL}/lead/meta-ads/${userId}`,
+          // `${baseURL}/lead/not-meta-ads/${userId}`
+          `${baseURL}/lead/facebook/${userId}`,
+          `${baseURL}/lead/referral/${userId}`,
+          `${baseURL}/lead/campaign/${userId}`,
+          `${baseURL}/lead/google/${userId}`,
+          `${baseURL}/lead/others/${userId}`,
+        ];
+
+        const responses = await Promise.all(
+          endpoints.map(url => axios.get(url))
+        );
+
+        console.log("API Responses:", responses); // Log the responses
+
+        setCounts({
+          leadsToday: responses[0].data.count,
+          confirmedToday: responses[1].data.count,
+          inProgressToday: responses[2].data.count,
+          leadsYesterday: responses[3].data.count,
+          confirmedYesterday: responses[4].data.count,
+          inProgressYesterday: responses[5].data.count,
+          // metaAdsCount: responses[6].data.count,
+          // notMetaAdsCount: responses[7].data.count
+          facebookCount: responses[6].data.count,
+          referralCount: responses[7].data.count,
+          campaignCount: responses[8].data.count,
+          googleCount: responses[9].data.count,
+          othersCount: responses[10].data.count,
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load dashboard data");
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchEnquiries = async () => {
+      // console.log("userid=",userId) 
+      if (!userId) {
+        // console.log("not exist userid=",userId) 
+        return;
+      }
+
+      try {
+        const response = await fetch(`${webhookUrl}/api/enquiries`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+        const data = await response.json();
+        const filteredData = data.filter(
+          (enquiry) => enquiry.assignedSalesId == userId && enquiry.status == 'lead'
+        );
+        console.log("filterd data=", filteredData.length);
+        setData(filteredData);
+      } catch (error) {
+        console.error('Error fetching enquiries:', error);
+      }
+    };
+
+    fetchEnquiries();
+  }, [userId, authToken]);
+
+  const totalLeads = counts.facebookCount + counts.referralCount + counts.campaignCount + counts.googleCount + counts.othersCount;
+
+  const facebookWidth = totalLeads > 0 ? (counts.facebookCount / totalLeads) * 100 : 0;
+  const referralWidth = totalLeads > 0 ? (counts.referralCount / totalLeads) * 100 : 0;
+  const campaignWidth = totalLeads > 0 ? (counts.campaignCount / totalLeads) * 100 : 0;
+  const googleWidth = totalLeads > 0 ? (counts.googleCount / totalLeads) * 100 : 0;
+  const othersWidth = totalLeads > 0 ? (counts.othersCount / totalLeads) * 100 : 0;
+
+  const handleDownload = () => {
+    if (data.length === 0) {
+      alert('No data available to export!');
+      return;
+    }
+
+    // Define fields with their labels
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      { key: "description", label: "DESCRIPTION", width: 30 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "destination", label: "DESTINATION", width: 15 },
+      { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primaryStatus", label: "PRIMARY STATUS", width: 15 },
+      { key: "secondaryStatus", label: "SECONDARY STATUS", width: 15 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 }
+    ];
+
+    // Format data to match selected fields
+    const formattedData = data.map(item =>
+      Object.fromEntries(fields.map(field => [field.label, item[field.key] || ""]))
+    );
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(formattedData, { origin: "A1" });
+
+    // Set column widths
+    worksheet["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Create workbook and append worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+
+    // Download Excel file
+    XLSX.writeFile(workbook, "LeadsData.xlsx");
+  };
 
   const scheduleData = [
     {
@@ -154,8 +233,8 @@ const Dashboard = () => {
                   // },
                 ].map((card, index) => (
                   <div className="col-lg-6 col-md-6 col-sm-6 mb-3  mt-2" key={index}
-                  onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} // Navigate only if not static
-                  style={{ cursor: card.navigateTo !== "#" ? "pointer" : "default" }}>
+                    onClick={() => card.navigateTo !== "#" && navigate(card.navigateTo)} // Navigate only if not static
+                    style={{ cursor: card.navigateTo !== "#" ? "pointer" : "default" }}>
                     <div className="card Manager-gradient-card">
                       <h5 className="pt-3">{card.title}</h5>
                       <h2>{card.value}</h2>
@@ -163,6 +242,11 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div>
+                <button onClick={handleDownload} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", fontSize: "16px" }}>
+                  <FaFileDownload size={20} /> Download
+                </button>
               </div>
               {/* <div className="card Manager-lead-card p-3 mt-4">
                 <h5>Most Lead</h5>
@@ -212,7 +296,7 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div> */}
-                <div className="card Manager-lead-card p-3 mt-4">
+              <div className="card Manager-lead-card p-3 mt-4">
                 <h5>Most Lead</h5>
                 <div>
                   {[
@@ -220,28 +304,28 @@ const Dashboard = () => {
                       label: "Facebook",
                       icon: "fa-brands fa-facebook",
                       value: counts.facebookCount,
-                      width: `${facebookWidth}%`, 
+                      width: `${facebookWidth}%`,
                       color: "#1877F2",
                     },
                     {
                       label: "Referral",
                       icon: "fa-solid fa-user-plus",
                       value: counts.referralCount,
-                      width: `${referralWidth}%`, 
+                      width: `${referralWidth}%`,
                       color: "#28A745",
                     },
                     {
                       label: "Campaign",
                       icon: "fa-solid fa-bullhorn",
                       value: counts.campaignCount,
-                      width: `${campaignWidth}%`, 
+                      width: `${campaignWidth}%`,
                       color: "#FFC107",
                     },
                     {
                       label: "Google",
                       icon: "fa-brands fa-google",
                       value: counts.googleCount,
-                      width: `${googleWidth}%`, 
+                      width: `${googleWidth}%`,
                       color: "#EA4335",
                     },
                     {

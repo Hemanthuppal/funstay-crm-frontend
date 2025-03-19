@@ -10,7 +10,7 @@ import './PotentialLeads.css';
 import axios from 'axios';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 
-const Potentialleads = () => {
+const Potentialleads = () => { 
   const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
@@ -18,7 +18,7 @@ const Potentialleads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "In Progress");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2") || "");
  
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee") || "");
@@ -218,7 +218,7 @@ const Potentialleads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("");
+    setFilterOppStatus1("In Progress");
     setFilterOppStatus2("");
     
     setFilterAssignee("");
@@ -234,7 +234,9 @@ const Potentialleads = () => {
       const matchesFreeText = !searchTerm || Object.values(item).some(val => val && val.toString().toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesStatus = !filterStatus || (item.status && item.status.toLowerCase() == filterStatus.toLowerCase());
       const matchesDestination = !filterDestination || (item.travel_destination && item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
-      const matchesOppStatus1 = !filterOppStatus1 || (item.opportunity_status1 && item.opportunity_status1.toLowerCase() == filterOppStatus1.toLowerCase());
+      const actualPrimaryStatus = item.opportunity_status1 ? item.opportunity_status1.toLowerCase() : "In Progress";
+        const matchesOppStatus1 =
+          !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesOppStatus2 = !filterOppStatus2 || (item.opportunity_status2 && item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
       const matchesDateRange = (() => {

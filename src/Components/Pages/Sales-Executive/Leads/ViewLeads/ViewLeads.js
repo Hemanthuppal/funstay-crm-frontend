@@ -23,7 +23,7 @@ const ViewLeads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("destination-1") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("opp1-1") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("opp1-1") || "new");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("opp2-1") || "");
   const [showDateRange, setShowDateRange] = useState(false);
   const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("startdate-1") || "");
@@ -210,7 +210,7 @@ const ViewLeads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("");
+    setFilterOppStatus1("new");
     setFilterOppStatus2("");
     
    
@@ -232,8 +232,9 @@ const ViewLeads = () => {
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-      const matchesPrimaryStatus =
-        !filterOppStatus1 || (item.primaryStatus && item.primaryStatus.toLowerCase() === filterOppStatus1.toLowerCase());
+        const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
+        const matchesPrimaryStatus =
+          !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesSecondaryStatus =
         !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() === filterOppStatus2.toLowerCase());
       const matchesDestination = !filterDestination || (item.destination && item.destination.toLowerCase() == filterDestination.toLowerCase());
@@ -505,10 +506,13 @@ const ViewLeads = () => {
                   }}
                 >
                   <option value="">Primary Status</option>
-                  {dropdownOptions.primary.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
+                  <option value="new">New</option> {/* Pre-select New */}
+                  {dropdownOptions.primary
+                    .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
+                    .map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
                   ))}
                 </select>
               </Col>

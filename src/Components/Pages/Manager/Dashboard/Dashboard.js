@@ -8,11 +8,15 @@ import FollowUp from "./FollowUp";
 import { baseURL } from "../../../Apiservices/Api";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from 'xlsx';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { userId } = useContext(AuthContext); 
+  const [data, setData] = useState([]);
+  const webhookUrl = "http://localhost:4000";
+  const { authToken, userId } = useContext(AuthContext); 
   const [collapsed, setCollapsed] = useState(false);
+  const [employees, setEmployees] = useState([]);
   const [selectedDay, setSelectedDay] = useState("Tue");
   const [counts, setCounts] = useState({
     leadsToday: 0,
@@ -80,6 +84,36 @@ const Dashboard = () => {
     fetchData();
   }, [userId]); 
 
+  useEffect(() => { 
+      const fetchEnquiries = async () => {
+        try {
+          const response = await fetch(`${webhookUrl}/api/enquiries`);
+          const data = await response.json();
+          const filteredData = data.filter((enquiry) => enquiry.managerid == userId && enquiry.status == "lead");
+          setData(filteredData);
+        } catch (error) {
+          console.error("Error fetching enquiries:", error);
+        }
+      };
+  
+      const fetchEmployees = async () => {
+        try {
+          const response = await axios.get(`${baseURL}/employeesassign`, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          });
+          console.log(response.data);
+          setEmployees(response.data);
+        } catch (error) {
+          console.error("Error fetching employees:", error);
+        }
+      };
+  
+      fetchEnquiries();
+      fetchEmployees();
+    }, [authToken, userId]);
+
   const totalLeads = counts.facebookCount + counts.referralCount + counts.campaignCount + counts.googleCount + counts.othersCount;
 
 
@@ -94,6 +128,53 @@ const Dashboard = () => {
   
   const googleWidth = totalLeads > 0 ? (counts.googleCount / totalLeads) * 100 : 0;
   const othersWidth = totalLeads > 0 ? (counts.othersCount / totalLeads) * 100 : 0;
+
+  const handleDownload = () => {
+      if (data.length === 0) {
+        alert('No data available to export!');
+        return;
+      }
+    
+      // Define fields with their labels
+      const fields = [
+        { key: "leadid", label: "LEAD ID", width: 15 },
+        { key: "name", label: "NAME", width: 20 },
+        { key: "email", label: "EMAIL", width: 25 },
+        { key: "country_code", label: "COUNTRY CODE", width: 10 },
+        { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+        { key: "sources", label: "SOURCES", width: 20 },
+        { key: "another_name", label: "ANOTHER NAME", width: 20 },
+        { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+        { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+        { key: "description", label: "DESCRIPTION", width: 30 },
+        { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+        { key: "origincity", label: "ORIGIN CITY", width: 15 },
+        { key: "destination", label: "DESTINATION", width: 15 },
+        { key: "created_at", label: "CREATED AT", width: 20 },
+        { key: "primaryStatus", label: "PRIMARY STATUS", width: 15 },
+        { key: "secondaryStatus", label: "SECONDARY STATUS", width: 15 },
+        { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+        { key: "channel", label: "CHANNEL", width: 15 }
+      ];
+    
+      // Format data to match selected fields
+      const formattedData = data.map(item =>
+        Object.fromEntries(fields.map(field => [field.label, item[field.key] || ""]))
+      );
+    
+      // Create worksheet
+      const worksheet = XLSX.utils.json_to_sheet(formattedData, { origin: "A1" });
+    
+      // Set column widths
+      worksheet["!cols"] = fields.map(field => ({ width: field.width }));
+    
+      // Create workbook and append worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+    
+      // Download Excel file
+      XLSX.writeFile(workbook, "LeadsData.xlsx");
+    };
 
   const scheduleData = [
     {
@@ -163,6 +244,9 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+              <div>
+              <button onClick={handleDownload}>Download Leads</button>
               </div>
               {/* <div className="card Manager-lead-card p-3 mt-4">
                 <h5>Most Lead</h5>

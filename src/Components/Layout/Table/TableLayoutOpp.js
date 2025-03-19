@@ -15,11 +15,13 @@ export default function DataTable({ columns, data, initialSearchValue }) {
   React.useEffect(() => {
     setFilteredData(data);
     // Only reset page index when the data length changes (indicating a filter was applied)
-    if (data.length !== previousDataLength) {
+    if (data.length > previousDataLength) {
       setCurrentPageIndex(0);
-      setPreviousDataLength(data.length);
     }
+  
+    setPreviousDataLength(data.length); // Always update previous data length
   }, [data, previousDataLength]);
+
 
   const {
     getTableProps,
@@ -42,7 +44,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
       data: filteredData,
       initialState: { 
         pageIndex: currentPageIndex, 
-        pageSize: 20,
+        pageSize: 5,
         globalFilter: initialSearchValue 
       },
     },
@@ -65,7 +67,7 @@ export default function DataTable({ columns, data, initialSearchValue }) {
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
           >
-            {[20, 50, 100].map((size) => (
+            {[5, 50, 100].map((size) => (
               <option key={size} value={size}>
                 Show {size}
               </option>

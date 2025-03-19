@@ -25,7 +25,7 @@ const AdminViewLeads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "new");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
   const [filterManager, setFilterManager] = useState(localStorage.getItem("filterManager-1") || "");
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
@@ -178,7 +178,7 @@ const AdminViewLeads = () => {
         const response = await fetch(`${webhookUrl}/api/enquiries`);
         const data = await response.json();
 
-        const filteredData = data.filter((enquiry) =>enquiry.adminAssign !== 'admin' && enquiry.status == 'lead');
+        const filteredData = data.filter((enquiry) => enquiry.adminAssign !== 'admin' && enquiry.status == 'lead');
         setData(filteredData);
       } catch (error) {
         console.error('Error fetching enquiries:', error);
@@ -209,7 +209,7 @@ const AdminViewLeads = () => {
         setError(err.message);
       }
     };
-  
+
     fetchManager();
   }, []);
 
@@ -272,7 +272,7 @@ const AdminViewLeads = () => {
       }
       setAssociatesByManager(associatesData);
     };
-  
+
     if (managers.length > 0) {
       fetchAssociatesForManagers();
     }
@@ -280,12 +280,12 @@ const AdminViewLeads = () => {
   const handleSelfAssign = async (leadid) => {
     try {
       const response = await axios.post(`${baseURL}/api/assign-admin`, { leadid });
-  
+
       if (response.status == 200) {
         setMessage(response.data.message);
         setTimeout(() => setMessage(""), 1000);
-        
-  
+
+
         // Update the local state to reflect the assignment
         setData((prevData) =>
           prevData
@@ -329,7 +329,7 @@ const AdminViewLeads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("");
+    setFilterOppStatus1("new"); // Reset to "new" when filters are cleared
     setFilterOppStatus2("");
     setFilterManager("");
     setFilterAssignee("");
@@ -350,8 +350,10 @@ const AdminViewLeads = () => {
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
 
+      const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
+
       const matchesPrimaryStatus =
-        !filterOppStatus1 || (item.primaryStatus && item.primaryStatus.toLowerCase() == filterOppStatus1.toLowerCase());
+        !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesSecondaryStatus =
         !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() == filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
@@ -621,25 +623,25 @@ const AdminViewLeads = () => {
           const initialAssociateValue = row.original.assignedSalesId
             ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
             : "";
-      
+
           const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
-          
+
           const [showIcon, setShowIcon] = useState(false);
-      
+
           const managerId = row.original.managerid;
           const associates = managerId ? associatesByManager[managerId] || [] : [];
-      
+
           useEffect(() => {
             setSelectedAssociate(initialAssociateValue);
             setShowIcon(false);
           }, [row.original.assignedSalesId, row.original.assignedSalesName]);
-      
+
           const handleChange = (e) => {
             const newValue = e.target.value;
             setSelectedAssociate(newValue);
             setShowIcon(newValue !== initialAssociateValue);
           };
-      
+
           const handleAssignClick = async () => {
             if (selectedAssociate) {
               const [associateId, associateName] = selectedAssociate.split("|");
@@ -650,14 +652,14 @@ const AdminViewLeads = () => {
               setShowIcon(false);
             }
           };
-      
+
           return (
             <div className="d-flex align-items-center" >
               <select
                 value={selectedAssociate}
                 onChange={handleChange}
                 className="form-select me-2"
-               
+
               >
                 <option value="">Select Associate</option>
                 {associates.map((associate, index) => (
@@ -821,13 +823,17 @@ const AdminViewLeads = () => {
                   }}
                 >
                   <option value="">Primary Status</option>
-                  {dropdownOptions.primary.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
+                  <option value="new">New</option> {/* Pre-select New */}
+                  {dropdownOptions.primary
+                    .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
+                    .map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
                 </select>
               </Col>
+
               <Col md={2}>
                 <select
                   className="form-select"
@@ -862,7 +868,7 @@ const AdminViewLeads = () => {
                 </select>
               </Col>
             </Row>
-            <DataTable columns={columns} data={filteredData} setPageIndex={setPageIndex}/>
+            <DataTable columns={columns} data={filteredData} setPageIndex={setPageIndex} />
           </div>
         </div>
       </div>

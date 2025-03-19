@@ -16,17 +16,17 @@ const Potentialleads = () => {
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "");
-  const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus") || "");
-  const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "In Progress");
-  const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2") || "");
+  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-m") || "");
+  const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-m") || "");
+  const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-m") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-m") || "In Progress");
+  const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-m") || "");
  
-  const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee") || "");
-  const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate") || "");
-  const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate") || "");
-  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate") || "");
-  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate") || "");
+  const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-m") || "");
+  const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-m") || "");
+  const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-m") || "");
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-m") || "");
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-m") || "");
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]); 
@@ -200,17 +200,17 @@ const Potentialleads = () => {
   
 
   useEffect(() => {
-    localStorage.setItem("searchTerm", searchTerm);
-    localStorage.setItem("filterStatus", filterStatus);
-    localStorage.setItem("filterDestination", filterDestination);
-    localStorage.setItem("filterOppStatus1", filterOppStatus1);
-    localStorage.setItem("filterOppStatus2", filterOppStatus2);
+    localStorage.setItem("searchTerm-m", searchTerm);
+    localStorage.setItem("filterStatus-m", filterStatus);
+    localStorage.setItem("filterDestination-m", filterDestination);
+    localStorage.setItem("filterOppStatus1-m", filterOppStatus1);
+    localStorage.setItem("filterOppStatus2-m", filterOppStatus2);
    
-    localStorage.setItem("filterAssignee", filterAssignee);
-    localStorage.setItem("filterStartDate", filterStartDate);
-    localStorage.setItem("filterEndDate", filterEndDate);
-    localStorage.setItem("appliedFilterStartDate", appliedFilterStartDate);
-    localStorage.setItem("appliedFilterEndDate", appliedFilterEndDate);
+    localStorage.setItem("filterAssignee-m", filterAssignee);
+    localStorage.setItem("filterStartDate-m", filterStartDate);
+    localStorage.setItem("filterEndDate-m", filterEndDate);
+    localStorage.setItem("appliedFilterStartDate-m", appliedFilterStartDate);
+    localStorage.setItem("appliedFilterEndDate-m", appliedFilterEndDate);
   }, [
     searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
     filterAssignee, filterStartDate, filterEndDate,
@@ -229,7 +229,7 @@ const Potentialleads = () => {
     setFilterEndDate("");
     setAppliedFilterStartDate("");
     setAppliedFilterEndDate("");
-    localStorage.removeItem("potentialLeadsFilters");
+    localStorage.removeItem("potentialLeadsFilters-m");
   };
 
   const filteredData = useMemo(() => {

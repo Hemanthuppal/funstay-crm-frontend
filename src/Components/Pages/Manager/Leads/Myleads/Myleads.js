@@ -18,17 +18,17 @@ const ViewLeads = () => {
 
 
 
-   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
-    const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
-    const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
-      const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "new");
-    const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
+   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-m1") || "");
+    const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-m1") || "");
+    const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-m1") || "");
+      const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-m1") || "new");
+    const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-m1") || "");
    
-    const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
-    const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-1") || "");
-    const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-1") || "");
-    const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-1") || "");
-    const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-1") || "");
+    const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-m1") || "");
+    const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-m1") || "");
+    const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-m1") || "");
+    const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-m1") || "");
+    const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-m1") || "");
     const [showDateRange, setShowDateRange] = useState(false);
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
@@ -180,17 +180,17 @@ const ViewLeads = () => {
 
   
     useEffect(() => {
-      localStorage.setItem("searchTerm-1", searchTerm);
-      localStorage.setItem("filterStatus-1", filterStatus);
-      localStorage.setItem("filterDestination-1", filterDestination);
-      localStorage.setItem("filterOppStatus1-1", filterOppStatus1);
-      localStorage.setItem("filterOppStatus2-1", filterOppStatus2);
+      localStorage.setItem("searchTerm-m1", searchTerm);
+      localStorage.setItem("filterStatus-m1", filterStatus);
+      localStorage.setItem("filterDestination-m1", filterDestination);
+      localStorage.setItem("filterOppStatus1-m1", filterOppStatus1);
+      localStorage.setItem("filterOppStatus2-m1", filterOppStatus2);
      
-      localStorage.setItem("filterAssignee-1", filterAssignee);
-      localStorage.setItem("filterStartDate-1", filterStartDate);
-      localStorage.setItem("filterEndDate-1", filterEndDate);
-      localStorage.setItem("appliedFilterStartDate-1", appliedFilterStartDate);
-      localStorage.setItem("appliedFilterEndDate-1", appliedFilterEndDate);
+      localStorage.setItem("filterAssignee-m1", filterAssignee);
+      localStorage.setItem("filterStartDate-m1", filterStartDate);
+      localStorage.setItem("filterEndDate-m1", filterEndDate);
+      localStorage.setItem("appliedFilterStartDate-m1", appliedFilterStartDate);
+      localStorage.setItem("appliedFilterEndDate-m1", appliedFilterEndDate);
     }, [
       searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
       filterAssignee, filterStartDate, filterEndDate,

@@ -11,34 +11,34 @@ import { AuthContext } from '../../../../../AuthContext/AuthContext';
 import { adminMail } from '../../../../../Apiservices/Api';
 
 const CommentsPage = () => {
-  const { authToken, userRole, userId, userName, assignManager,managerId } = useContext(AuthContext);
+  const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
   const { leadid } = useParams(); // Gets the lead ID from the URL
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
 
-   useEffect(() => {
-          const checkDataExists = async () => {
-            try {
-              const response = await fetch(`${baseURL}/api/sales-leadid/leads/${leadid}/${userId}`);
-              const data = await response.json();
-      
-              if (response.ok) {
-                console.log(data.message); // Should print "Exists"
-              } else {
-                console.error(data.error);
-                navigate('/not-found');
-              }
-            } catch (error) {
-              console.error("Error checking data:", error);
-            }
-          };
-      
-          if (leadid && userId) { // Ensure values are defined before making the request
-            checkDataExists();
-          }
-        }, [leadid, userId]);
+  useEffect(() => {
+    const checkDataExists = async () => {
+      try {
+        const response = await fetch(`${baseURL}/api/sales-leadid/leads/${leadid}/${userId}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log(data.message); // Should print "Exists"
+        } else {
+          console.error(data.error);
+          navigate('/not-found');
+        }
+      } catch (error) {
+        console.error("Error checking data:", error);
+      }
+    };
+
+    if (leadid && userId) { // Ensure values are defined before making the request
+      checkDataExists();
+    }
+  }, [leadid, userId]);
 
   useEffect(() => {
     // Fetch comments based on lead ID when the component mounts
@@ -65,7 +65,7 @@ const CommentsPage = () => {
     if (!newComment.trim()) return;
     const trimmedComment = newComment.trim();
     const commentName = `${userName} (Sales)`;
-    
+
     const comment = {
       name: commentName,
       leadid: leadid,
@@ -77,7 +77,7 @@ const CommentsPage = () => {
       managerId: managerId,
       email: `${adminMail}`
     };
-    
+
     // const comment = {
     //   name: `${userName} (Sales)`,
     //   leadid: leadid,
@@ -137,8 +137,8 @@ const CommentsPage = () => {
             <Form.Group>
               <Form.Label>Add a New Comment</Form.Label>
               <Form.Control
-                  as ="textarea"
-                  rows={4}
+                as="textarea"
+                rows={4}
                 type="text"
                 placeholder="Write your comment here..."
                 value={newComment}
@@ -156,37 +156,37 @@ const CommentsPage = () => {
           </div>
 
           {/* Display Existing Comments */}
-        {/* Display Existing Comments */}
-<div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
-  {[...comments]
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort latest comments on top
-    .map((comment, index) => (
-      <div key={index} className="mb-3">
-        
-         <p style={{ fontSize: "13px", color: "gray" }}>
-  {new Date(comment.timestamp).toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  })}
-</p>
+          {/* Display Existing Comments */}
+          <div style={{ maxHeight: "300px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", borderRadius: "5px" }}>
+            {[...comments]
+              .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Sort latest comments on top
+              .map((comment, index) => (
+                <div key={index} className="mb-3">
 
-      
-<p className="comment-text">
-  <strong>{comment.name}</strong>:  
-  <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
-</p>
+                  <p style={{ fontSize: "13px", color: "gray" }}>
+                    {new Date(comment.timestamp).toLocaleString("en-IN", {
+                      timeZone: "Asia/Kolkata",
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: true,
+                    })}
+                  </p>
 
-        {/* Display formatted timestamp */}
-       
-      </div>
-    ))}
-</div>
+
+                  <p className="comment-text">
+                    <strong>{comment.name}</strong>:
+                    <span style={{ whiteSpace: "pre-line" }}>{comment.text}</span>
+                  </p>
+
+                  {/* Display formatted timestamp */}
+
+                </div>
+              ))}
+          </div>
 
 
           {/* Close Button */}

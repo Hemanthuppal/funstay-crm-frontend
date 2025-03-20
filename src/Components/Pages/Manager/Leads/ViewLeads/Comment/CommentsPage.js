@@ -10,7 +10,7 @@ import {baseURL} from '../../../../../Apiservices/Api';
 import { AuthContext } from '../../../../../AuthContext/AuthContext';
 import { adminMail } from '../../../../../Apiservices/Api';
 
-const CommentsPage = () => {
+const CommentsPage = () => { 
   const { authToken, userRole, userId, userName, assignManager,managerId} = useContext(AuthContext);
   const { leadid } = useParams(); 
   const [comments, setComments] = useState([]);
@@ -18,6 +18,29 @@ const CommentsPage = () => {
 const [collapsed, setCollapsed] = useState(false);
 const [assignedSalesId, setAssignedSalesId] = useState(null);
 const navigate = useNavigate();
+
+
+ useEffect(() => {
+          const checkDataExists = async () => {
+            try {
+              const response = await fetch(`${baseURL}/api/manager-leadid/leads/${leadid}/${userId}`);
+              const data = await response.json();
+      
+              if (response.ok) {
+                console.log(data.message); // Should print "Exists"
+              } else {
+                console.error(data.error);
+                navigate('/not-found');
+              }
+            } catch (error) {
+              console.error("Error checking data:", error);
+            }
+          };
+      
+          if (leadid && userId) { // Ensure values are defined before making the request
+            checkDataExists();
+          }
+        }, [leadid, userId]);
 
   useEffect(() => {
    

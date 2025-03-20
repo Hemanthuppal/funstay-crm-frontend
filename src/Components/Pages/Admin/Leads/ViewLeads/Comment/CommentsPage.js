@@ -20,6 +20,7 @@ const CommentsPage = () => {
   const { themeColor } = useContext(ThemeContext);
   const [managerid, setManagerId] = useState(null);
   const navigate = useNavigate();
+
   useEffect(() => {
 
     const fetchComments = async () => {
@@ -38,7 +39,6 @@ const CommentsPage = () => {
   }, [leadid]);
 
 
-
   useEffect(() => {
     const fetchLeadDetails = async () => {
       try {
@@ -49,6 +49,7 @@ const CommentsPage = () => {
 
       } catch (error) {
         console.error("Error fetching lead details:", error);
+        navigate('/not-found');
       }
     };
 

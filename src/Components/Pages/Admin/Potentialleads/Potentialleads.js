@@ -710,11 +710,23 @@ const handleAssignLead = async (leadid, associateObj,status) => {
 
   ], [dropdownOptions]);
 
+  // const uniqueDestinations = useMemo(() => {
+  //   const normalizedDestinations = data.map((item) => item.travel_destination.trim().toLowerCase());
+  //   const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
+  //   return uniqueNormalizedDestinations.map((dest) => dest.charAt(0).toUpperCase() + dest.slice(1));
+  // }, [data]);
+
   const uniqueDestinations = useMemo(() => {
-    const normalizedDestinations = data.map((item) => item.travel_destination.trim().toLowerCase());
-    const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-    return uniqueNormalizedDestinations.map((dest) => dest.charAt(0).toUpperCase() + dest.slice(1));
-  }, [data]);
+      // Filter out empty destinations and normalize valid ones
+      const normalizedDestinations = data
+        .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+        .filter(dest => dest) // Remove empty values
+        .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+  
+      // Get unique values and format them
+      return [...new Set(normalizedDestinations)]
+        .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+    }, [data]);
 
   // Extract team members for the selected manager
   const teamMembers = useMemo(() => {

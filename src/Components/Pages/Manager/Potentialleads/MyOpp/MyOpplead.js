@@ -364,15 +364,16 @@ const Potentialleads = () => {
   ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
-    // Normalize the destinations by trimming spaces and converting to lowercase
-    const normalizedDestinations = data.map(item => item.travel_destination.trim().toLowerCase());
-
-    // Use a Set to get unique values, then convert back to the original format
-    const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-
-    // Map back to the original format (if needed)
-    return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
-  }, [data]);
+         // Filter out empty destinations and normalize valid ones
+         const normalizedDestinations = data
+           .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+           .filter(dest => dest) // Remove empty values
+           .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+     
+         // Get unique values and format them
+         return [...new Set(normalizedDestinations)]
+           .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+       }, [data]);
 
   return (
     <div className="salesOpportunitycontainer">

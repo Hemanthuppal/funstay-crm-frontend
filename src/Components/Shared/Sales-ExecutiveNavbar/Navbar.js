@@ -83,22 +83,45 @@ const Sales = ({ onToggleSidebar }) => {
     }
   };
 
+  // const handleNotificationClick = async (notification) => {
+  //   await markNotificationAsRead(notification.id);
+  //   setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+  //   setShowNotificationDropdown(false);
+  
+  //   if (notification.leadid) {
+  //     navigate(`/opportunity-comments/${notification.leadid}`);
+  //   } else {
+  //     navigate('/View-lead');
+  //   }
+  //   // Use a timeout to ensure navigation happens before the reload
+  //   setTimeout(() => {
+  //     window.location.reload();
+  //   }, 0);
+  // };
+
+
+  
   const handleNotificationClick = async (notification) => {
     await markNotificationAsRead(notification.id);
     setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
     setShowNotificationDropdown(false);
   
-    if (notification.leadid) {
+    // Navigate based on conditions
+    if (notification.status === "lead") {
+      navigate("/View-lead");
+    } else if (notification.status === "opportunity") {
+      navigate("/potential-leads");
+    } else if (notification.leadid) {
       navigate(`/opportunity-comments/${notification.leadid}`);
     } else {
-      navigate('/View-lead');
+      navigate("/View-leads");
     }
+  
     // Use a timeout to ensure navigation happens before the reload
     setTimeout(() => {
       window.location.reload();
     }, 0);
   };
-
   useEffect(() => {
     const fetchNotifications = async () => {
       try {

@@ -26,7 +26,7 @@ const AdminViewLeads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-l1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-l1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-l1") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-l1") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-l1") || "new");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-l1") || "");
   const [filterManager, setFilterManager] = useState(localStorage.getItem("filterManager-l1") || "");
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-l1") || "");
@@ -311,7 +311,7 @@ const AdminViewLeads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("");
+    setFilterOppStatus1("new");
     setFilterOppStatus2("");
     setFilterManager("");
     setFilterAssignee("");
@@ -331,9 +331,9 @@ const AdminViewLeads = () => {
             val &&
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
-
+        const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
       const matchesPrimaryStatus =
-        !filterOppStatus1 || (item.primaryStatus && item.primaryStatus.toLowerCase() === filterOppStatus1.toLowerCase());
+      !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesSecondaryStatus =
         !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() === filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
@@ -814,22 +814,25 @@ const AdminViewLeads = () => {
                 </select>
               </Col>
               <Col md={2}>
-                <select
-                  className="form-select"
-                  value={filterOppStatus1}
-                  onChange={(e) => {
-                    setFilterOppStatus1(e.target.value);
-                    setFilterOppStatus2(""); // Reset secondary filter when primary changes
-                  }}
-                >
-                  <option value="">Primary Status</option>
-                  {dropdownOptions.primary.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </Col>
+                             <select
+                               className="form-select"
+                               value={filterOppStatus1}
+                               onChange={(e) => {
+                                 setFilterOppStatus1(e.target.value);
+                                 setFilterOppStatus2(""); // Reset secondary filter when primary changes
+                               }}
+                             >
+                               <option value="">Primary Status</option>
+                               <option value="new">New</option> {/* Pre-select New */}
+                               {dropdownOptions.primary
+                                 .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
+                                 .map((status) => (
+                                   <option key={status} value={status}>
+                                     {status}
+                                   </option>
+                                 ))}
+                             </select>
+                           </Col>
               <Col md={2}>
                 <select
                   className="form-select"

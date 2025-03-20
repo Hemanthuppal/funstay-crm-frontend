@@ -1,6 +1,6 @@
 import React, { useState, useContext ,useEffect} from "react";
 import { Link } from "react-router-dom";
-import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaTachometerAlt, FaBell, FaEnvelope, FaCaretDown, FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry } from "react-icons/fa";
+import { FaUsers, FaUserTie, FaChartBar, FaPeopleArrows, FaBusinessTime, FaTachometerAlt, FaBell, FaEnvelope, FaCaretDown, FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry } from "react-icons/fa";
 import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -82,24 +82,47 @@ const Manager = ({ onToggleSidebar }) => {
     }
   };
 
-  const handleNotificationClick = async (notification) => {
+  // const handleNotificationClick = async (notification) => {
+  //   await markNotificationAsRead(notification.id);
+  //   setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
+  //   setShowNotificationDropdown(false);
+  
+  //   // Navigate based on whether the notification has a leadid
+  //   if (notification.leadid) {
+  //     navigate(`/m-opportunity-comments/${notification.leadid}`);
+  //   } else {
+  //     navigate('/m-view-leads');
+  //   }
+
+  //    // Use a timeout to ensure navigation happens before the reload
+  //    setTimeout(() => {
+  //     window.location.reload();
+  //   }, 0);
+  // };
+
+
+
+   const handleNotificationClick = async (notification) => {
     await markNotificationAsRead(notification.id);
     setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
     setShowNotificationDropdown(false);
   
-    // Navigate based on whether the notification has a leadid
-    if (notification.leadid) {
+    // Navigate based on conditions
+    if (notification.status === "lead") {
+      navigate("/m-view-leads");
+    } else if (notification.status === "opportunity") {
+      navigate("/m-potential-leads");
+    } else if (notification.leadid) {
       navigate(`/m-opportunity-comments/${notification.leadid}`);
     } else {
-      navigate('/m-view-leads');
+      navigate("/m-view-leads");
     }
-
-     // Use a timeout to ensure navigation happens before the reload
-     setTimeout(() => {
+  
+    // Use a timeout to ensure navigation happens before the reload
+    setTimeout(() => {
       window.location.reload();
     }, 0);
   };
-
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
@@ -226,85 +249,70 @@ const Manager = ({ onToggleSidebar }) => {
 
         <div className={`manager-sidebar ${collapsed ? 'collapsed' : ''}`} style={{ "--theme-color": themeColor }}>
           <div className="manager-position-sticky">
-            <ul className="nav flex-column">
-              <li className={`manager-nav-item ${location.pathname.startsWith("/m-dashboard") ? "active"
-                : ""
-                }`}>
-                <Link className="nav-link" to="/m-dashboard" onClick={handleNavItemClick}>
-                  <FaHome className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">Dashboard</span>}
-                </Link>
-              </li>
-              <li className={`manager-nav-item ${location.pathname.startsWith("/m-allleads")||
-              location.pathname.startsWith("/m-viewallleads")
-               ? "active"
-                : ""
-                }`}>
-                <Link className="nav-link" to="/m-allleads" onClick={handleNavItemClick}>
-                  <FaUsers className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">All Leads</span>}
-                </Link>
-              </li>
+          <ul className="nav flex-column">
+  <li className={`manager-nav-item ${location.pathname.startsWith("/m-dashboard") ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-dashboard" onClick={handleNavItemClick}>
+      <FaHome className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">Dashboard</span>}
+    </Link>
+  </li>
 
-             
+  <li className={`manager-nav-item ${location.pathname.startsWith("/m-allleads") || location.pathname.startsWith("/m-viewallleads") ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-allleads" onClick={handleNavItemClick}>
+      <FaUsers className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">All Leads</span>}
+    </Link>
+  </li>
 
-              <li
-                className={`manager-nav-item ${location.pathname.startsWith("/m-view-leads") ||
-                  location.pathname.startsWith("/m-edit-lead") ||
-                  location.pathname.startsWith("/m-add-leads") ||
-                  location.pathname.startsWith("/m-comments") ||
-                  location.pathname.startsWith("/m-view-lead") ||
-                  location.pathname.startsWith("/m-create-customer-opportunity")
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/m-view-leads" onClick={handleNavItemClick}>
-                  <FaClipboardList className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">My Leads</span>}
-                </Link>
-              </li>
+  <li className={`manager-nav-item ${["/m-view-leads", "/m-edit-lead", "/m-add-leads", "/m-comments", "/m-view-lead", "/m-create-customer-opportunity"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-view-leads" onClick={handleNavItemClick}>
+      <FaClipboardList className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">My Team Leads</span>}
+    </Link>
+  </li>
 
-              <li
-                className={`manager-nav-item ${location.pathname.startsWith("/m-potential-leads") ||
-                  location.pathname.startsWith("/m-edit-opportunity") ||
-                  location.pathname.startsWith("/m-opportunity-comments") ||
-                  location.pathname.startsWith("/m-details")
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/m-potential-leads" onClick={handleNavItemClick}>
-                  <FaChartLine className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">My Teams Opportunities</span>}
-                </Link>
-              </li>
+  <li className={`manager-nav-item ${["/m-myleads", "/m-myedit-lead", "/m-myadd-leads", "/m-mycomments", "/m-myview-lead", "/m-mycreate-customer-opportunity"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-myleads" onClick={handleNavItemClick}>
+      <FaUserTie className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">My Leads</span>}
+    </Link>
+  </li>
 
-              <li
-  className={`manager-nav-item ${
-    ["/m-customers", "/m-customer-details", "/m-customerdetails", "/m-editcustomerdetails"].some(path => location.pathname.includes(path))
-      ? "active"
-      : ""
-  }`}
->
-  <Link className="nav-link" to="/m-customers" onClick={handleNavItemClick}>
-    <FaUserFriends className="manager-nav-icon" />
-    {!collapsed && <span className="link_text">My Teams customer</span>}
-  </Link>
-</li>
+  <li className={`manager-nav-item ${["/m-potential-leads", "/m-edit-opportunity", "/m-opportunity-comments", "/m-details"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-potential-leads" onClick={handleNavItemClick}>
+      <FaChartBar className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">My Team's Opportunities</span>}
+    </Link>
+  </li>
 
+  <li className={`manager-nav-item ${["/m-myoppleads", "/m-myedit-opportunity", "/m-myopportunity-comments", "/m-mydetails"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-myoppleads" onClick={handleNavItemClick}>
+      <FaChartLine className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">My Opportunities</span>}
+    </Link>
+  </li>
 
-              <li
-                className={`manager-nav-item ${location.pathname === "/m-myteam" ? "active" : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/m-myteam" onClick={handleNavItemClick}>
-                  <FaPeopleCarry className="manager-nav-icon" />
-                  {!collapsed && <span className="link_text">My Teams </span>}
-                </Link>
-              </li>
+  <li className={`manager-nav-item ${["/m-customers", "/m-customer-details", "/m-customerdetails", "/m-editcustomerdetails"].some(path => location.pathname.includes(path)) ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-customers" onClick={handleNavItemClick}>
+      <FaUserFriends className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">My Team's Customers</span>}
+    </Link>
+  </li>
 
-            </ul>
+  <li className={`manager-nav-item ${location.pathname === "/m-myteam" ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-myteam" onClick={handleNavItemClick}>
+      <FaPeopleArrows className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">My Team</span>}
+    </Link>
+  </li>
+
+  <li className={`manager-nav-item ${location.pathname.startsWith("/m-business") ? "active" : ""}`}>
+    <Link className="nav-link" to="/m-business" onClick={handleNavItemClick}>
+      <FaBusinessTime className="manager-nav-icon" />
+      {!collapsed && <span className="link_text">Business Insights</span>}
+    </Link>
+  </li>
+</ul>
           </div>
         </div>
       </div>

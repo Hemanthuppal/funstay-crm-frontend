@@ -7,7 +7,6 @@ import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 import { AuthContext } from "../../../../AuthContext/AuthContext";
-import { FontSizeContext } from '../../../../Shared/Font/FontContext';
 
 import { HiUserGroup } from "react-icons/hi"; // Import icon
 
@@ -26,7 +25,7 @@ const AdminViewLeads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "new");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
   const [filterManager, setFilterManager] = useState(localStorage.getItem("filterManager-1") || "");
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
@@ -179,7 +178,7 @@ const AdminViewLeads = () => {
         const response = await fetch(`${webhookUrl}/api/enquiries`);
         const data = await response.json();
 
-        const filteredData = data.filter((enquiry) => enquiry.adminAssign !== 'admin' && enquiry.status == 'lead');
+        const filteredData = data.filter((enquiry) =>enquiry.adminAssign !== 'admin' && enquiry.status == 'lead');
         setData(filteredData);
       } catch (error) {
         console.error('Error fetching enquiries:', error);
@@ -210,11 +209,11 @@ const AdminViewLeads = () => {
         setError(err.message);
       }
     };
-
+  
     fetchManager();
   }, []);
 
-  const handleAssignToChange = async (assignee, leadid, managerid,status) => {
+  const handleAssignToChange = async (assignee, leadid, managerid) => {
     try {
       const response = await fetch(`${baseURL}/update-assignee`, {
         method: 'PUT',
@@ -225,7 +224,6 @@ const AdminViewLeads = () => {
           leadid,
           assignee,
           managerid,
-          status,
         }),
       });
       const data = await response.json();
@@ -274,7 +272,7 @@ const AdminViewLeads = () => {
       }
       setAssociatesByManager(associatesData);
     };
-
+  
     if (managers.length > 0) {
       fetchAssociatesForManagers();
     }
@@ -282,12 +280,12 @@ const AdminViewLeads = () => {
   const handleSelfAssign = async (leadid) => {
     try {
       const response = await axios.post(`${baseURL}/api/assign-admin`, { leadid });
-
+  
       if (response.status == 200) {
         setMessage(response.data.message);
         setTimeout(() => setMessage(""), 1000);
-
-
+        
+  
         // Update the local state to reflect the assignment
         setData((prevData) =>
           prevData
@@ -331,7 +329,7 @@ const AdminViewLeads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("new"); // Reset to "new" when filters are cleared
+    setFilterOppStatus1("");
     setFilterOppStatus2("");
     setFilterManager("");
     setFilterAssignee("");
@@ -352,10 +350,8 @@ const AdminViewLeads = () => {
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-      const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
-
       const matchesPrimaryStatus =
-        !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
+        !filterOppStatus1 || (item.primaryStatus && item.primaryStatus.toLowerCase() == filterOppStatus1.toLowerCase());
       const matchesSecondaryStatus =
         !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() == filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
@@ -375,7 +371,7 @@ const AdminViewLeads = () => {
     });
   }, [searchTerm, filterOppStatus1, filterOppStatus2, filterManager, filterAssignee, filterDestination, appliedFilterStartDate, appliedFilterEndDate, data]);
 
-  const handleAssignLead = async (leadid, associateObj,status) => {
+  const handleAssignLead = async (leadid, associateObj) => {
     // Validate that the associate object contains an id and name.
     if (!associateObj?.id || !associateObj?.name) {
       setMessage("Please select a valid associate.");
@@ -389,7 +385,6 @@ const AdminViewLeads = () => {
         leadid,
         employeeId: associateObj.id,
         employeeName: associateObj.name,
-        status
       });
       setMessage(response.data.message);
       setTimeout(() => setMessage(""), 1000);
@@ -492,21 +487,20 @@ const AdminViewLeads = () => {
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
-          const { fontSize } = useContext(FontSizeContext);
           const primaryStatus = row.original.primaryStatus;
           const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
 
           return (
-            <div className="d-flex align-items-center"style={{ fontSize: fontSize }}
+            <div className="d-flex align-items-center"
             >
               <select
                 value={primaryStatus}
                 onChange={(e) =>
                   handlePrimaryStatusChange(e.target.value, row.original.leadid)
                 }
-                className="form-select me-2" style={{ fontSize: fontSize }}
+                className="form-select me-2"
               >
                 {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
@@ -520,7 +514,7 @@ const AdminViewLeads = () => {
                 onChange={(e) =>
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
-                className="form-select" style={{ fontSize: fontSize }}
+                className="form-select"
                 disabled={isSecondaryDisabled}
               >
                 {!secondaryStatus && <option value="">Select Secondary Status</option>}
@@ -546,10 +540,10 @@ const AdminViewLeads = () => {
 
       },
 
+
       {
         Header: "Manager ",
         Cell: ({ row }) => {
-          const { fontSize } = useContext(FontSizeContext);
           const assignedManagerId = row.original.managerid || "";
           const assignedManagerName = row.original.assign_to_manager || "";
 
@@ -579,7 +573,7 @@ const AdminViewLeads = () => {
                 // Call the new API for self assignment
                 await handleSelfAssign(row.original.leadid);
               } else {
-                handleAssignToChange(assignee, row.original.leadid, managerid,row.original.status,);
+                handleAssignToChange(assignee, row.original.leadid, managerid);
               }
 
               // await handleAssignToChange(assignee, row.original.leadid, managerid);
@@ -595,12 +589,12 @@ const AdminViewLeads = () => {
           };
 
           return (
-            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
+            <div className="d-flex align-items-center">
               <select
                 value={selectedManager}
                 onChange={handleChange}
-                className="form-select me-2" 
-                style={{ maxWidth: "150px",fontSize: fontSize }}
+                className="form-select me-2"
+                style={{ maxWidth: "150px" }}
               >
                 <option value="">Select Assignee</option>
                 <option value="self">Self</option>
@@ -624,12 +618,12 @@ const AdminViewLeads = () => {
       {
         Header: "Associate",
         Cell: ({ row }) => {
-          const { fontSize } = useContext(FontSizeContext);
           const initialAssociateValue = row.original.assignedSalesId
             ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
             : "";
       
           const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
+          
           const [showIcon, setShowIcon] = useState(false);
       
           const managerId = row.original.managerid;
@@ -649,18 +643,20 @@ const AdminViewLeads = () => {
           const handleAssignClick = async () => {
             if (selectedAssociate) {
               const [associateId, associateName] = selectedAssociate.split("|");
-              await handleAssignLead(row.original.leadid, { id: associateId, name: associateName }, row.original.status);
-              // No need to update row.original directly; state is already updated in handleAssignLead
+              await handleAssignLead(row.original.leadid, { id: associateId, name: associateName });
+              row.original.assignedSalesId = associateId;
+              row.original.assignedSalesName = associateName;
+              setSelectedAssociate(`${associateId}|${associateName}`);
               setShowIcon(false);
             }
           };
       
           return (
-            <div className="d-flex align-items-center"style={{fontSize: fontSize}} >
+            <div className="d-flex align-items-center" >
               <select
                 value={selectedAssociate}
                 onChange={handleChange}
-                className="form-select me-2" style={{fontSize: fontSize}}
+                className="form-select me-2"
                
               >
                 <option value="">Select Associate</option>
@@ -825,17 +821,13 @@ const AdminViewLeads = () => {
                   }}
                 >
                   <option value="">Primary Status</option>
-                  <option value="new">New</option> {/* Pre-select New */}
-                  {dropdownOptions.primary
-                    .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
-                    .map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
+                  {dropdownOptions.primary.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
                 </select>
               </Col>
-
               <Col md={2}>
                 <select
                   className="form-select"
@@ -870,7 +862,7 @@ const AdminViewLeads = () => {
                 </select>
               </Col>
             </Row>
-            <DataTable columns={columns} data={filteredData} setPageIndex={setPageIndex} />
+            <DataTable columns={columns} data={filteredData} setPageIndex={setPageIndex}/>
           </div>
         </div>
       </div>

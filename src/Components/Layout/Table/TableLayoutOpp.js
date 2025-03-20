@@ -17,11 +17,13 @@ export default function DataTable({ columns, data, initialSearchValue }) {
   React.useEffect(() => {
     setFilteredData(data);
     // Only reset page index when the data length changes (indicating a filter was applied)
-    if (data.length !== previousDataLength) {
+    if (data.length > previousDataLength) {
       setCurrentPageIndex(0);
-      setPreviousDataLength(data.length);
     }
+  
+    setPreviousDataLength(data.length); // Always update previous data length
   }, [data, previousDataLength]);
+
 
   const {
     getTableProps,

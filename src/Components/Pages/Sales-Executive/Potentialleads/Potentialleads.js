@@ -182,7 +182,7 @@ const Potentialleads = () => {
     });
   };
 
-  
+
 
   useEffect(() => {
     localStorage.setItem("searchTerm", searchTerm);
@@ -190,7 +190,7 @@ const Potentialleads = () => {
     localStorage.setItem("filterDestination", filterDestination);
     localStorage.setItem("filterOppStatus1", filterOppStatus1);
     localStorage.setItem("filterOppStatus2", filterOppStatus2);
-   
+
     localStorage.setItem("filterAssignee", filterAssignee);
     localStorage.setItem("filterStartDate", filterStartDate);
     localStorage.setItem("filterEndDate", filterEndDate);
@@ -208,7 +208,7 @@ const Potentialleads = () => {
     setFilterDestination("");
     setFilterOppStatus1("In Progress");
     setFilterOppStatus2("");
-    
+
     setFilterAssignee("");
     setFilterStartDate("");
     setFilterEndDate("");
@@ -310,7 +310,7 @@ const Potentialleads = () => {
       Header: "Opportunity Status",
       accessor: "opportunityStatus",
       Cell: ({ row }) => {
-        const { fontSize } = useContext(FontSizeContext); 
+        const { fontSize } = useContext(FontSizeContext);
         const primaryStatus = row.original.opportunity_status1;
         const secondaryStatus = row.original.opportunity_status2;
         const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
@@ -334,57 +334,58 @@ const Potentialleads = () => {
         );
       },
     },
- 
+
     {
-           Header: "Action",
-           Cell: ({ row }) => (
-             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-               <FaEdit
-                 style={{ color: "#ff9966", cursor: "pointer" }}
-                 onClick={() => handleEdit(row.original.leadid)}
-               />
-               <FaEye
-                 style={{ color: "#ff9966", cursor: "pointer" }}
-                 onClick={() => navigateToLead(row.original.leadid)}
-               />
-               <FaComment
-                 style={{ color: "#ff9966", cursor: "pointer" }}
-                 onClick={() => {
-                   navigate(`/opportunity-comments/${row.original.leadid}`);
-                 }}
-               />
-             </div>
-           ),
-         },
-        
+      Header: "Action",
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <FaEdit
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => handleEdit(row.original.leadid)}
+          />
+          <FaEye
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => navigateToLead(row.original.leadid)}
+          />
+          <FaComment
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => {
+              navigate(`/opportunity-comments/${row.original.leadid}`);
+            }}
+          />
+        </div>
+      ),
+    },
+
   ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
-    // Normalize the destinations by trimming spaces and converting to lowercase
-    const normalizedDestinations = data.map(item => item.travel_destination.trim().toLowerCase());
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
 
-    // Use a Set to get unique values, then convert back to the original format
-    const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-
-    // Map back to the original format (if needed)
-    return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
   }, [data]);
 
   // const uniqueDestinations = useMemo(() => {
   //   if (!data || !Array.isArray(data)) return []; // Ensure data is valid
-    
+
   //   // Normalize and filter out invalid values
   //   const normalizedDestinations = data
   //     .map(item => item.travel_destination?.trim().toLowerCase()) // Use optional chaining (?.)
   //     .filter(Boolean); // Remove null, undefined, and empty values
-  
+
   //   // Use a Set to get unique values, then convert back to the original format
   //   const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-  
+
   //   // Capitalize the first letter
   //   return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
   // }, [data]);
-  
+
   return (
     <div className="salesOpportunitycontainer">
       <Navbar onToggleSidebar={setCollapsed} />
@@ -421,7 +422,7 @@ const Potentialleads = () => {
               )}
             </Col>
             <Col md={6} className="d-flex justify-content-end">
-                    <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>
@@ -448,7 +449,7 @@ const Potentialleads = () => {
                 ))}
               </select>
             </Col>
-            
+
           </Row>
           {data.length == 0 ? (
             <div>No data available</div>

@@ -24,7 +24,8 @@ const LeadOppView = () => {
         const [activeKey, setActiveKey] = useState("0");
         const location = useLocation();
         const navigate = useNavigate();
-        const customerId = location.state?.id || null; // Ensure customerId is valid
+        // const customerId = location.state?.id || null; // Ensure customerId is valid
+        const { customerId } = useParams();
         const [message, setMessage] = useState('');
 
     console.log("customerId=", customerId, "userId=", userId);
@@ -88,7 +89,7 @@ const LeadOppView = () => {
         } finally {
             setTravelLoading(false);
         }
-    };
+    }; 
 
     useEffect(() => {
         if (!customerId || !userId) {

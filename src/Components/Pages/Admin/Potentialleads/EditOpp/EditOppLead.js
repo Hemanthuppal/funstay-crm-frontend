@@ -99,7 +99,7 @@ const EditOppLead = () => { //look
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
-        navigate('/not-found');
+        // navigate('/not-found');
         setError("Failed to fetch lead data.");
       }
     };

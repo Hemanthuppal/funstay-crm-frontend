@@ -8,11 +8,13 @@ import { FaCopy,FaCheck } from "react-icons/fa";
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { adminMail } from '../../../Apiservices/Api';
 import axios from 'axios';
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 const LeadOppView = () => {
     const { authToken, userRole, userId, userName, assignManager, managerId } = useContext(AuthContext);
     const [assignedSalesId, setAssignedSalesId] = useState(null);
     const [collapsed, setCollapsed] = useState(false);
+    const { themeColor } = useContext(ThemeContext);
     const [lead, setLead] = useState(null);
     const location = useLocation();
     // const { leadid } = location.state;
@@ -183,7 +185,7 @@ const LeadOppView = () => {
             <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
                 <div className="lead-opportunity-view">
                     <Card className="mb-4">
-                        <Card.Header className='s-LeadOppView-modal-header'>
+                        <Card.Header className='s-LeadOppView-modal-header'style={{ "--theme-color": themeColor }}>
                             <h2>Customer and Opportunity Details</h2>
                         </Card.Header>
                         <Card.Body>

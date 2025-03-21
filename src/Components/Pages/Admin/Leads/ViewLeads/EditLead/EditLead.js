@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useContext} from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Select from "react-select";
@@ -8,6 +8,7 @@ import { Form, Row, Col } from 'react-bootstrap';
 import './EditLead.css';
 import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
+import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
 
 const EditOppLead = () => {
   const location = useLocation();
@@ -15,6 +16,7 @@ const EditOppLead = () => {
   const { leadid } = useParams();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const { themeColor } = useContext(ThemeContext);
   const [message, setMessage] = useState("");
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
   const [invalidDestinations, setInvalidDestinations] = useState([]);
@@ -294,7 +296,7 @@ const EditOppLead = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="editlead-form-container">
-          <h2 className="editlead-form-header">Edit Leads</h2>
+          <h2 className="editlead-form-header" style={{ "--theme-color": themeColor }}>Edit Leads</h2>
 
           <div className="editlead-form">
             <Form className="s-edit-opp-lead-FormLable" onSubmit={handleFormSubmit}>

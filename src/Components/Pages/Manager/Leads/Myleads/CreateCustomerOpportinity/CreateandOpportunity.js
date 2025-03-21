@@ -7,12 +7,14 @@ import Select from "react-select";
 import { baseURL } from "../../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import { AuthContext } from '../../../../../AuthContext/AuthContext';
+import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
 
 
 const CreateCustomerOpportunity = () => {
   const navigate = useNavigate();
   const { leadid } = useParams();
   const { userId } = useContext(AuthContext);
+  const { themeColor } = useContext(ThemeContext);
   const [activeTab, setActiveTab] = useState("customer");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -328,7 +330,7 @@ const CreateCustomerOpportunity = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="createcustomer-form-container">
-          <h2 className="createcustomer-form-header">
+          <h2 className="createcustomer-form-header" style={{ "--theme-color": themeColor }}>
             {customerData.customer_status === "existing" ? "Customer and Opportunity" : "Create Customer and Opportunity"}
           </h2>
           {message && <div className="alert alert-info">{message}</div>}

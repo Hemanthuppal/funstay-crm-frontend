@@ -7,7 +7,7 @@ import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 import { AuthContext } from "../../../../AuthContext/AuthContext";
-// import { FontSizeContext } from '../../../../Shared/Font/FontContext';
+import { FontSizeContext } from '../../../../Shared/Font/FontContext';
 
 import { HiUserGroup } from "react-icons/hi"; // Import icon
 
@@ -471,7 +471,7 @@ const AdminViewLeads = () => {
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
-          // const { fontSize } = useContext(FontSizeContext);
+          const { fontSize } = useContext(FontSizeContext);
           const primaryStatus = row.original.primaryStatus;
           const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
@@ -479,7 +479,7 @@ const AdminViewLeads = () => {
 
           return (
             <div className="d-flex align-items-center"
-            //  style={{ fontSize: fontSize }}
+             style={{ fontSize: fontSize }}
             >
               <select
                 value={primaryStatus}
@@ -487,7 +487,7 @@ const AdminViewLeads = () => {
                   handlePrimaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select me-2"
-                //  style={{ fontSize: fontSize }}
+                 style={{ fontSize: fontSize }}
               >
                 {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
@@ -503,7 +503,7 @@ const AdminViewLeads = () => {
                 }
                 className="form-select"
                 disabled={isSecondaryDisabled} 
-                // style={{ fontSize: fontSize }}
+                style={{ fontSize: fontSize }}
               >
                 {!secondaryStatus && <option value="">Select Secondary Status</option>}
                 {secondaryOptions.map((option) => (

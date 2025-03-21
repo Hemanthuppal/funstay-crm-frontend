@@ -9,8 +9,8 @@ import { baseURL } from "../../../../Apiservices/Api";
 import "./Myopp.css";
 import axios from "axios";
 import { AuthContext } from "../../../../AuthContext/AuthContext";
-// import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
-// import { FontSizeContext } from "../../../../Shared/Font/FontContext";
+import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
+import { FontSizeContext } from "../../../../Shared/Font/FontContext";
 import { HiUserGroup } from "react-icons/hi"; 
 
 const Potentialleads = () => {
@@ -18,7 +18,7 @@ const Potentialleads = () => {
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  // const { themeColor } = useContext(ThemeContext);
+  const { themeColor } = useContext(ThemeContext);
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-op1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-op1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-op1") || "");
@@ -441,7 +441,7 @@ const Potentialleads = () => {
       Header: "Opportunity Status",
       accessor: "opportunityStatus",
       Cell: ({ row }) => {
-        // const { fontSize } = useContext(FontSizeContext);
+        const { fontSize } = useContext(FontSizeContext);
         const primaryStatus = row.original.opportunity_status1;
         const secondaryStatus = row.original.opportunity_status2;
         const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
@@ -449,11 +449,11 @@ const Potentialleads = () => {
 
         return (
           <div className="d-flex align-items-center gap-2"
-          //  style={{
-          //   fontSize: fontSize, }}
+           style={{
+            fontSize: fontSize, }}
             >
             <select value={primaryStatus} onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)} className="form-select"
-            // style={{ fontSize: fontSize }}
+            style={{ fontSize: fontSize }}
             >
               <option value="">Select Primary Status</option>
               {dropdownOptions.primary.map((option) => (
@@ -461,7 +461,7 @@ const Potentialleads = () => {
               ))}
             </select>
             <select value={secondaryStatus} onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)} className="form-select" disabled={isSecondaryDisabled}
-            // style={{ fontSize: fontSize }}
+            style={{ fontSize: fontSize }}
             >
               <option value="">Select Secondary Status</option>
               {secondaryOptions.map((option) => (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useContext} from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
@@ -7,6 +7,8 @@ import "./InDetailViewLeads.css";
 import axios from "axios";
 import { baseURL } from "../../../../../Apiservices/Api";
 import { FaCopy } from "react-icons/fa";
+import { ThemeContext } from "../../../../../Shared/Themes/ThemeContext";
+
 
 const InDetailViewLeads = () => {
   const navigate = useNavigate();
@@ -41,6 +43,7 @@ const InDetailViewLeads = () => {
   });
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
+  const { themeColor } = useContext(ThemeContext);
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -223,7 +226,7 @@ const InDetailViewLeads = () => {
         <div className="indetail-container">
           <div className="card mt-4">
             <div className="card-body">
-              <h2 className="lead-details-header">Lead Details</h2>
+              <h2 className="lead-details-header" style={{ "--theme-color": themeColor }}>Lead Details</h2>
               {message && <div className="alert alert-info">{message}</div>}
               {leadid ? (
                 <div className="row">

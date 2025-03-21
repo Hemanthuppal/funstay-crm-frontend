@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -8,24 +9,23 @@ import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
 import { Form, Dropdown, Button } from "react-bootstrap";
 import { baseURL } from "../../../Apiservices/Api";
 import { AuthContext } from '../../../AuthContext/AuthContext';
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 const LeadOppView = () => {
-        const { authToken, userId } = useContext(AuthContext);
-    const [collapsed, setCollapsed] = useState(false);
-    const [customer, setCustomer] = useState(null);
-    const [travelOpportunity, setTravelOpportunity] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [travelLoading, setTravelLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [travelError, setTravelError] = useState(null);
-    const [activeKey, setActiveKey] = useState("0");
-    const location = useLocation();
-    const navigate = useNavigate();
-    
-//     const customerId = location.state?.id;
-        const { customerId } = useParams();
-//     const userId = location.state?.userId; // Ensure userId is available
-    const [message, setMessage] = useState('');
+        const [collapsed, setCollapsed] = useState(false);
+        const [customer, setCustomer] = useState(null);
+         const { authToken, userId } = useContext(AuthContext);
+        const { themeColor } = useContext(ThemeContext);
+        const [travelOpportunity, setTravelOpportunity] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [travelLoading, setTravelLoading] = useState(true);
+        const [error, setError] = useState(null);
+        const [travelError, setTravelError] = useState(null);
+        const [activeKey, setActiveKey] = useState("0");
+        const location = useLocation();
+        const navigate = useNavigate();
+        const customerId = location.state?.id || null; // Ensure customerId is valid
+        const [message, setMessage] = useState('');
 
     console.log("customerId=", customerId, "userId=", userId);
 
@@ -115,7 +115,7 @@ const LeadOppView = () => {
                         <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
                                 <div className="lead-opportunity-view">
                                         <Card className="mb-4">
-                                                <Card.Header className="s-LeadOppView-modal-header">
+                                                <Card.Header className="s-LeadOppView-modal-header"style={{ "--theme-color": themeColor }}>
                                                         <h2> Customer Details</h2>
                                                 </Card.Header>
                                                 <Card.Body>

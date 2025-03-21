@@ -9,6 +9,7 @@ import FollowUp from "./FollowUp";
 import { baseURL,webhookUrl } from "../../../Apiservices/Api";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 import * as XLSX from 'xlsx';
 
 const Dashboard = () => {
@@ -17,6 +18,7 @@ const Dashboard = () => {
  
   const { authToken, userId } = useContext(AuthContext); // Get userId from context
   const [collapsed, setCollapsed] = useState(false);
+  const { themeColor } = useContext(ThemeContext);
   const [selectedDay, setSelectedDay] = useState("Tue");
   const [counts, setCounts] = useState({
     leadsToday: 0,
@@ -200,7 +202,7 @@ const Dashboard = () => {
   return (
     <div className="dashboardContainer1">
       <Navbar onToggleSidebar={setCollapsed} />
-      <div className={`dashboard1 ${collapsed ? 'collapsed' : ''}`}>
+      <div className={`dashboard1 ${collapsed ? 'collapsed' : ''}`}style={{ "--theme-color": themeColor }}>
         <div className="container">
           {/* Cards Section */}
           <div className="row Manager-dashboard-cards-container justify-content-center mt-4">

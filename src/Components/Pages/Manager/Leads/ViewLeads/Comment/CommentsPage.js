@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import {baseURL} from '../../../../../Apiservices/Api';
 import { AuthContext } from '../../../../../AuthContext/AuthContext';
 import { adminMail } from '../../../../../Apiservices/Api';
+import { ThemeContext } from '../../../../../Shared/Themes/ThemeContext';
 
 const CommentsPage = () => { 
   const { authToken, userRole, userId, userName, assignManager,managerId} = useContext(AuthContext);
@@ -16,6 +17,7 @@ const CommentsPage = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 const [collapsed, setCollapsed] = useState(false);
+const { themeColor } = useContext(ThemeContext);
 const [assignedSalesId, setAssignedSalesId] = useState(null);
 const navigate = useNavigate();
 
@@ -124,7 +126,7 @@ const navigate = useNavigate();
     <Navbar onToggleSidebar={setCollapsed} />
     <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
     <div className="comment-form-container">
-    <h3 className='comment-form-header'>Comments</h3>
+    <h3 className='comment-form-header'style={{ "--theme-color": themeColor }}>Comments</h3>
 
    
     <div className="mb-3 opp-modal-footer">

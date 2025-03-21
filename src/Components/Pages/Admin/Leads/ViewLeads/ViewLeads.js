@@ -67,23 +67,26 @@ const AdminViewLeads = () => {
     });
   };
   const handleArchive = async (leadid) => {
+    const confirmDelete = window.confirm("Are you sure you want to archive this lead?");
+    if (!confirmDelete) return; // If the user cancels, exit the function
+  
     try {
       const response = await fetch(`${baseURL}/api/archiveByLeadId/${leadid}`, {
-        method: 'PUT',
+        method: "PUT",
       });
-
+  
       if (response.ok) {
         setData((prevData) => prevData.filter((item) => item.leadid !== leadid)); // Remove from active list
-        setMessage('The lead has been archived successfully.');
+        setMessage("The lead has been archived successfully.");
       } else {
-        setMessage('Failed to archive the lead. Please try again later.');
+        setMessage("Failed to archive the lead. Please try again later.");
       }
-      setTimeout(() => setMessage(""), 1000);
     } catch (error) {
       console.error("Error:", error);
-      setMessage('An unexpected error occurred while archiving the lead.');
-      setTimeout(() => setMessage(""), 1000);
+      setMessage("An unexpected error occurred while archiving the lead.");
     }
+  
+    setTimeout(() => setMessage(""), 1000);
   };
 
   const handleDelete = async (leadid) => {

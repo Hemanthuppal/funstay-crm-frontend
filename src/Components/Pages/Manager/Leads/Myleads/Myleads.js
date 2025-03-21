@@ -93,6 +93,8 @@ const ViewLeads = () => {
   };
 
   const handleDelete = async (leadid) => {
+    // const confirmDelete = window.confirm("Are you sure you want to delete this Lead?");
+    // if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/deleteByLeadId/${leadid}`, {
         method: 'DELETE',

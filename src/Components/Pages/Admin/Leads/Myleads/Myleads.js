@@ -88,6 +88,8 @@ const AdminViewLeads = () => {
   };
 
   const handleArchive = async (leadid) => {
+     const confirmDelete = window.confirm("Are you sure you want to archive this Lead?");
+    if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/archiveByLeadId/${leadid}`, {
         method: 'PUT',

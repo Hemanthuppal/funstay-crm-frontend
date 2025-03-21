@@ -94,15 +94,18 @@ const AdminCustomer = () => {
     fetchFilteredCustomers();
   }, [selectedTag, authToken]);
   console.log(`${baseURL}/api/tagfilter?tag=${selectedTag}`);
-  const navigateToCustomerDetails = (id) => {
-    navigate(`/a-customerdetails/${id}`, { state: { id } });
+  
+  const navigateToCustomerDetails = (customerId) => {
+    navigate(`/a-customerdetails/${customerId}`);
   };
 
-  const navigateToEditLead = (id) => {
-    navigate(`/a-editcustomerdetails/${id}`, { state: { id } });
+  const navigateToEditLead = (customerId) => {
+    navigate(`/a-editcustomerdetails/${customerId}`);
   };
 
   const handleDeleteCustomer = async (customerId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this Customer?");
+    if (!confirmDelete) return;
     try {
       await axios.delete(`${baseURL}/api/customers/${customerId}`);
       setData(prev => prev.filter(customer => customer.id !== customerId));

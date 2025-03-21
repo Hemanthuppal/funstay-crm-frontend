@@ -368,6 +368,21 @@ const Potentialleads = () => {
     return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
   }, [data]);
 
+  // const uniqueDestinations = useMemo(() => {
+  //   if (!data || !Array.isArray(data)) return []; // Ensure data is valid
+    
+  //   // Normalize and filter out invalid values
+  //   const normalizedDestinations = data
+  //     .map(item => item.travel_destination?.trim().toLowerCase()) // Use optional chaining (?.)
+  //     .filter(Boolean); // Remove null, undefined, and empty values
+  
+  //   // Use a Set to get unique values, then convert back to the original format
+  //   const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
+  
+  //   // Capitalize the first letter
+  //   return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
+  // }, [data]);
+  
   return (
     <div className="salesOpportunitycontainer">
       <Navbar onToggleSidebar={setCollapsed} />

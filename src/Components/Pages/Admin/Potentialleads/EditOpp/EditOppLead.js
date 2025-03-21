@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 
-const EditOppLead = () => {
+const EditOppLead = () => { //look
   const location = useLocation();
   // const { leadid } = location.state;
   const { leadid } = useParams();
@@ -60,7 +60,7 @@ const EditOppLead = () => {
 
     notes: '',
     comments: '',
-    reminder_setting: '',
+    reminder_setting: '', 
     opportunity_status1: '',
     opportunity_status2: '',
     primarySource: '',

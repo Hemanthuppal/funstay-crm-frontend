@@ -242,6 +242,8 @@ const Potentialleads = () => {
     navigate(`/a-edit-opportunity/${rowId}`, { state: { leadid: rowId } });
   };
   const handleArchive = async (leadid) => {
+    const confirmDelete = window.confirm("Are you sure you want to archive this Opportunity?");
+    if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/archiveByLeadId/${leadid}`, {
         method: 'PUT',

@@ -170,6 +170,8 @@ const Potentialleads = () => {
   };
 
   const handleDelete = async (leadid) => {
+    // const confirmDelete = window.confirm("Are you sure you want to delete this Opportunity?");
+    // if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
         method: 'DELETE',

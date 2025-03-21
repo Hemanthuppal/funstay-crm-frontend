@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
 import "../Potentialleads/LeadDetails.css";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
-
+import { AuthContext } from '../../../AuthContext/AuthContext';
 import { baseURL } from "../../../Apiservices/Api";
 
-const LeadOppView = () => {
+const LeadOppView = () => { 
+    const { authToken, userId } = useContext(AuthContext);
     const [collapsed, setCollapsed] = useState(false);
     const [customer, setCustomer] = useState(null);
     const [travelOpportunity, setTravelOpportunity] = useState([]);
@@ -18,8 +19,9 @@ const LeadOppView = () => {
     const [travelError, setTravelError] = useState(null);
     const [activeKey, setActiveKey] = useState("0");
     const location = useLocation();
-    const navigate = useNavigate();
-    const customerId = location.state?.id || null;
+    const navigate = useNavigate(); 
+    // const customerId = location.state?.id || null;
+    const { customerId } = useParams();
     console.log("customerId=", customerId);
     const [message, setMessage] = useState('');
     const copyToClipboard = (text) => {
@@ -29,6 +31,16 @@ const LeadOppView = () => {
         }).catch(err => {
             console.error('Failed to copy: ', err);
         });
+    };
+
+    const validateCustomerAccess = async (customerId, userId) => {
+        try {
+            const response = await axios.get(`${baseURL}/api/manager-customers/${customerId}/${userId}`);
+            return response.status === 200;
+        } catch (error) {
+            console.error("Validation failed:", error);
+            return false;
+        }
     };
 
     const fetchCustomerDetails = async (id) => {
@@ -76,13 +88,23 @@ const LeadOppView = () => {
     };
 
     useEffect(() => {
-        if (!customerId) {
-            console.error("No customer ID found! Redirecting...");
-            return;
-        }
-        fetchCustomerDetails(customerId);
-        fetchopportunityDetails(customerId);
-    }, [customerId]);
+            if (!customerId || !userId) {
+                console.error("No customer ID or user ID found! Redirecting...");
+                navigate("/not-found");
+                return;
+            }
+    
+            (async () => {
+                const isValid = await validateCustomerAccess(customerId, userId);
+                if (!isValid) {
+                    navigate("/not-found");
+                    return;
+                }
+    
+                fetchCustomerDetails(customerId);
+                fetchopportunityDetails(customerId);
+            })();
+        }, [customerId, userId, navigate]);
 
     return (
         <div className="salesViewLeadsContainer">

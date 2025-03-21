@@ -190,6 +190,8 @@ const Potentialleads = () => {
 
 
   const handleArchive = async (leadid) => {
+    const confirmDelete = window.confirm("Are you sure you want to archive this Opportunity?");
+    if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/opportunity/archive/${leadid}`, {
         method: 'PUT',

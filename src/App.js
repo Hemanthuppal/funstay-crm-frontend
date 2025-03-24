@@ -97,6 +97,7 @@ import Themes from "./Components/Shared/Themes/Themes";
 import M_Myoppleads from "./Components/Pages/Manager/Potentialleads/MyOpp/MyOpplead";
 import M_Myleads from "./Components/Pages/Manager/Leads/Myleads/Myleads";
 import M_MYCreateCustomerOpportunity from "./Components/Pages/Manager/Leads/Myleads/CreateCustomerOpportinity/CreateandOpportunity"
+import EmailHistory from "./Components/Pages/Admin/Potentialleads/Email/Email_new";
 
 function App() {
     return (
@@ -297,6 +298,8 @@ function App() {
                 <Route path="/m-mydetails/:leadid" element={<M_LeadDetailss />} />
                 <Route path="/m-mycreate-customer-opportunity/:leadid" element={<M_MYCreateCustomerOpportunity />} />
                 <Route path="/m-myopportunity-comments/:leadid" element={<M_CommentsPage />} />
+                <Route path="/email-history" element={<EmailHistory />} />
+                
 
 
                 </Route>

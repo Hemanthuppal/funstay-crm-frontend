@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Navbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy,FaSave ,FaHistory} from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -479,92 +479,79 @@ const handleAssignLead = async (leadid, associateObj,status) => {
         );
       },
     },
-    // {
-    //   Header: "Quotations",
-    //   accessor: "quotation_id",
-    //   Cell: ({ row }) => {
-    //     const [selectedFile, setSelectedFile] = useState(null);
-    //     const [showIcon, setShowIcon] = useState(false);
-    //     const [uploading, setUploading] = useState(false);
-    //     const [message, setMessage] = useState("");
-
-    //     const quotationId = row.original.quotation_id; // Get quotation_id from row
-    //     const leadId = row.original.leadid; // Get lead ID for email chat link
-
-    //     const handleFileChange = (e) => {
-    //       const file = e.target.files[0];
-    //       if (file && (file.type === "application/pdf" || file.type.includes("word"))) {
-    //         setSelectedFile(file);
-    //         setShowIcon(true);
-    //         setMessage("");
-    //       } else {
-    //         setMessage("Only PDF or DOCX files allowed.");
-    //         setSelectedFile(null);
-    //         setShowIcon(false);
-    //       }
-    //     };
-
-    //     const handleUpload = async () => {
-    //       if (!selectedFile) return;
-    //       setUploading(true);
-    //       const formData = new FormData();
-    //       formData.append("quotation", selectedFile);
-    //       formData.append("leadid", leadId);
-    //       formData.append("email", row.original.email);
-    //       formData.append("name", row.original.name);
-
-    //       try {
-    //         const response = await axios.post(
-    //           `${baseURL}/api/quotations/upload`,
-    //           formData,
-    //           { headers: { "Content-Type": "multipart/form-data" } }
-    //         );
-
-    //         setMessage(response.data.message);
-    //         setSelectedFile(null);
-    //         setShowIcon(false);
-    //       } catch (error) {
-    //         setMessage("Error uploading file.");
-    //       }
-    //       setUploading(false);
-    //     };
-
-    //     return (
-    //       <div className="d-flex align-items-center">
-    //         {quotationId ? (
-    //           <a
-    //             href={`a-email/${leadId}`} // Fetch chat via API
-    //             target="_blank"
-    //             rel="noopener noreferrer"
-    //             style={{ color: "#007bff", textDecoration: "underline", cursor: "pointer" }}
-    //           >
-    //             View Email Chat (ID: {quotationId})
-    //           </a>
-    //         ) : (
-    //           <>
-    //             <input
-    //               type="file"
-    //               accept=".pdf,.docx"
-    //               className="form-control me-2"
-    //               onChange={handleFileChange}
-    //               style={{ maxWidth: "200px" }}
-    //             />
-
-    //             {showIcon && (
-    //               <HiOutlinePaperClip
-    //                 style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
-    //                 onClick={handleUpload}
-    //               />
-    //             )}
-    //           </>
-    //         )}
-
-    //         {uploading && <span>Uploading...</span>}
-    //         {message && <p style={{ color: "green", fontSize: "12px" }}>{message}</p>}
-    //       </div>
-    //     );
-    //   },
-    // },
+    {
+      Header: "Quotation",
+      accessor: "email_sent",
+      minWidth: 150, // Reduce width (adjust as needed)
+      maxWidth: 180, // Limit max width
+      width: 160, // Set an approximate fixed width
+      Cell: ({ row }) => {
+        const navigate = useNavigate();
+        const [selectedFile, setSelectedFile] = useState(null);
+        const [emailSent, setEmailSent] = useState(row.original.email_sent);
+    
+       
+        const handleFileChange = (event) => {
+          setSelectedFile(event.target.files[0]);
+        };
+    
+        const handleUpload = async () => {
+          if (!selectedFile) {
+            alert("Please choose a file before saving.");
+            return;
+          }
+    
+          const formData = new FormData();
+          formData.append("file", selectedFile);
+          formData.append("email", row.original.email);
+          formData.append("leadid", row.original.leadid);
+    
+          try {
+            await axios.post(`${baseURL}/api/upload-quotation`, formData);
+            await axios.post(`${baseURL}/api/update-email-status`, {
+              leadid: row.original.leadid,
+            });
+    
+            alert("File uploaded and email sent successfully!");
+          } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("Error sending email.");
+          }
+        };
+    
+        const handleViewHistory = () => {
+          navigate("/email-history", { state: { email: row.original.email } });
+        };
+    
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: "5px", flexWrap: "nowrap" }}>
+            {emailSent ? (
+              <button
+                onClick={handleViewHistory}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: "5px" }}
+              >
+                <FaHistory size={16} color="blue" /> {/* Reduced icon size */}
+              </button>
+            ) : (
+              <>
+                <input type="file" onChange={handleFileChange} style={{ width: "100px" }} />
+                <button
+                  onClick={handleUpload}
+                  style={{ background: "none", border: "none", cursor: "pointer", padding: "5px" }}
+                >
+                  <FaSave size={16} color="green" /> {/* Reduced icon size */}
+                </button>
+              </>
+            )}
+          </div>
+        );
+      },
+    },
+    
+    
+    
+    
+    
       {
                Header: "Manager ",
                Cell: ({ row }) => {

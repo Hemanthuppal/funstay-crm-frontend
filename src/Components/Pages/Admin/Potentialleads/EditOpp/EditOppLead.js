@@ -70,6 +70,12 @@ const EditOppLead = () => {
   });
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
+   const [isOriginCityValid, setIsOriginCityValid] = useState(true);
+  
+    const validateOriginCity = (value) => {
+      const regex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/; // Regex for "city, state, country"
+      return regex.test(value);
+    };
 
   useEffect(() => {
     const fetchLeadData = async () => {
@@ -97,6 +103,10 @@ const EditOppLead = () => {
           primarySource: leadData.primarySource || '',
           secondarysource: leadData.secondarysource || '',
         }));
+        // Validate the origincity after setting the form data
+        const isValid = validateOriginCity(leadData.origincity);
+        setIsOriginCityValid(isValid);
+  
       } catch (err) {
         console.error("Error fetching lead data:", err);
         navigate('/not-found');
@@ -197,7 +207,11 @@ useEffect(() => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+ // Validate origincity field
+ if (name === "origincity") {
+  const isValid = validateOriginCity(value);
+  setIsOriginCityValid(isValid);
+}
     if (name === "start_date") {
       const newStartDate = new Date(value);
       const today = new Date();
@@ -615,6 +629,11 @@ useEffect(() => {
                       value={formData.origincity}
                       onChange={handleChange}
                     />
+                     {!isOriginCityValid && (
+      <div className="text-danger mt-2 small">
+        Warning: Please enter a valid city, state, and country format (e.g., "City, State, Country").
+      </div>
+    )}
                   </Form.Group>
                 </Col>
                  <Col md={4}>

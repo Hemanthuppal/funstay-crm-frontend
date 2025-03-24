@@ -1,5 +1,5 @@
 import React, { useState, useEffect ,useContext} from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion, Form, Button } from "react-bootstrap";
 import "../Potentialleads/OppDetails/LeadDetails.css";
@@ -7,9 +7,13 @@ import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { FaPhone, FaEnvelope } from "react-icons/fa";
 import { baseURL } from "../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
+
+import { AuthContext } from '../../../AuthContext/AuthContext';
 import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
-const EditLeadOppView = () => {
+
+const EditLeadOppView = () => { 
+    const { authToken, userId } = useContext(AuthContext);
     const [message, setMessage] = useState(null);
     const [collapsed, setCollapsed] = useState(false);
     const [customer, setCustomer] = useState(null);
@@ -25,7 +29,8 @@ const EditLeadOppView = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [originalOpportunities, setOriginalOpportunities] = useState({});
-    const customerId = location.state?.id || null;
+    // const customerId = location.state?.id || null;
+    const { customerId } = useParams();
 
     const [countryCodeOptions, setCountryCodeOptions] = useState([]);
 
@@ -40,6 +45,16 @@ const EditLeadOppView = () => {
 
         setCountryCodeOptions(uniqueCodes);
     }, []);
+    
+    const validateCustomerAccess = async (customerId, userId) => {
+        try {
+            const response = await axios.get(`${baseURL}/api/sales-customers/${customerId}/${userId}`);
+            return response.status === 200;
+        } catch (error) {
+            console.error("Validation failed:", error);
+            return false;
+        }
+    };
 
     const fetchCustomerDetails = async (id) => {
         try {
@@ -87,13 +102,23 @@ const EditLeadOppView = () => {
     };
 
     useEffect(() => {
-        if (!customerId) {
-            console.error("No customer ID found! Redirecting...");
-            return;
-        }
-        fetchCustomerDetails(customerId);
-        fetchopportunityDetails(customerId);
-    }, [customerId]);
+            if (!customerId || !userId) {
+                console.error("No customer ID or user ID found! Redirecting...");
+                navigate("/not-found");
+                return;
+            }
+    
+            (async () => {
+                const isValid = await validateCustomerAccess(customerId, userId);
+                if (!isValid) {
+                    navigate("/not-found");
+                    return;
+                }
+    
+                fetchCustomerDetails(customerId);
+                fetchopportunityDetails(customerId);
+            })();
+        }, [customerId, userId, navigate]);
 
     const handleCustomerChange = (e) => {
         const { name, value } = e.target;

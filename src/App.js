@@ -99,6 +99,7 @@ import M_Myleads from "./Components/Pages/Manager/Leads/Myleads/Myleads";
 import M_MYCreateCustomerOpportunity from "./Components/Pages/Manager/Leads/Myleads/CreateCustomerOpportinity/CreateandOpportunity"
 import EmailHistory from "./Components/Pages/Admin/Potentialleads/Email/Email_new";
 
+
 function App() {
     return (
         <AuthProvider>
@@ -197,9 +198,9 @@ function App() {
                 <Route path="/a-opportunity-comments/:leadid" element={<A_CommentsPage />} />
 
 
-                <Route path="/customerdetails/:leadid" element={<Customerdetails />} />
-                <Route path="/m-customerdetails/:leadid" element={<M_Customerdetails />} />
-                <Route path="/a-customerdetails/:leadid" element={<A_Customerdetails />} />
+                <Route path="/customerdetails/:customerId" element={<Customerdetails />} />
+                <Route path="/m-customerdetails/:customerId" element={<M_Customerdetails />} />
+                <Route path="/a-customerdetails/:customerId" element={<A_Customerdetails />} />
 
 
 
@@ -207,9 +208,9 @@ function App() {
 
                 <Route path="/team-members" element={<TeamMembers />} />
 
-                <Route path="/editcustomerdetails/:leadid" element={<EditCustomer />} />
-                <Route path="/a-editcustomerdetails/:leadid" element={<A_EditCustomer />} />
-                <Route path="/m-editcustomerdetails/:leadid" element={<M_EditCustomer />} />
+                <Route path="/editcustomerdetails/:customerId" element={<EditCustomer />} />
+                <Route path="/a-editcustomerdetails/:customerId" element={<A_EditCustomer />} />
+                <Route path="/m-editcustomerdetails/:customerId" element={<M_EditCustomer />} />
 
 
 
@@ -298,10 +299,10 @@ function App() {
                 <Route path="/m-mydetails/:leadid" element={<M_LeadDetailss />} />
                 <Route path="/m-mycreate-customer-opportunity/:leadid" element={<M_MYCreateCustomerOpportunity />} />
                 <Route path="/m-myopportunity-comments/:leadid" element={<M_CommentsPage />} />
-                <Route path="/email-history" element={<EmailHistory />} />
+                {/* <Route path="/email-history" element={<EmailHistory />} /> */}
                 
 
-
+                <Route path="/email-history/:leadid" element={<EmailHistory />} />
                 </Route>
             </Routes>
 

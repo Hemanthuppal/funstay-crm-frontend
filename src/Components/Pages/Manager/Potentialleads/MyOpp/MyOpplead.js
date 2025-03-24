@@ -2,17 +2,18 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
-import { Row, Col ,Form} from "react-bootstrap";
+import { FaEdit, FaEye,FaDownload, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { Row, Col, Form } from "react-bootstrap";
 import { HiUserGroup } from "react-icons/hi";
 import DataTable from "../../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../../Apiservices/Api";
 import './MyOppleads.css';
 import axios from 'axios';
 import { AuthContext } from '../../../../AuthContext/AuthContext';
+import * as XLSX from 'xlsx';
 
-const Potentialleads = () => { 
-  const { authToken, userId,userName } = useContext(AuthContext);
+const Potentialleads = () => {
+  const { authToken, userId, userName } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Potentialleads = () => {
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-m") || "");
   const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-m") || "In Progress");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-m") || "");
- 
+
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-m") || "");
   const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-m") || "");
   const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-m") || "");
@@ -29,7 +30,65 @@ const Potentialleads = () => {
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-m") || "");
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
-  const [employees, setEmployees] = useState([]); 
+  const [employees, setEmployees] = useState([]);
+  const downloadExcel = () => {
+       if (!filteredData || filteredData.length === 0) {
+         alert("No data available to export.");
+         return;
+       }
+     
+       // Define the fields to export
+       const fields = [ 
+         { key: "leadid", label: "LEAD ID", width: 15 },
+         { key: "name", label: "NAME", width: 20 },
+         { key: "email", label: "EMAIL", width: 25 },
+         { key: "country_code", label: "COUNTRY CODE", width: 10 },
+         { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+         { key: "sources", label: "SOURCES", width: 20 },
+         { key: "another_name", label: "ANOTHER NAME", width: 20 },
+         { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+         { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+        //  { key: "description", label: "DESCRIPTION", width: 30 },
+        //  { key: "origincity", label: "ORIGIN CITY", width: 15 },
+        //  { key: "destination", label: "DESTINATION", width: 15 },
+        //  { key: "created_at", label: "CREATED AT", width: 20 },
+         { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+         { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+         { key: "channel", label: "CHANNEL", width: 15 },
+         { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
+         { key: "travel_destination", label: "DESTINATION", width: 15 },
+         { key: "travel_created_at", label: "CREATED AT", width: 20 },
+         { key: "start_date", label: "START DATE", width: 20 },
+         { key: "end_date", label: "END DATE", width: 20 },
+         { key: "duration", label: "DURATION", width: 15 },
+         { key: "adults_count", label: "ADULTS COUNT", width: 15 },
+         { key: "children_count", label: "CHILDREN COUNT", width: 15 },
+         { key: "child_ages", label: "CHILD AGES", width: 20 },
+         { key: "approx_budget", label: "BUDGET", width: 15 },
+         { key: "travel_description", label: "DESCRIPTION", width: 20 },
+       ];
+     
+       // Transform the data to only include specified fields
+       const exportData = filteredData.map(row => {
+         let newRow = {};
+         fields.forEach(field => {
+           newRow[field.label] = row[field.key] || ""; // Use field label as header
+         });
+         return newRow;
+       });
+     
+       // Create a new workbook and worksheet
+       const wb = XLSX.utils.book_new();
+       const ws = XLSX.utils.json_to_sheet(exportData);
+     
+       // Apply column widths
+       ws["!cols"] = fields.map(field => ({ width: field.width }));
+     
+       // Append sheet and save file
+       XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
+       const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
+       XLSX.writeFile(wb, fileName);
+     };
 
   const fetchLeads = async () => {
     try {
@@ -48,7 +107,7 @@ const Potentialleads = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
-      setTimeout(() => setMessage(""), 1000);  
+      setTimeout(() => setMessage(""), 1000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
@@ -170,6 +229,8 @@ const Potentialleads = () => {
   };
 
   const handleDelete = async (leadid) => {
+    // const confirmDelete = window.confirm("Are you sure you want to delete this Opportunity?");
+    // if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/opportunity/${leadid}`, {
         method: 'DELETE',
@@ -197,7 +258,7 @@ const Potentialleads = () => {
     }
   };
 
-  
+
 
   useEffect(() => {
     localStorage.setItem("searchTerm-m", searchTerm);
@@ -205,7 +266,7 @@ const Potentialleads = () => {
     localStorage.setItem("filterDestination-m", filterDestination);
     localStorage.setItem("filterOppStatus1-m", filterOppStatus1);
     localStorage.setItem("filterOppStatus2-m", filterOppStatus2);
-   
+
     localStorage.setItem("filterAssignee-m", filterAssignee);
     localStorage.setItem("filterStartDate-m", filterStartDate);
     localStorage.setItem("filterEndDate-m", filterEndDate);
@@ -223,7 +284,7 @@ const Potentialleads = () => {
     setFilterDestination("");
     setFilterOppStatus1("In Progress");
     setFilterOppStatus2("");
-    
+
     setFilterAssignee("");
     setFilterStartDate("");
     setFilterEndDate("");
@@ -238,15 +299,15 @@ const Potentialleads = () => {
       const matchesStatus = !filterStatus || (item.status && item.status.toLowerCase() == filterStatus.toLowerCase());
       const matchesDestination = !filterDestination || (item.travel_destination && item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
       const actualPrimaryStatus = item.opportunity_status1 ? item.opportunity_status1.toLowerCase() : "In Progress";
-        const matchesOppStatus1 =
-          !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
+      const matchesOppStatus1 =
+        !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesOppStatus2 = !filterOppStatus2 || (item.opportunity_status2 && item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
+          const createdAt = new Date(item.travel_created_at);
           return createdAt >= start && createdAt <= end;
         }
         return true;
@@ -348,32 +409,32 @@ const Potentialleads = () => {
         );
       },
     },
-   
+
     {
       Header: "Action",
       Cell: ({ row }) => (
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} />
           <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-mydetails/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-          <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} />
+          {/* <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} /> */}
           <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-myopportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
         </div>
       ),
     },
-   
+
   ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
-         // Filter out empty destinations and normalize valid ones
-         const normalizedDestinations = data
-           .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
-           .filter(dest => dest) // Remove empty values
-           .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
-     
-         // Get unique values and format them
-         return [...new Set(normalizedDestinations)]
-           .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
-       }, [data]);
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+  }, [data]);
 
   return (
     <div className="salesOpportunitycontainer">
@@ -384,6 +445,8 @@ const Potentialleads = () => {
             <Col className="d-flex justify-content-between align-items-center fixed">
               <h3>Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>}
+              <button className="btn btn-success" onClick={downloadExcel}>
+              <FaDownload /> Download Excel</button>
             </Col>
           </Row>
           <Row className="mb-3 align-items-center">
@@ -411,7 +474,7 @@ const Potentialleads = () => {
               )}
             </Col>
             <Col md={6} className="d-flex justify-content-end">
-                    <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>
@@ -438,7 +501,6 @@ const Potentialleads = () => {
                 ))}
               </select>
             </Col>
-           
           </Row>
           {data.length == 0 ? (
             <div>No data available</div>

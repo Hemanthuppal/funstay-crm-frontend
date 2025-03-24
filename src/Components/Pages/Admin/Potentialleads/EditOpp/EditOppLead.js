@@ -11,7 +11,7 @@ import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 
-const EditOppLead = () => {
+const EditOppLead = () => { //look
   const location = useLocation();
   // const { leadid } = location.state;
   const { leadid } = useParams();
@@ -62,7 +62,7 @@ const EditOppLead = () => {
 
     notes: '',
     comments: '',
-    reminder_setting: '',
+    reminder_setting: '', 
     opportunity_status1: '',
     opportunity_status2: '',
     primarySource: '',
@@ -81,6 +81,11 @@ const EditOppLead = () => {
     const fetchLeadData = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
+        // Check if the response status is 404
+        if (response.status === 404) {
+          navigate("/not-found");
+          return;
+        }
         const leadData = response.data;
 
         setFormData((prev) => ({
@@ -109,8 +114,11 @@ const EditOppLead = () => {
   
       } catch (err) {
         console.error("Error fetching lead data:", err);
-        navigate('/not-found');
-        setError("Failed to fetch lead data.");
+        if (err.response && err.response.status === 404) {
+          navigate("/not-found");
+        } else {
+          setError("Failed to fetch lead data.");
+        }
       }
     };
 
@@ -164,19 +172,19 @@ const EditOppLead = () => {
  const [destinationOptions, setDestinationOptions] = useState([]);
  const [invalidDestinations, setInvalidDestinations] = useState([]);
  
- // Update your existing useEffect that fetches opportunity data
+ 
  useEffect(() => {
    const fetchOpportunityData = async () => {
      try {
        const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
        const opportunityData = response.data;
        
-       // Convert stored destinations to select format
+       
        const initialDestinations = opportunityData.destination 
          ? opportunityData.destination.split(", ").map(item => ({ value: item, label: item }))
          : [];
  
-       // Check for invalid destinations after options are loaded
+       
        if (destinationOptions.length > 0 && initialDestinations.length > 0) {
          const invalid = initialDestinations.filter(dest => 
            !destinationOptions.some(option => option.value === dest.value)
@@ -185,7 +193,6 @@ const EditOppLead = () => {
          setInvalidDestinations(invalid);
        }
  
-       // Rest of your existing data setting...
      } catch (err) {
        console.error("Error fetching opportunity data:", err);
        setError("Failed to fetch opportunity data.");
@@ -195,7 +202,7 @@ const EditOppLead = () => {
    fetchOpportunityData();
  }, [leadid, destinationOptions]);
 useEffect(() => {
-    // Check destinations when either destinations or options change
+    
     const invalid = formData.destination
       .filter(dest => 
         !destinationOptions.some(option => option.value === dest.value)
@@ -357,7 +364,7 @@ useEffect(() => {
   const handleMultiSelectChange = (selectedOptions) => {
     setFormData((prev) => ({
       ...prev,
-      destination: selectedOptions || [], // ✅ Always an array, never undefined
+      destination: selectedOptions || [], 
     }));
   };
 
@@ -417,12 +424,12 @@ useEffect(() => {
 
   const [loading, setLoading] = useState(false);
   const handleSubmitAndClose = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault(); 
     setLoading(true);
 
     try {
-      await handleSubmit(e); // Call the original handleSubmit function
-      navigate("/a-potential-leads"); // Redirect to leads list page after saving
+      await handleSubmit(e); 
+      navigate("/a-potential-leads"); 
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {

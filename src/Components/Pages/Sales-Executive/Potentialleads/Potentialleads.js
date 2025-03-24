@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit,FaDownload, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -10,6 +10,7 @@ import './PotentialLeads.css';
 import axios from 'axios';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { FontSizeContext } from "../../../Shared/Font/FontContext";
+import * as XLSX from 'xlsx';
 
 const Potentialleads = () => {
   const { authToken, userId } = useContext(AuthContext);
@@ -30,6 +31,64 @@ const Potentialleads = () => {
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]); // State for employees
 
+ const downloadExcel = () => {
+     if (!filteredData || filteredData.length === 0) {
+       alert("No data available to export.");
+       return;
+     }
+   
+     // Define the fields to export
+     const fields = [ 
+       { key: "leadid", label: "LEAD ID", width: 15 },
+       { key: "name", label: "NAME", width: 20 },
+       { key: "email", label: "EMAIL", width: 25 },
+       { key: "country_code", label: "COUNTRY CODE", width: 10 },
+       { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+       { key: "sources", label: "SOURCES", width: 20 },
+       { key: "another_name", label: "ANOTHER NAME", width: 20 },
+       { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+       { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      //  { key: "description", label: "DESCRIPTION", width: 30 },
+      //  { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      //  { key: "destination", label: "DESTINATION", width: 15 },
+      //  { key: "created_at", label: "CREATED AT", width: 20 },
+       { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+       { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+       { key: "channel", label: "CHANNEL", width: 15 },
+       { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
+       { key: "travel_destination", label: "DESTINATION", width: 15 },
+       { key: "travel_created_at", label: "CREATED AT", width: 20 },
+       { key: "start_date", label: "START DATE", width: 20 },
+       { key: "end_date", label: "END DATE", width: 20 },
+       { key: "duration", label: "DURATION", width: 15 },
+       { key: "adults_count", label: "ADULTS COUNT", width: 15 },
+       { key: "children_count", label: "CHILDREN COUNT", width: 15 },
+       { key: "child_ages", label: "CHILD AGES", width: 20 },
+       { key: "approx_budget", label: "BUDGET", width: 15 },
+       { key: "travel_description", label: "DESCRIPTION", width: 20 },
+     ];
+   
+     // Transform the data to only include specified fields
+     const exportData = filteredData.map(row => {
+       let newRow = {};
+       fields.forEach(field => {
+         newRow[field.label] = row[field.key] || ""; // Use field label as header
+       });
+       return newRow;
+     });
+   
+     // Create a new workbook and worksheet
+     const wb = XLSX.utils.book_new();
+     const ws = XLSX.utils.json_to_sheet(exportData);
+   
+     // Apply column widths
+     ws["!cols"] = fields.map(field => ({ width: field.width }));
+   
+     // Append sheet and save file
+     XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
+     const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
+     XLSX.writeFile(wb, fileName);
+   };
 
 
   const fetchLeads = async () => {
@@ -182,7 +241,7 @@ const Potentialleads = () => {
     });
   };
 
-  
+
 
   useEffect(() => {
     localStorage.setItem("searchTerm", searchTerm);
@@ -190,7 +249,7 @@ const Potentialleads = () => {
     localStorage.setItem("filterDestination", filterDestination);
     localStorage.setItem("filterOppStatus1", filterOppStatus1);
     localStorage.setItem("filterOppStatus2", filterOppStatus2);
-   
+
     localStorage.setItem("filterAssignee", filterAssignee);
     localStorage.setItem("filterStartDate", filterStartDate);
     localStorage.setItem("filterEndDate", filterEndDate);
@@ -208,7 +267,7 @@ const Potentialleads = () => {
     setFilterDestination("");
     setFilterOppStatus1("In Progress");
     setFilterOppStatus2("");
-    
+
     setFilterAssignee("");
     setFilterStartDate("");
     setFilterEndDate("");
@@ -230,8 +289,8 @@ const Potentialleads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
+          const createdAt = new Date(item.travel_created_at);
           return createdAt >= start && createdAt <= end;
         }
         return true;
@@ -310,7 +369,7 @@ const Potentialleads = () => {
       Header: "Opportunity Status",
       accessor: "opportunityStatus",
       Cell: ({ row }) => {
-        const { fontSize } = useContext(FontSizeContext); 
+        const { fontSize } = useContext(FontSizeContext);
         const primaryStatus = row.original.opportunity_status1;
         const secondaryStatus = row.original.opportunity_status2;
         const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
@@ -334,41 +393,57 @@ const Potentialleads = () => {
         );
       },
     },
- 
+
     {
-           Header: "Action",
-           Cell: ({ row }) => (
-             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-               <FaEdit
-                 style={{ color: "#ff9966", cursor: "pointer" }}
-                 onClick={() => handleEdit(row.original.leadid)}
-               />
-               <FaEye
-                 style={{ color: "#ff9966", cursor: "pointer" }}
-                 onClick={() => navigateToLead(row.original.leadid)}
-               />
-               <FaComment
-                 style={{ color: "#ff9966", cursor: "pointer" }}
-                 onClick={() => {
-                   navigate(`/opportunity-comments/${row.original.leadid}`);
-                 }}
-               />
-             </div>
-           ),
-         },
-        
+      Header: "Action",
+      Cell: ({ row }) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <FaEdit
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => handleEdit(row.original.leadid)}
+          />
+          <FaEye
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => navigateToLead(row.original.leadid)}
+          />
+          <FaComment
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => {
+              navigate(`/opportunity-comments/${row.original.leadid}`);
+            }}
+          />
+        </div>
+      ),
+    },
+
   ], [dropdownOptions]);
 
   const uniqueDestinations = useMemo(() => {
-    // Normalize the destinations by trimming spaces and converting to lowercase
-    const normalizedDestinations = data.map(item => item.travel_destination.trim().toLowerCase());
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
 
-    // Use a Set to get unique values, then convert back to the original format
-    const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-
-    // Map back to the original format (if needed)
-    return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
   }, [data]);
+
+  // const uniqueDestinations = useMemo(() => {
+  //   if (!data || !Array.isArray(data)) return []; // Ensure data is valid
+
+  //   // Normalize and filter out invalid values
+  //   const normalizedDestinations = data
+  //     .map(item => item.travel_destination?.trim().toLowerCase()) // Use optional chaining (?.)
+  //     .filter(Boolean); // Remove null, undefined, and empty values
+
+  //   // Use a Set to get unique values, then convert back to the original format
+  //   const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
+
+  //   // Capitalize the first letter
+  //   return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
+  // }, [data]);
 
   return (
     <div className="salesOpportunitycontainer">
@@ -379,6 +454,8 @@ const Potentialleads = () => {
             <Col className="d-flex justify-content-between align-items-center fixed">
               <h3>Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>}
+              <button className="btn btn-success" onClick={downloadExcel}>
+              <FaDownload /> Download Excel</button>
             </Col>
           </Row>
           <Row className="mb-3 align-items-center">
@@ -406,7 +483,7 @@ const Potentialleads = () => {
               )}
             </Col>
             <Col md={6} className="d-flex justify-content-end">
-                    <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>
@@ -433,7 +510,6 @@ const Potentialleads = () => {
                 ))}
               </select>
             </Col>
-            
           </Row>
           {data.length == 0 ? (
             <div>No data available</div>

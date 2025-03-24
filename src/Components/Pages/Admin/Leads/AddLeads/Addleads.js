@@ -489,11 +489,11 @@ const DynamicForm = () => {
   };
 
   return (
-    <div className="salesViewLeadsContainer" >
+    <div className="salesViewLeadsContainer">
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="addleads-form-container">
-          <h2 className="addleads-form-header"style={{ "--theme-color": themeColor }}>Add Leads</h2>
+        <h2 className="addleads-form-header"style={{ "--theme-color": themeColor }}>Add Leads</h2>
           {error && <div className="alert alert-danger">{error}</div>}
           {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
           <form onSubmit={(e) => handleSubmit(e, "save")} className="addleads-form">

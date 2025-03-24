@@ -126,8 +126,8 @@ const SalesCustomer = () => {
   }, [selectedTag, authToken]);
 
   const handleDeleteCustomer = async (customerId) => {
-
-
+    // const confirmDelete = window.confirm("Are you sure you want to delete this Customer?");
+    // if (!confirmDelete) return;
     try {
       const response = await axios.delete(`${baseURL}/api/customers/${customerId}`);
       setMessage(response.data.message);
@@ -143,17 +143,25 @@ const SalesCustomer = () => {
     }
   };
 
+  const navigateToLead = (customerId) => {
+    navigate(`/m-customerdetails/${customerId}`) 
+  };
 
-  const navigateToLead = (id) => {
-    navigate(`/m-customerdetails/${id}`, {
-      state: { id: id },
-    });
+  const navigateToEditLead = (customerId) => {
+    navigate(`/m-editcustomerdetails/${customerId}`)
   };
-  const navigateToEditLead = (id) => {
-    navigate(`/m-editcustomerdetails/${id}`, {
-      state: { id: id },
-    });
-  };
+
+  // const navigateToLead = (id) => {
+  //   navigate(`/m-customerdetails/${id}`, {
+  //     state: { id: id }, 
+  //   });
+  // };
+
+  // const navigateToEditLead = (id) => {
+  //   navigate(`/m-editcustomerdetails/${id}`, {
+  //     state: { id: id },
+  //   });
+  // };
 
 
 
@@ -248,10 +256,10 @@ const SalesCustomer = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToLead(row.original.id)}
             />
-            <FaTrash
+            {/* <FaTrash
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleDeleteCustomer(row.original.id)}
-            />
+            /> */}
             <FaEdit
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToEditLead(row.original.id)}

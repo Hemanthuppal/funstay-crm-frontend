@@ -1,17 +1,20 @@
-import React, { useState, useEffect,useContext } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+
+import React, { useState, useEffect, useContext } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
 import "../Potentialleads/OppDetails/LeadDetails.css";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
-import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa"; // Import FontAwesome icons
-import { Form, Dropdown, Button } from "react-bootstrap"; // Import Bootstrap components
+import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
+import { Form, Dropdown, Button } from "react-bootstrap";
 import { baseURL } from "../../../Apiservices/Api";
+import { AuthContext } from '../../../AuthContext/AuthContext';
 import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 const LeadOppView = () => {
         const [collapsed, setCollapsed] = useState(false);
         const [customer, setCustomer] = useState(null);
+         const { authToken, userId } = useContext(AuthContext);
         const { themeColor } = useContext(ThemeContext);
         const [travelOpportunity, setTravelOpportunity] = useState([]);
         const [loading, setLoading] = useState(true);
@@ -21,71 +24,91 @@ const LeadOppView = () => {
         const [activeKey, setActiveKey] = useState("0");
         const location = useLocation();
         const navigate = useNavigate();
-        const customerId = location.state?.id || null; // Ensure customerId is valid
+        // const customerId = location.state?.id || null; // Ensure customerId is valid
+        const { customerId } = useParams();
         const [message, setMessage] = useState('');
-        console.log("customerId=", customerId);
-        const copyToClipboard = (text) => {
-                navigator.clipboard.writeText(text).then(() => {
-                        setMessage("Copied to clipboard!");
-                        setTimeout(() => setMessage(""), 1000);
-                }).catch(err => {
-                        console.error('Failed to copy: ', err);
-                });
-        };
 
-        const fetchCustomerDetails = async (id) => {
-                try {
-                        const response = await axios.get(`${baseURL}/api/customers/${id}`);
-                        console.log("API Response for Customer:", response.data);
+    console.log("customerId=", customerId, "userId=", userId);
 
-                        // Ensure correct state update
-                        if (response.data && typeof response.data === "object") {
-                                setCustomer(response.data.customer || response.data);
-                        } else {
-                                throw new Error("Invalid API response structure");
-                        }
-                } catch (err) {
-                        console.error("Error fetching customer details:", err);
-                        setError("Failed to fetch customer details");
-                } finally {
-                        setLoading(false);
-                }
-        };
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setMessage("Copied to clipboard!");
+            setTimeout(() => setMessage(""), 1000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    };
 
-        const fetchopportunityDetails = async (id) => {
-                try {
-                        const response = await axios.get(`${baseURL}/api/travel-opportunities/${id}`);
-                        const opportunities = response.data;
+    const validateCustomerAccess = async (customerId, userId) => {
+        try {
+            const response = await axios.get(`${baseURL}/api/sales-customers/${customerId}/${userId}`);
+            return response.status === 200;
+        } catch (error) {
+            console.error("Validation failed:", error);
+            return false;
+        }
+    };
 
-                        // Fetch comments for each travel opportunity
-                        const opportunitiesWithComments = await Promise.all(
-                                opportunities.map(async (trip) => {
-                                        const commentsResponse = await axios.get(`${baseURL}/comments/${trip.leadid}`);
-                                        return {
-                                                ...trip,
-                                                comments: commentsResponse.data, // Assuming the API returns an array of comments
-                                        };
-                                })
-                        );
+    const fetchCustomerDetails = async (id) => {
+        try {
+            const response = await axios.get(`${baseURL}/api/customers/${id}`);
+            console.log("API Response for Customer:", response.data);
 
-                        setTravelOpportunity(opportunitiesWithComments);
-                        console.log("TravelOpportunity with Comments=", opportunitiesWithComments);
-                } catch (err) {
-                        setTravelError("Failed to fetch TravelOpportunity details");
-                } finally {
-                        setTravelLoading(false);
-                }
-        };
+            if (response.data && typeof response.data === "object") {
+                setCustomer(response.data.customer || response.data);
+            } else {
+                throw new Error("Invalid API response structure");
+            }
+        } catch (err) {
+            console.error("Error fetching customer details:", err);
+            setError("Failed to fetch customer details");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        useEffect(() => {
-                if (!customerId) {
-                        console.error("No customer ID found! Redirecting...");
+    const fetchopportunityDetails = async (id) => {
+        try {
+            const response = await axios.get(`${baseURL}/api/travel-opportunities/${id}`);
+            const opportunities = response.data;
 
-                        return;
-                }
-                fetchCustomerDetails(customerId);
-                fetchopportunityDetails(customerId)
-        }, [customerId]);
+            const opportunitiesWithComments = await Promise.all(
+                opportunities.map(async (trip) => {
+                    const commentsResponse = await axios.get(`${baseURL}/comments/${trip.leadid}`);
+                    return {
+                        ...trip,
+                        comments: commentsResponse.data,
+                    };
+                })
+            );
+
+            setTravelOpportunity(opportunitiesWithComments);
+            console.log("TravelOpportunity with Comments=", opportunitiesWithComments);
+        } catch (err) {
+            setTravelError("Failed to fetch TravelOpportunity details");
+        } finally {
+            setTravelLoading(false);
+        }
+    }; 
+
+    useEffect(() => {
+        if (!customerId || !userId) {
+            console.error("No customer ID or user ID found! Redirecting...");
+            navigate("/not-found");
+            return;
+        }
+
+        (async () => {
+            const isValid = await validateCustomerAccess(customerId, userId);
+            if (!isValid) {
+                navigate("/not-found");
+                return;
+            }
+
+            fetchCustomerDetails(customerId);
+            fetchopportunityDetails(customerId);
+        })();
+    }, [customerId, userId, navigate]);
 
         return (
                 <div className="salesViewLeadsContainer">

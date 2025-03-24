@@ -129,16 +129,25 @@ const SalesCustomer = () => {
     });
   };
 
-  const navigateToLead = (id) => {
-    navigate(`/customerdetails/${id}`, {
-      state: { id: id },
-    });
-  };
-  const navigateToEditLead = (id) => {
-    navigate(`/editcustomerdetails/${id}`, {
-      state: { id: id },
-    });
-  };
+  // const navigateToLead = (id) => {
+  //   navigate(`/customerdetails/${id}`, {
+  //     state: { id: id },
+  //   });
+  // };
+
+  const navigateToLead = (customerId) => {
+    navigate(`/customerdetails/${customerId}`);
+};
+
+  // const navigateToEditLead = (id) => {
+  //   navigate(`/editcustomerdetails/${id}`, {
+  //     state: { id: id },
+  //   });
+  // };
+  const navigateToEditLead = (customerId) => {
+    navigate(`/editcustomerdetails/${customerId}`);
+   };
+
 
 
   // Columns for DataTable component

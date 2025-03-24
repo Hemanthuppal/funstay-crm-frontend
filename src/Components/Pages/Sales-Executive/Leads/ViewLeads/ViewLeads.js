@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayoutOpp";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
+import { FaEdit,FaDownload, FaTrash, FaEye, FaUserPlus, FaComment, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
 import { Button, Row, Col } from "react-bootstrap";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "./ViewLeads.css";
@@ -11,6 +11,7 @@ import { io } from 'socket.io-client';
 import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { webhookUrl } from "../../../../Apiservices/Api";
 import { FontSizeContext } from "../../../../Shared/Font/FontContext";
+import * as XLSX from 'xlsx';
 
 const ViewLeads = () => {
   const { authToken, userId } = useContext(AuthContext);
@@ -32,8 +33,64 @@ const ViewLeads = () => {
   const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedstart-1") || "");
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliesend-1") || "");
 
+  // const downloadExcel = () => {
+  //   const wb = XLSX.utils.book_new();
+  //   const ws = XLSX.utils.json_to_sheet(filteredData);
+  //   XLSX.utils.book_append_sheet(wb, ws, "Filtered Leads");
+  //   const fileName = `Filtered_Leads_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  //   XLSX.writeFile(wb, fileName);
+  // };
 
-
+  const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+  
+    // Define the fields to export
+    const fields = [ 
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      { key: "description", label: "DESCRIPTION", width: 30 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "destination", label: "DESTINATION", width: 15 },
+      { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primaryStatus", label: "PRIMARY STATUS", width: 15 },
+      { key: "secondaryStatus", label: "SECONDARY STATUS", width: 15 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 }
+    ];
+  
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+  
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+  
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+  
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Leads");
+    const fileName = `Filtered_Leads_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+  
 
   const generateWhatsAppLink = (phoneNumber) => {
     return `https://wa.me/${phoneNumber}`;
@@ -207,6 +264,9 @@ const ViewLeads = () => {
     appliedFilterStartDate, appliedFilterEndDate
   ]);
 
+
+  
+
   const clearFilters = () => {
     setSearchTerm("");
     setFilterStatus("");
@@ -242,7 +302,7 @@ const ViewLeads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
           const createdAt = new Date(item.created_at);
           return createdAt >= start && createdAt <= end;
         }
@@ -531,6 +591,10 @@ const ViewLeads = () => {
                     </option>
                   ))}
                 </select>
+              </Col>
+              <Col md={3}>
+              <button className="btn btn-success" onClick={downloadExcel}>
+                <FaDownload /> Download Excel</button>
               </Col>
             </Row>
             <DataTable columns={columns} data={filteredData} />

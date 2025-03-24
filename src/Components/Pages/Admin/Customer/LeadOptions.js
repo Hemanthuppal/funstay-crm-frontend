@@ -1,17 +1,19 @@
-import React, { useState, useEffect ,useContext} from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+
+import React, { useState, useEffect, useContext } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion } from "react-bootstrap";
 import "../Potentialleads/LeadDetails.css";
 import Navbar from "../../../Shared/Navbar/Navbar";
 import { FaPhone, FaEnvelope, FaCopy } from "react-icons/fa";
-
+import { AuthContext } from '../../../AuthContext/AuthContext';
 import { baseURL } from "../../../Apiservices/Api";
 import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 
 
 const LeadOppView = () => {
         const [collapsed, setCollapsed] = useState(false);
+        const { authToken, userId } = useContext(AuthContext);
         const [customer, setCustomer] = useState(null);
         const [travelOpportunity, setTravelOpportunity] = useState([]);
         const [loading, setLoading] = useState(true);
@@ -23,7 +25,8 @@ const LeadOppView = () => {
         const [activeKey, setActiveKey] = useState("0");
         const location = useLocation();
         const navigate = useNavigate();
-        const customerId = location.state?.id || null;
+        // const customerId = location.state?.id || null;
+        const { customerId } = useParams();
         console.log("customerId=", customerId);
         const [message, setMessage] = useState('');
 
@@ -49,6 +52,7 @@ const LeadOppView = () => {
                         }
                 } catch (err) {
                         console.error("Error fetching customer details:", err);
+                        navigate('/not-found');
                         setError("Failed to fetch customer details");
                 } finally {
                         setLoading(false);
@@ -83,7 +87,7 @@ const LeadOppView = () => {
         useEffect(() => {
                 if (!customerId) {
                         console.error("No customer ID found! Redirecting...");
-
+                        navigate('/not-found');
                         return;
                 }
                 fetchCustomerDetails(customerId);

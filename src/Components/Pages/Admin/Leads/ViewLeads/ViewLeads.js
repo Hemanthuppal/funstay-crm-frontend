@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from './../../../../Layout/Table/TableLayoutOpp';
-import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus, FaCopy, FaCalendarAlt, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaDownload, FaComment, FaUserPlus, FaCopy, FaCalendarAlt, FaTimes } from 'react-icons/fa';
 import { Button, Row, Col, Modal } from 'react-bootstrap';
 import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 import { AuthContext } from "../../../../AuthContext/AuthContext";
 import { FontSizeContext } from '../../../../Shared/Font/FontContext';
-
+import * as XLSX from 'xlsx';
 import { HiUserGroup } from "react-icons/hi"; // Import icon
 
 import './ViewLeads.css'
@@ -38,6 +38,57 @@ const AdminViewLeads = () => {
   const [showDateRange, setShowDateRange] = useState(false);
 
   const [data, setData] = useState([]); // Initialize to an empty array
+
+  const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Define the fields to export
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      { key: "description", label: "DESCRIPTION", width: 30 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "destination", label: "DESTINATION", width: 15 },
+      { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primaryStatus", label: "PRIMARY STATUS", width: 15 },
+      { key: "secondaryStatus", label: "SECONDARY STATUS", width: 15 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 }
+    ];
+
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Leads");
+    const fileName = `Filtered_Leads_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
   useEffect(() => {
     setPageIndex(0);
   }, [searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2, filterManager, filterAssignee, appliedFilterStartDate, appliedFilterEndDate]);
@@ -68,23 +119,26 @@ const AdminViewLeads = () => {
     });
   };
   const handleArchive = async (leadid) => {
+    const confirmDelete = window.confirm("Are you sure you want to archive this lead?");
+    if (!confirmDelete) return; // If the user cancels, exit the function
+
     try {
       const response = await fetch(`${baseURL}/api/archiveByLeadId/${leadid}`, {
-        method: 'PUT',
+        method: "PUT",
       });
 
       if (response.ok) {
         setData((prevData) => prevData.filter((item) => item.leadid !== leadid)); // Remove from active list
-        setMessage('The lead has been archived successfully.');
+        setMessage("The lead has been archived successfully.");
       } else {
-        setMessage('Failed to archive the lead. Please try again later.');
+        setMessage("Failed to archive the lead. Please try again later.");
       }
-      setTimeout(() => setMessage(""), 1000);
     } catch (error) {
       console.error("Error:", error);
-      setMessage('An unexpected error occurred while archiving the lead.');
-      setTimeout(() => setMessage(""), 1000);
+      setMessage("An unexpected error occurred while archiving the lead.");
     }
+
+    setTimeout(() => setMessage(""), 1000);
   };
 
   const handleDelete = async (leadid) => {
@@ -214,7 +268,7 @@ const AdminViewLeads = () => {
     fetchManager();
   }, []);
 
-  const handleAssignToChange = async (assignee, leadid, managerid,status) => {
+  const handleAssignToChange = async (assignee, leadid, managerid, status) => {
     try {
       const response = await fetch(`${baseURL}/update-assignee`, {
         method: 'PUT',
@@ -364,7 +418,7 @@ const AdminViewLeads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
           const createdAt = new Date(item.created_at);
           return createdAt >= start && createdAt <= end;
         }
@@ -375,7 +429,7 @@ const AdminViewLeads = () => {
     });
   }, [searchTerm, filterOppStatus1, filterOppStatus2, filterManager, filterAssignee, filterDestination, appliedFilterStartDate, appliedFilterEndDate, data]);
 
-  const handleAssignLead = async (leadid, associateObj,status) => {
+  const handleAssignLead = async (leadid, associateObj, status) => {
     // Validate that the associate object contains an id and name.
     if (!associateObj?.id || !associateObj?.name) {
       setMessage("Please select a valid associate.");
@@ -499,7 +553,7 @@ const AdminViewLeads = () => {
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
 
           return (
-            <div className="d-flex align-items-center"style={{ fontSize: fontSize }}
+            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}
             >
               <select
                 value={primaryStatus}
@@ -579,7 +633,7 @@ const AdminViewLeads = () => {
                 // Call the new API for self assignment
                 await handleSelfAssign(row.original.leadid);
               } else {
-                handleAssignToChange(assignee, row.original.leadid, managerid,row.original.status,);
+                handleAssignToChange(assignee, row.original.leadid, managerid, row.original.status,);
               }
 
               // await handleAssignToChange(assignee, row.original.leadid, managerid);
@@ -599,8 +653,8 @@ const AdminViewLeads = () => {
               <select
                 value={selectedManager}
                 onChange={handleChange}
-                className="form-select me-2" 
-                style={{ maxWidth: "150px",fontSize: fontSize }}
+                className="form-select me-2"
+                style={{ maxWidth: "150px", fontSize: fontSize }}
               >
                 <option value="">Select Assignee</option>
                 <option value="self">Self</option>
@@ -628,24 +682,24 @@ const AdminViewLeads = () => {
           const initialAssociateValue = row.original.assignedSalesId
             ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
             : "";
-      
+
           const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
           const [showIcon, setShowIcon] = useState(false);
-      
+
           const managerId = row.original.managerid;
           const associates = managerId ? associatesByManager[managerId] || [] : [];
-      
+
           useEffect(() => {
             setSelectedAssociate(initialAssociateValue);
             setShowIcon(false);
           }, [row.original.assignedSalesId, row.original.assignedSalesName]);
-      
+
           const handleChange = (e) => {
             const newValue = e.target.value;
             setSelectedAssociate(newValue);
             setShowIcon(newValue !== initialAssociateValue);
           };
-      
+
           const handleAssignClick = async () => {
             if (selectedAssociate) {
               const [associateId, associateName] = selectedAssociate.split("|");
@@ -654,14 +708,14 @@ const AdminViewLeads = () => {
               setShowIcon(false);
             }
           };
-      
+
           return (
-            <div className="d-flex align-items-center"style={{fontSize: fontSize}} >
+            <div className="d-flex align-items-center" style={{ fontSize: fontSize }} >
               <select
                 value={selectedAssociate}
                 onChange={handleChange}
-                className="form-select me-2" style={{fontSize: fontSize}}
-               
+                className="form-select me-2" style={{ fontSize: fontSize }}
+
               >
                 <option value="">Select Associate</option>
                 {associates.map((associate, index) => (
@@ -803,8 +857,11 @@ const AdminViewLeads = () => {
                   </div>
                 )}
               </Col>
-              <Col md={6} className="d-flex justify-content-end">
+              <Col md={3} className="d-flex justify-content-end">
                 <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <Col md={3} className="d-flex justify-content-end">
+                <button className="btn btn-success" onClick={downloadExcel}>
+                  <FaDownload /> Download Excel</button></Col>
             </Row>
             <Row className="mb-3">
               <Col md={3}>

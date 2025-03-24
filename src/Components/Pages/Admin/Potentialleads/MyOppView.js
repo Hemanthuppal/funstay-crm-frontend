@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Row, Col, Card, Button, Form } from 'react-bootstrap';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import './LeadDetails.css';
 import Navbar from '../../../Shared/Navbar/Navbar';
 import { baseURL } from "../../../Apiservices/Api";
@@ -13,7 +13,8 @@ const LeadOppView = () => {
     const [lead, setLead] = useState(null);
     const location = useLocation();
     // const { themeColor } = useContext(ThemeContext);
-    const { leadid } = location.state;
+    // const { leadid } = location.state;
+    const { leadid } = useParams();
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [newComment, setNewComment] = useState('');
@@ -91,6 +92,7 @@ const [tagChanged, setTagChanged] = useState(false);
                 }
             } catch (error) {
                 console.error('Error fetching lead details:', error);
+                navigate('/not-found');
             }
         };
 

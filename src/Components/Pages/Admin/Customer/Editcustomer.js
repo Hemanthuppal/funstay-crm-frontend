@@ -1,5 +1,6 @@
-import React, { useState, useEffect ,useContext} from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+
+import React, { useState, useEffect, useContext } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Card, Accordion, Form, Button } from "react-bootstrap";
 import "../Potentialleads/LeadDetails.css";
@@ -8,6 +9,7 @@ import { FaPhone, FaEnvelope } from "react-icons/fa";
 import { baseURL } from "../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
+
 const EditLeadOppView = () => {
     const [message, setMessage] = useState(null);
     const [collapsed, setCollapsed] = useState(false);
@@ -24,8 +26,8 @@ const EditLeadOppView = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [originalOpportunities, setOriginalOpportunities] = useState({});
-    const customerId = location.state?.id || null;
-
+    // const customerId = location.state?.id || null;
+     const { customerId } = useParams();
     const [countryCodeOptions, setCountryCodeOptions] = useState([]);
 
 
@@ -51,6 +53,7 @@ const EditLeadOppView = () => {
         } catch (err) {
             console.error("Error fetching customer details:", err);
             setError("Failed to fetch customer details");
+            navigate('/not-found');
         } finally {
             setLoading(false);
         }
@@ -88,6 +91,7 @@ const EditLeadOppView = () => {
     useEffect(() => {
         if (!customerId) {
             console.error("No customer ID found! Redirecting...");
+            navigate('/not-found');
             return;
         }
         fetchCustomerDetails(customerId);

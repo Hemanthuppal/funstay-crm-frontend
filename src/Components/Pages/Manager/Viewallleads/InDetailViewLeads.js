@@ -1,6 +1,6 @@
 import React, { useState, useEffect ,useContext} from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "./InDetailViewLeads.css";
 import axios from "axios";
@@ -11,8 +11,11 @@ import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
 const InDetailViewLeads = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // const { leadid } = location.state;
+  const { leadid } = useParams();
+
   const { themeColor } = useContext(ThemeContext);
-  const { leadid } = location.state;
+  
   const [collapsed, setCollapsed] = useState(false);
   const [formData, setFormData] = useState({
     lead_type: "",
@@ -76,6 +79,7 @@ const InDetailViewLeads = () => {
         }));
       } catch (err) {
         console.error("Error fetching lead data:", err);
+        navigate('/not-found');
         setError("Failed to fetch lead data.");
       }
     };

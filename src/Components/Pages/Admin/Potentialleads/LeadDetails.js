@@ -92,7 +92,7 @@ const LeadOppView = () => {
                 }
             } catch (error) {
                 console.error('Error fetching lead details:', error);
-                navigate('/not-found');
+               
             }
         };
 

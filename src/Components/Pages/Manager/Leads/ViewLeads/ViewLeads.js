@@ -289,7 +289,7 @@ const ViewLeads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
           const createdAt = new Date(item.created_at);
           return createdAt >= start && createdAt <= end;
         }
@@ -517,10 +517,10 @@ const ViewLeads = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleViewLeads(row.original)}
             />
-            <FaTrash
+            {/* <FaTrash
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleDelete(row.original.leadid)}
-            />
+            /> */}
             <FaUserPlus
               style={{ color: "ff9966", cursor: "pointer" }}
               onClick={() => handleAddUser(row.original)}

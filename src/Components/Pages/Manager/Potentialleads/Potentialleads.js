@@ -14,6 +14,7 @@ import { FontSizeContext } from "../../../Shared/Font/FontContext";
 
 const Potentialleads = () => { 
   const { authToken, userId,userName } = useContext(AuthContext);
+   const { fontSize } = useContext(FontSizeContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -314,8 +315,8 @@ const Potentialleads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
+          const createdAt = new Date(item.travel_created_at);
           return createdAt >= start && createdAt <= end;
         }
         return true;
@@ -448,11 +449,11 @@ const Potentialleads = () => {
                 };
             
                 return (
-                  <div className="d-flex align-items-center">
+                  <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
                     <Form.Select
                       value={selectedEmployee}
                       onChange={handleChange}
-                      className="me-2"
+                      className="me-2"  style={{ fontSize: fontSize }}
                     >
                       <option value="">Select Employee</option>
                       <option value="self">Self</option> {/* Add Self option */}
@@ -478,7 +479,7 @@ const Potentialleads = () => {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} />
           <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-          <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} />
+          {/* <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} /> */}
           <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
         </div>
       ),

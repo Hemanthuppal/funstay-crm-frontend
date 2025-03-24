@@ -247,8 +247,8 @@ const Potentialleads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
+          const createdAt = new Date(item.travel_created_at);
           return createdAt >= start && createdAt <= end;
         }
         return true;
@@ -357,7 +357,7 @@ const Potentialleads = () => {
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} />
           <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-mydetails/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-          <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} />
+          {/* <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} /> */}
           <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-myopportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
         </div>
       ),

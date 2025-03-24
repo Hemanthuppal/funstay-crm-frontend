@@ -256,10 +256,10 @@ const SalesCustomer = () => {
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToLead(row.original.id)}
             />
-            <FaTrash
+            {/* <FaTrash
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => handleDeleteCustomer(row.original.id)}
-            />
+            /> */}
             <FaEdit
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() => navigateToEditLead(row.original.id)}

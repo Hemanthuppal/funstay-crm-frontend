@@ -230,8 +230,8 @@ const Potentialleads = () => {
       const matchesDateRange = (() => {
         if (appliedFilterStartDate && appliedFilterEndDate) {
           const start = new Date(appliedFilterStartDate);
-          const end = new Date(appliedFilterEndDate);
-          const createdAt = new Date(item.created_at);
+          const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
+          const createdAt = new Date(item.travel_created_at);
           return createdAt >= start && createdAt <= end;
         }
         return true;

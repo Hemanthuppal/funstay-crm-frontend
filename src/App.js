@@ -98,6 +98,7 @@ import M_Myoppleads from "./Components/Pages/Manager/Potentialleads/MyOpp/MyOppl
 import M_Myleads from "./Components/Pages/Manager/Leads/Myleads/Myleads";
 import M_MYCreateCustomerOpportunity from "./Components/Pages/Manager/Leads/Myleads/CreateCustomerOpportinity/CreateandOpportunity"
 
+import EmailHistory from "./Components/Pages/Admin/Potentialleads/Email/Email_new";
 function App() {
     return (
         <AuthProvider>
@@ -298,7 +299,7 @@ function App() {
                 <Route path="/m-mycreate-customer-opportunity/:leadid" element={<M_MYCreateCustomerOpportunity />} />
                 <Route path="/m-myopportunity-comments/:leadid" element={<M_CommentsPage />} />
 
-
+                <Route path="/email-history/:leadid" element={<EmailHistory />} />
                 </Route>
             </Routes>
 

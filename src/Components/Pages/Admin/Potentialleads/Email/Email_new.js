@@ -41,6 +41,28 @@ const EmailHistory = () => {
     setSelectedFile(event.target.files[0]);
   };
 
+  // Automatically pre-fill the reply format when the user starts composing a new email
+  useEffect(() => {
+    if (emailHistory.length > 0) {
+      const lastEmail = emailHistory[emailHistory.length - 1];
+      const replySubject = lastEmail.subject.startsWith("Re:") ? lastEmail.subject : `Re: ${lastEmail.subject}`;
+      const replyText = `
+---
+
+**${lastEmail.receiver_email}**  
+${lastEmail.text}
+
+---
+
+On ${new Date(lastEmail.created_at).toLocaleString()}, ${lastEmail.receiver_email} wrote:
+> ${lastEmail.text}
+      `;
+
+      setSubject(replySubject);
+      setText(replyText.trim()); // Trim to remove extra whitespace
+    }
+  }, [emailHistory]);
+
   const handleSendEmail = async () => {
     if (!subject || !text) {
       alert("Subject and Message are required.");
@@ -54,6 +76,13 @@ const EmailHistory = () => {
     formData.append("text", text);
     formData.append("leadid", leadid);
     formData.append("type", "sent");
+
+    // Always include reply_to_message_id of the last email in the thread
+    if (emailHistory.length > 0) {
+      const lastEmail = emailHistory[emailHistory.length - 1];
+      formData.append("reply_to_message_id", lastEmail.message_id);
+    }
+
     if (selectedFile) {
       formData.append("file", selectedFile);
     }
@@ -64,7 +93,7 @@ const EmailHistory = () => {
       setSubject("");
       setText("");
       setSelectedFile(null);
-      fetchEmailHistory(email);
+      fetchEmailHistory(email); // Refresh email history
     } catch (error) {
       console.error("Error sending email:", error);
       alert("Failed to send email.");

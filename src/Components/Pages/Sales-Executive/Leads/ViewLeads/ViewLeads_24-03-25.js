@@ -11,7 +11,7 @@ import { io } from 'socket.io-client';
 import { AuthContext } from '../../../../AuthContext/AuthContext';
 import { webhookUrl } from "../../../../Apiservices/Api";
 import { FontSizeContext } from "../../../../Shared/Font/FontContext";
-
+import * as XLSX from 'xlsx';
 
 const ViewLeads = () => {
   const { authToken, userId } = useContext(AuthContext);
@@ -34,7 +34,13 @@ const ViewLeads = () => {
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliesend-1") || "");
 
 
-
+  const downloadExcel = () => {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(filteredData);
+    XLSX.utils.book_append_sheet(wb, ws, "Leads");
+    const fileName = `Leads_${new Date().toLocaleDateString()}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
   const generateWhatsAppLink = (phoneNumber) => {
     return `https://wa.me/${phoneNumber}`;
@@ -433,6 +439,7 @@ const ViewLeads = () => {
                 <h3>Lead Details</h3>
                 {message && <div className="alert alert-info">{message}</div>}
                 <Button onClick={handleAddLead}>Add Leads</Button>
+                <Button onClick={downloadExcel}>Download Excel</Button>
               </Col>
             </Row>
             <Row className="mb-3 align-items-center">

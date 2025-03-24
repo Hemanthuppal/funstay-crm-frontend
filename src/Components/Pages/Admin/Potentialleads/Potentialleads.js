@@ -495,7 +495,6 @@ const handleAssignLead = async (leadid, associateObj,status) => {
         const [selectedFile, setSelectedFile] = useState(null);
         const [emailSent, setEmailSent] = useState(row.original.email_sent);
     
-       
         const handleFileChange = (event) => {
           setSelectedFile(event.target.files[0]);
         };
@@ -524,21 +523,23 @@ const handleAssignLead = async (leadid, associateObj,status) => {
           }
         };
     
-        const handleViewHistory = () => {
+        const handleNavigate = () => {
           navigate(`/email-history/${row.original.leadid}`, { state: { email: row.original.email } });
         };
-        
     
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "5px", flexWrap: "nowrap" }}>
-            {emailSent ? (
-              <button
-                onClick={handleViewHistory}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: "5px" }}
-              >
-                <FaHistory size={16} color="blue" />  
-              </button>
-            ) : (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", flexWrap: "nowrap" }}>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavigate();
+              }}
+              style={{ textDecoration: "underline", color: "blue", cursor: "pointer" }}
+            >
+              {row.original.quotation_id}
+            </a>
+            {!emailSent && (
               <>
                 <input type="file" onChange={handleFileChange} style={{ width: "100px" }} />
                 <button
@@ -552,7 +553,10 @@ const handleAssignLead = async (leadid, associateObj,status) => {
           </div>
         );
       },
-    },  
+    },
+    ,
+    
+    
     {
                Header: "Manager ",
                Cell: ({ row }) => {

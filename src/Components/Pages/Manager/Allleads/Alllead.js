@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from '../../../Layout/Table/TableLayout';
-import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus, FaCopy } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus, FaDownload, FaCopy } from 'react-icons/fa';
 import { Button, Row, Col, Modal } from 'react-bootstrap';
 import Navbar from '../../../Shared/ManagerNavbar/Navbar';
 import { baseURL, webhookUrl } from '../../../Apiservices/Api';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 import './Alllead.css'
 
@@ -13,10 +15,23 @@ const AdminViewLeads = () => {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState(null);
-
-
   const [data, setData] = useState([]);
 
+  // Function to export data to Excel
+  const downloadExcel = () => {
+    if (data.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const dataBlob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    saveAs(dataBlob, "LeadsData.xlsx");
+  };
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -36,10 +51,6 @@ const AdminViewLeads = () => {
   };
 
 
-
-
-
-
   const dropdownOptions = {
     primary: ["New", "No Response", "Duplicate", "False Lead", "Lost"],
     secondary: {
@@ -50,7 +61,6 @@ const AdminViewLeads = () => {
       Lost: ["Plan Cancelled", "Plan Delayed", "Already Booked", "Others"],
     },
   };
-
 
 
 
@@ -95,15 +105,6 @@ const AdminViewLeads = () => {
 
     fetchManagers();
   }, []);
-
-
-
-
-
-
-
-
-
 
   const columns = useMemo(
     () => [
@@ -205,8 +206,6 @@ const AdminViewLeads = () => {
     [dropdownOptions, managers]
   );
 
-
-
   return (
     <div className="admin-ViewLeadcontainer">
       <Navbar onToggleSidebar={setCollapsed} />
@@ -218,7 +217,11 @@ const AdminViewLeads = () => {
                 <h3>Lead Details</h3>
                 {message && <div className="alert alert-info">{message}</div>}
                 {/* <Button onClick={handleAddLead}>Add Leads</Button> */}
+                <button className="btn btn-success" onClick={downloadExcel}>
+                  <FaDownload /> Download Excel</button>
               </Col>
+            </Row>
+            <Row>
             </Row>
             <DataTable columns={columns} data={data} />
           </div>

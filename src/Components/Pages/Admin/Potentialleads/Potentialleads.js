@@ -2,16 +2,17 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Navbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy,FaHistory,FaSave } from "react-icons/fa";
+import { FaEdit, FaEye, FaDownload, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy, FaHistory, FaSave } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
 import "./PotentialLeads.css";
 import axios from "axios";
 import { AuthContext } from "../../../AuthContext/AuthContext";
-import { HiOutlinePaperClip , HiUserGroup } from "react-icons/hi";
+import { HiOutlinePaperClip, HiUserGroup } from "react-icons/hi";
 import { FontSizeContext } from '../../../Shared/Font/FontContext';
 // import { HiUserGroup } from "react-icons/hi"; 
+import * as XLSX from 'xlsx';
 
 const Potentialleads = () => {
   const { authToken, userId } = useContext(AuthContext);
@@ -34,6 +35,66 @@ const Potentialleads = () => {
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
   const [managers, setManagers] = useState([]);
+
+  const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Define the fields to export
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      //  { key: "description", label: "DESCRIPTION", width: 30 },
+      //  { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      //  { key: "destination", label: "DESTINATION", width: 15 },
+      //  { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 },
+      { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "travel_destination", label: "DESTINATION", width: 15 },
+      { key: "travel_created_at", label: "CREATED AT", width: 20 },
+      { key: "start_date", label: "START DATE", width: 20 },
+      { key: "end_date", label: "END DATE", width: 20 },
+      { key: "duration", label: "DURATION", width: 15 },
+      { key: "adults_count", label: "ADULTS COUNT", width: 15 },
+      { key: "children_count", label: "CHILDREN COUNT", width: 15 },
+      { key: "child_ages", label: "CHILD AGES", width: 20 },
+      { key: "approx_budget", label: "BUDGET", width: 15 },
+      { key: "travel_description", label: "DESCRIPTION", width: 20 },
+    ];
+
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
+    const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
@@ -70,88 +131,88 @@ const Potentialleads = () => {
     fetchManagers();
   }, [userId]);
 
-   const handleAssignToChange = async (assignee, leadid, managerid,status) => {
-        try {
-          const response = await fetch(`${baseURL}/update-assignee`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              leadid,
-              assignee,
-              managerid,
-              status,
-            }),
-          });
-          const data = await response.json();
-          if (response.ok) {
-            setMessage(data.message);
-            setTimeout(() => setMessage(""), 1000);
-    
-            setData((prevData) =>
-              prevData.map((lead) =>
-                lead.leadid == leadid
-                  ? { ...lead, assign_to_manager: assignee }
-                  : lead
-              )
-            );
-          } else {
-            setMessage(data.message);
-          }
-        } catch (error) {
-          console.error('Error updating assignee:', error);
-        }
-      };
-  
-  
-      useEffect(() => {
-        const fetchAssociatesForManagers = async () => {
-          const associatesData = {};
-          for (const manager of managers) {
-            try {
-              const response = await fetch(`${baseURL}/associates/${manager.id}`);
-              const data = await response.json();
-              associatesData[manager.id] = data;
-            } catch (error) {
-              console.error("Error fetching associates: ", error);
-            }
-          }
-          setAssociatesByManager(associatesData);
-        };
-      
-        if (managers.length > 0) {
-          fetchAssociatesForManagers();
-        }
-      }, [managers]);
+  const handleAssignToChange = async (assignee, leadid, managerid, status) => {
+    try {
+      const response = await fetch(`${baseURL}/update-assignee`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          leadid,
+          assignee,
+          managerid,
+          status,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setMessage(data.message);
+        setTimeout(() => setMessage(""), 1000);
 
-    const handleSelfAssign = async (leadid) => {
+        setData((prevData) =>
+          prevData.map((lead) =>
+            lead.leadid == leadid
+              ? { ...lead, assign_to_manager: assignee }
+              : lead
+          )
+        );
+      } else {
+        setMessage(data.message);
+      }
+    } catch (error) {
+      console.error('Error updating assignee:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    const fetchAssociatesForManagers = async () => {
+      const associatesData = {};
+      for (const manager of managers) {
         try {
-          const response = await axios.post(`${baseURL}/api/assign-admin`, { leadid });
-      
-          if (response.status == 200) {
-            setMessage(response.data.message);
-            setTimeout(() => setMessage(""), 1000);
-            
-      
-            // Update the local state to reflect the assignment
-            setData((prevData) =>
-              prevData
-                .map((lead) =>
-                  lead.leadid == leadid ? { ...lead, adminAssign: "admin" } : lead
-                )
-                .filter((lead) => lead.adminAssign !== 'admin') // Remove rows where adminAssign is not "admin"
-            );
-          } else {
-            setMessage("Failed to assign the lead. Please try again.");
-            setTimeout(() => setMessage(""), 1000);
-          }
+          const response = await fetch(`${baseURL}/associates/${manager.id}`);
+          const data = await response.json();
+          associatesData[manager.id] = data;
         } catch (error) {
-          console.error("Error assigning lead:", error);
-          setMessage("An error occurred while assigning the lead. Please try again.");
-          setTimeout(() => setMessage(""), 1000);
+          console.error("Error fetching associates: ", error);
         }
-      };
+      }
+      setAssociatesByManager(associatesData);
+    };
+
+    if (managers.length > 0) {
+      fetchAssociatesForManagers();
+    }
+  }, [managers]);
+
+  const handleSelfAssign = async (leadid) => {
+    try {
+      const response = await axios.post(`${baseURL}/api/assign-admin`, { leadid });
+
+      if (response.status == 200) {
+        setMessage(response.data.message);
+        setTimeout(() => setMessage(""), 1000);
+
+
+        // Update the local state to reflect the assignment
+        setData((prevData) =>
+          prevData
+            .map((lead) =>
+              lead.leadid == leadid ? { ...lead, adminAssign: "admin" } : lead
+            )
+            .filter((lead) => lead.adminAssign !== 'admin') // Remove rows where adminAssign is not "admin"
+        );
+      } else {
+        setMessage("Failed to assign the lead. Please try again.");
+        setTimeout(() => setMessage(""), 1000);
+      }
+    } catch (error) {
+      console.error("Error assigning lead:", error);
+      setMessage("An error occurred while assigning the lead. Please try again.");
+      setTimeout(() => setMessage(""), 1000);
+    }
+  };
 
   const dropdownOptions = {
     primary: ["In Progress", "Confirmed", "Lost", "Duplicate"],
@@ -332,8 +393,8 @@ const Potentialleads = () => {
       const matchesStatus = !filterStatus || (item.status && item.status.toLowerCase() == filterStatus.toLowerCase());
       const matchesDestination = !filterDestination || (item.travel_destination && item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
       const actualPrimaryStatus = item.opportunity_status1 ? item.opportunity_status1.toLowerCase() : "In Progress";
-        const matchesOppStatus1 =
-          !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
+      const matchesOppStatus1 =
+        !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesOppStatus2 = !filterOppStatus2 || (item.opportunity_status2 && item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
       const matchesManager = !filterManager || (item.assign_to_manager && item.assign_to_manager.toLowerCase() == filterManager.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
@@ -342,10 +403,10 @@ const Potentialleads = () => {
           const start = new Date(appliedFilterStartDate).getTime();
           const end = new Date(appliedFilterEndDate).setHours(23, 59, 59, 999);
           const createdAt = new Date(item.travel_created_at).getTime();
-        
+
           return createdAt >= start && createdAt <= end;
         }
-        
+
         return true;
       })();
 
@@ -353,7 +414,7 @@ const Potentialleads = () => {
     });
   }, [searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2, filterManager, filterAssignee, appliedFilterStartDate, appliedFilterEndDate, data]);
 
-const handleAssignLead = async (leadid, associateObj,status) => {
+  const handleAssignLead = async (leadid, associateObj, status) => {
     // Validate that the associate object contains an id and name.
     if (!associateObj?.id || !associateObj?.name) {
       setMessage("Please select a valid associate.");
@@ -467,14 +528,14 @@ const handleAssignLead = async (leadid, associateObj,status) => {
         const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
 
         return (
-          <div className="d-flex align-items-center gap-2"   style={{ fontSize: fontSize }}>
-            <select value={primaryStatus} onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)} className="form-select"style={{ fontSize: fontSize }} >
+          <div className="d-flex align-items-center gap-2" style={{ fontSize: fontSize }}>
+            <select value={primaryStatus} onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)} className="form-select" style={{ fontSize: fontSize }} >
               <option value="">Select Primary Status</option>
               {dropdownOptions.primary.map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
-            <select value={secondaryStatus} onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)} className="form-select" disabled={isSecondaryDisabled}style={{ fontSize: fontSize }}>
+            <select value={secondaryStatus} onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)} className="form-select" disabled={isSecondaryDisabled} style={{ fontSize: fontSize }}>
               <option value="">Select Secondary Status</option>
               {secondaryOptions.map((option) => (
                 <option key={option} value={option}>{option}</option>
@@ -494,41 +555,41 @@ const handleAssignLead = async (leadid, associateObj,status) => {
         const navigate = useNavigate();
         const [selectedFile, setSelectedFile] = useState(null);
         const [emailSent, setEmailSent] = useState(row.original.email_sent);
-    
-       
+
+
         const handleFileChange = (event) => {
           setSelectedFile(event.target.files[0]);
         };
-    
+
         const handleUpload = async () => {
           if (!selectedFile) {
             alert("Please choose a file before saving.");
             return;
           }
-    
+
           const formData = new FormData();
           formData.append("file", selectedFile);
           formData.append("email", row.original.email);
           formData.append("leadid", row.original.leadid);
-    
+
           try {
             await axios.post(`${baseURL}/api/upload-quotation`, formData);
             await axios.post(`${baseURL}/api/update-email-status`, {
               leadid: row.original.leadid,
             });
-    
+
             alert("File uploaded and email sent successfully!");
           } catch (error) {
             console.error("Error uploading file:", error);
             alert("Error sending email.");
           }
         };
-    
+
         const handleViewHistory = () => {
           navigate(`/email-history/${row.original.leadid}`, { state: { email: row.original.email } });
         };
-        
-    
+
+
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "5px", flexWrap: "nowrap" }}>
             {emailSent ? (
@@ -536,7 +597,7 @@ const handleAssignLead = async (leadid, associateObj,status) => {
                 onClick={handleViewHistory}
                 style={{ background: "none", border: "none", cursor: "pointer", padding: "5px" }}
               >
-                <FaHistory size={16} color="blue" />  
+                <FaHistory size={16} color="blue" />
               </button>
             ) : (
               <>
@@ -552,138 +613,138 @@ const handleAssignLead = async (leadid, associateObj,status) => {
           </div>
         );
       },
-    },  
+    },
     {
-               Header: "Manager ",
-               Cell: ({ row }) => {
-                 const assignedManagerId = row.original.managerid || "";
-                 const assignedManagerName = row.original.assign_to_manager || "";
-       
-                 const [selectedManager, setSelectedManager] = useState(
-                   assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-                 );
-                 const [showIcon, setShowIcon] = useState(false);
-       
-                 useEffect(() => {
-                   setSelectedManager(
-                     assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-                   );
-                   setShowIcon(false);
-                 }, [assignedManagerId, assignedManagerName]);
-       
-                 const handleChange = (e) => {
-                   const newValue = e.target.value;
-                   setSelectedManager(newValue);
-                   setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
-                 };
-       
-                 const handleAssignClick = async () => {
-                   if (selectedManager) {
-                     const [managerid, assignee] = selectedManager.split("|");
-       
-                     if (selectedManager == "self") {
-                       // Call the new API for self assignment
-                       await handleSelfAssign(row.original.leadid);
-                     } else {
-                       handleAssignToChange(assignee, row.original.leadid, managerid,row.original.status,);
-                     }
-       
-                     // await handleAssignToChange(assignee, row.original.leadid, managerid);
-       
-                     // ✅ Update row data manually to trigger re-render
-                     row.original.managerid = managerid;
-                     row.original.assign_to_manager = assignee;
-       
-                     // ✅ Update state to reflect change instantly
-                     setSelectedManager(`${managerid}|${assignee}`);
-                     setShowIcon(false);
-                   }
-                 };
-       
-                 return (
-                   <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-                     <select
-                       value={selectedManager}
-                       onChange={handleChange}
-                       className="form-select me-2"
-                       style={{ maxWidth: "150px", fontSize: fontSize }}
-                     >
-                       <option value="">Select Assignee</option>
-                       <option value="self">Self</option>
-                       {managers.map((manager, index) => (
-                         <option key={index} value={`${manager.id}|${manager.name}`}>
-                           {manager.name}
-                         </option>
-                       ))}
-                     </select>
-                     {showIcon && (
-                       <HiUserGroup
-                         style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-                         onClick={handleAssignClick}
-                       />
-                     )}
-                   </div>
-                 );
-               },
-             },
-       
-             {
-               Header: "Associate",
-               Cell: ({ row }) => {
-                 const initialAssociateValue = row.original.assignedSalesId
-                   ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
-                   : "";
-             
-                 const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
-                 const [showIcon, setShowIcon] = useState(false);
-             
-                 const managerId = row.original.managerid;
-                 const associates = managerId ? associatesByManager[managerId] || [] : [];
-             
-                 useEffect(() => {
-                   setSelectedAssociate(initialAssociateValue);
-                   setShowIcon(false);
-                 }, [row.original.assignedSalesId, row.original.assignedSalesName]);
-             
-                 const handleChange = (e) => {
-                   const newValue = e.target.value;
-                   setSelectedAssociate(newValue);
-                   setShowIcon(newValue !== initialAssociateValue);
-                 };
-             
-                 const handleAssignClick = async () => {
-                   if (selectedAssociate) {
-                     const [associateId, associateName] = selectedAssociate.split("|");
-                     await handleAssignLead(row.original.leadid, { id: associateId, name: associateName }, row.original.status);
-                     // No need to update row.original directly; state is already updated in handleAssignLead
-                     setShowIcon(false);
-                   }
-                 };
-             
-                 return (
-                   <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-                     <select
-                       value={selectedAssociate}
-                       onChange={handleChange}
-                       className="form-select me-2" style={{ fontSize: fontSize }}
-                     >
-                       <option value="">Select Associate</option>
-                       {associates.map((associate, index) => (
-                         <option key={index} value={`${associate.id}|${associate.name}`}>
-                           {associate.name}
-                         </option>
-                       ))}
-                     </select>
-                     {showIcon && (
-                       <HiUserGroup
-                         style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-                         onClick={handleAssignClick}
-                       />
-                     )}
-                   </div>
-                 );
-               },
-             },
+      Header: "Manager ",
+      Cell: ({ row }) => {
+        const assignedManagerId = row.original.managerid || "";
+        const assignedManagerName = row.original.assign_to_manager || "";
+
+        const [selectedManager, setSelectedManager] = useState(
+          assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
+        );
+        const [showIcon, setShowIcon] = useState(false);
+
+        useEffect(() => {
+          setSelectedManager(
+            assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
+          );
+          setShowIcon(false);
+        }, [assignedManagerId, assignedManagerName]);
+
+        const handleChange = (e) => {
+          const newValue = e.target.value;
+          setSelectedManager(newValue);
+          setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
+        };
+
+        const handleAssignClick = async () => {
+          if (selectedManager) {
+            const [managerid, assignee] = selectedManager.split("|");
+
+            if (selectedManager == "self") {
+              // Call the new API for self assignment
+              await handleSelfAssign(row.original.leadid);
+            } else {
+              handleAssignToChange(assignee, row.original.leadid, managerid, row.original.status,);
+            }
+
+            // await handleAssignToChange(assignee, row.original.leadid, managerid);
+
+            // ✅ Update row data manually to trigger re-render
+            row.original.managerid = managerid;
+            row.original.assign_to_manager = assignee;
+
+            // ✅ Update state to reflect change instantly
+            setSelectedManager(`${managerid}|${assignee}`);
+            setShowIcon(false);
+          }
+        };
+
+        return (
+          <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
+            <select
+              value={selectedManager}
+              onChange={handleChange}
+              className="form-select me-2"
+              style={{ maxWidth: "150px", fontSize: fontSize }}
+            >
+              <option value="">Select Assignee</option>
+              <option value="self">Self</option>
+              {managers.map((manager, index) => (
+                <option key={index} value={`${manager.id}|${manager.name}`}>
+                  {manager.name}
+                </option>
+              ))}
+            </select>
+            {showIcon && (
+              <HiUserGroup
+                style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
+                onClick={handleAssignClick}
+              />
+            )}
+          </div>
+        );
+      },
+    },
+
+    {
+      Header: "Associate",
+      Cell: ({ row }) => {
+        const initialAssociateValue = row.original.assignedSalesId
+          ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
+          : "";
+
+        const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
+        const [showIcon, setShowIcon] = useState(false);
+
+        const managerId = row.original.managerid;
+        const associates = managerId ? associatesByManager[managerId] || [] : [];
+
+        useEffect(() => {
+          setSelectedAssociate(initialAssociateValue);
+          setShowIcon(false);
+        }, [row.original.assignedSalesId, row.original.assignedSalesName]);
+
+        const handleChange = (e) => {
+          const newValue = e.target.value;
+          setSelectedAssociate(newValue);
+          setShowIcon(newValue !== initialAssociateValue);
+        };
+
+        const handleAssignClick = async () => {
+          if (selectedAssociate) {
+            const [associateId, associateName] = selectedAssociate.split("|");
+            await handleAssignLead(row.original.leadid, { id: associateId, name: associateName }, row.original.status);
+            // No need to update row.original directly; state is already updated in handleAssignLead
+            setShowIcon(false);
+          }
+        };
+
+        return (
+          <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
+            <select
+              value={selectedAssociate}
+              onChange={handleChange}
+              className="form-select me-2" style={{ fontSize: fontSize }}
+            >
+              <option value="">Select Associate</option>
+              {associates.map((associate, index) => (
+                <option key={index} value={`${associate.id}|${associate.name}`}>
+                  {associate.name}
+                </option>
+              ))}
+            </select>
+            {showIcon && (
+              <HiUserGroup
+                style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
+                onClick={handleAssignClick}
+              />
+            )}
+          </div>
+        );
+      },
+    },
     {
       Header: "Action",
       Cell: ({ row }) => (
@@ -705,16 +766,16 @@ const handleAssignLead = async (leadid, associateObj,status) => {
   // }, [data]);
 
   const uniqueDestinations = useMemo(() => {
-      // Filter out empty destinations and normalize valid ones
-      const normalizedDestinations = data
-        .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
-        .filter(dest => dest) // Remove empty values
-        .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
-  
-      // Get unique values and format them
-      return [...new Set(normalizedDestinations)]
-        .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
-    }, [data]);
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+  }, [data]);
 
   // Extract team members for the selected manager
   const teamMembers = useMemo(() => {
@@ -732,6 +793,8 @@ const handleAssignLead = async (leadid, associateObj,status) => {
             <Col className="d-flex justify-content-between align-items-center fixed">
               <h3>Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>}
+              <button className="btn btn-success" onClick={downloadExcel}>
+                <FaDownload /> Download Excel</button>
             </Col>
           </Row>
           <Row className="mb-3 align-items-center">

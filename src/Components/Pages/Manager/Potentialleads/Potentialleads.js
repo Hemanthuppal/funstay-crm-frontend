@@ -2,8 +2,8 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
-import { Row, Col ,Form} from "react-bootstrap";
+import { FaEdit, FaEye, FaDownload, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { Row, Col, Form } from "react-bootstrap";
 import { HiUserGroup } from "react-icons/hi";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -11,10 +11,11 @@ import './PotentialLeads.css';
 import axios from 'axios';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import { FontSizeContext } from "../../../Shared/Font/FontContext";
+import * as XLSX from 'xlsx';
 
-const Potentialleads = () => { 
-  const { authToken, userId,userName } = useContext(AuthContext);
-   const { fontSize } = useContext(FontSizeContext);
+const Potentialleads = () => {
+  const { authToken, userId, userName } = useContext(AuthContext);
+  const { fontSize } = useContext(FontSizeContext);
   const [message, setMessage] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ const Potentialleads = () => {
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination") || "");
   const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1") || "In Progress");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2") || "");
- 
+
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee") || "");
   const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate") || "");
   const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate") || "");
@@ -31,14 +32,73 @@ const Potentialleads = () => {
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate") || "");
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
-  const [employees, setEmployees] = useState([]); 
+  const [employees, setEmployees] = useState([]);
+
+  const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Define the fields to export
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      //  { key: "description", label: "DESCRIPTION", width: 30 },
+      //  { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      //  { key: "destination", label: "DESTINATION", width: 15 },
+      //  { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 },
+      { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "travel_destination", label: "DESTINATION", width: 15 },
+      { key: "travel_created_at", label: "CREATED AT", width: 20 },
+      { key: "start_date", label: "START DATE", width: 20 },
+      { key: "end_date", label: "END DATE", width: 20 },
+      { key: "duration", label: "DURATION", width: 15 },
+      { key: "adults_count", label: "ADULTS COUNT", width: 15 },
+      { key: "children_count", label: "CHILDREN COUNT", width: 15 },
+      { key: "child_ages", label: "CHILD AGES", width: 20 },
+      { key: "approx_budget", label: "BUDGET", width: 15 },
+      { key: "travel_description", label: "DESCRIPTION", width: 20 },
+    ];
+
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
+    const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
   const fetchLeads = async () => {
     try {
       const response = await axios.get(`${baseURL}/api/fetch-data`);
       if (response.status == 200) {
         const filteredLeads = response.data.filter(
-          (enquiry) =>enquiry.managerAssign !== userId && enquiry.managerid == userId && enquiry.status == "opportunity"
+          (enquiry) => enquiry.managerAssign !== userId && enquiry.managerid == userId && enquiry.status == "opportunity"
         );
         setData(filteredLeads);
       }
@@ -50,7 +110,7 @@ const Potentialleads = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
-      setTimeout(() => setMessage(""), 1000);  
+      setTimeout(() => setMessage(""), 1000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
@@ -204,13 +264,13 @@ const Potentialleads = () => {
   const handleAssignLead = async (leadid, employeeId, status) => {
     const selectedEmp = employees.find((emp) => emp.id === parseInt(employeeId));
     const employeeName = selectedEmp ? selectedEmp.name : "";
-  
+
     if (!employeeName) {
       setMessage("Please select a valid employee.");
       setTimeout(() => setMessage(""), 3000);
       return;
     }
-  
+
     try {
       const response = await axios.post(`${baseURL}/api/assign-lead`, {
         leadid,
@@ -220,7 +280,7 @@ const Potentialleads = () => {
         userId,
         userName,
       });
-  
+
       if (response.status === 200) {
         // Update the local state immediately
         setData((prevData) =>
@@ -240,34 +300,34 @@ const Potentialleads = () => {
     }
   };
 
-   const handleSelfAssign = async (leadid) => {
-      try {
-        const response = await axios.post(`${baseURL}/api/assign-manager`, {
-          leadid,
-          userId, // Use the userId from context
-        });
-    
-        if (response.status === 200) {
-          setMessage(response.data.message);
-          setTimeout(() => setMessage(""), 3000);
-          window.location.reload();
-    
-          // Update the local state to reflect the assignment
-          setData((prevData) =>
-            prevData.map((lead) =>
-              lead.leadid === leadid ? { ...lead, managerAssign: userId } : lead
-            )
-          );
-        } else {
-          setMessage('Failed to assign the lead. Please try again.');
-          setTimeout(() => setMessage(""), 3000);
-        }
-      } catch (error) {
-        console.error("Error assigning lead:", error);
-        setMessage('An error occurred while assigning the lead. Please try again.');
+  const handleSelfAssign = async (leadid) => {
+    try {
+      const response = await axios.post(`${baseURL}/api/assign-manager`, {
+        leadid,
+        userId, // Use the userId from context
+      });
+
+      if (response.status === 200) {
+        setMessage(response.data.message);
+        setTimeout(() => setMessage(""), 3000);
+        window.location.reload();
+
+        // Update the local state to reflect the assignment
+        setData((prevData) =>
+          prevData.map((lead) =>
+            lead.leadid === leadid ? { ...lead, managerAssign: userId } : lead
+          )
+        );
+      } else {
+        setMessage('Failed to assign the lead. Please try again.');
         setTimeout(() => setMessage(""), 3000);
       }
-    };
+    } catch (error) {
+      console.error("Error assigning lead:", error);
+      setMessage('An error occurred while assigning the lead. Please try again.');
+      setTimeout(() => setMessage(""), 3000);
+    }
+  };
 
   useEffect(() => {
     localStorage.setItem("searchTerm", searchTerm);
@@ -275,7 +335,7 @@ const Potentialleads = () => {
     localStorage.setItem("filterDestination", filterDestination);
     localStorage.setItem("filterOppStatus1", filterOppStatus1);
     localStorage.setItem("filterOppStatus2", filterOppStatus2);
-   
+
     localStorage.setItem("filterAssignee", filterAssignee);
     localStorage.setItem("filterStartDate", filterStartDate);
     localStorage.setItem("filterEndDate", filterEndDate);
@@ -293,7 +353,7 @@ const Potentialleads = () => {
     setFilterDestination("");
     setFilterOppStatus1("In Progress");
     setFilterOppStatus2("");
-    
+
     setFilterAssignee("");
     setFilterStartDate("");
     setFilterEndDate("");
@@ -308,8 +368,8 @@ const Potentialleads = () => {
       const matchesStatus = !filterStatus || (item.status && item.status.toLowerCase() == filterStatus.toLowerCase());
       const matchesDestination = !filterDestination || (item.travel_destination && item.travel_destination.toLowerCase() == filterDestination.toLowerCase());
       const actualPrimaryStatus = item.opportunity_status1 ? item.opportunity_status1.toLowerCase() : "In Progress";
-        const matchesOppStatus1 =
-          !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
+      const matchesOppStatus1 =
+        !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesOppStatus2 = !filterOppStatus2 || (item.opportunity_status2 && item.opportunity_status2.toLowerCase() == filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
       const matchesDateRange = (() => {
@@ -419,60 +479,60 @@ const Potentialleads = () => {
         );
       },
     },
-     {
-              Header: "Assign",
-              accessor: "id",
-              Cell: ({ cell: { row } }) => {
-                const assignedSalesId = row.original.assignedSalesId || "";
-                const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
-                const [showIcon, setShowIcon] = useState(false);
-            
-                const handleChange = (e) => {
-                  const newValue = e.target.value;
-                  setSelectedEmployee(newValue);
-                  setShowIcon(newValue !== assignedSalesId); 
-                };
-            
-                const handleAssignClick = async () => {
-                  if (selectedEmployee) {
-                    if (selectedEmployee === "self") {
-                      // Call the new API for self assignment
-                      await handleSelfAssign(row.original.leadid);
-                    } else {
-                      handleAssignLead(row.original.leadid, selectedEmployee,row.original.status);
-                    }
-                    setShowIcon(false); // Hide icon after assignment
-                  } else {
-                    setMessage("Please select an employee to assign the lead.");
-                    setTimeout(() => setMessage(""), 3000);
-                  }
-                };
-            
-                return (
-                  <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-                    <Form.Select
-                      value={selectedEmployee}
-                      onChange={handleChange}
-                      className="me-2"  style={{ fontSize: fontSize }}
-                    >
-                      <option value="">Select Employee</option>
-                      <option value="self">Self</option> {/* Add Self option */}
-                      {employees.map((employee) => (
-                        <option key={employee.id} value={employee.id}>
-                          {employee.name}
-                        </option>
-                      ))}
-                    </Form.Select>
-                    {showIcon && (
-                      <HiUserGroup
-                        style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
-                        onClick={handleAssignClick}
-                      />
-                    )}
-                  </div>
-                );
-              },
-            },
+    {
+      Header: "Assign",
+      accessor: "id",
+      Cell: ({ cell: { row } }) => {
+        const assignedSalesId = row.original.assignedSalesId || "";
+        const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
+        const [showIcon, setShowIcon] = useState(false);
+
+        const handleChange = (e) => {
+          const newValue = e.target.value;
+          setSelectedEmployee(newValue);
+          setShowIcon(newValue !== assignedSalesId);
+        };
+
+        const handleAssignClick = async () => {
+          if (selectedEmployee) {
+            if (selectedEmployee === "self") {
+              // Call the new API for self assignment
+              await handleSelfAssign(row.original.leadid);
+            } else {
+              handleAssignLead(row.original.leadid, selectedEmployee, row.original.status);
+            }
+            setShowIcon(false); // Hide icon after assignment
+          } else {
+            setMessage("Please select an employee to assign the lead.");
+            setTimeout(() => setMessage(""), 3000);
+          }
+        };
+
+        return (
+          <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
+            <Form.Select
+              value={selectedEmployee}
+              onChange={handleChange}
+              className="me-2" style={{ fontSize: fontSize }}
+            >
+              <option value="">Select Employee</option>
+              <option value="self">Self</option> {/* Add Self option */}
+              {employees.map((employee) => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.name}
+                </option>
+              ))}
+            </Form.Select>
+            {showIcon && (
+              <HiUserGroup
+                style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
+                onClick={handleAssignClick}
+              />
+            )}
+          </div>
+        );
+      },
+    },
     {
       Header: "Action",
       Cell: ({ row }) => (
@@ -484,7 +544,7 @@ const Potentialleads = () => {
         </div>
       ),
     },
-   
+
   ], [dropdownOptions]);
 
   // const uniqueDestinations = useMemo(() => {
@@ -497,17 +557,17 @@ const Potentialleads = () => {
   //   // Map back to the original format (if needed)
   //   return uniqueNormalizedDestinations.map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
   // }, [data]);
-   const uniqueDestinations = useMemo(() => {
-          // Filter out empty destinations and normalize valid ones
-          const normalizedDestinations = data
-            .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
-            .filter(dest => dest) // Remove empty values
-            .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
-      
-          // Get unique values and format them
-          return [...new Set(normalizedDestinations)]
-            .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
-        }, [data]);
+  const uniqueDestinations = useMemo(() => {
+    // Filter out empty destinations and normalize valid ones
+    const normalizedDestinations = data
+      .map(item => item.travel_destination?.trim()) // Trim spaces and handle potential undefined/null values
+      .filter(dest => dest) // Remove empty values
+      .map(dest => dest.toLowerCase()); // Convert to lowercase for uniqueness
+
+    // Get unique values and format them
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); // Capitalize first letter
+  }, [data]);
 
   return (
     <div className="salesOpportunitycontainer">
@@ -518,6 +578,8 @@ const Potentialleads = () => {
             <Col className="d-flex justify-content-between align-items-center fixed">
               <h3>Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>}
+              <button className="btn btn-success" onClick={downloadExcel}>
+                <FaDownload /> Download Excel</button>
             </Col>
           </Row>
           <Row className="mb-3 align-items-center">
@@ -545,7 +607,7 @@ const Potentialleads = () => {
               )}
             </Col>
             <Col md={6} className="d-flex justify-content-end">
-                    <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>

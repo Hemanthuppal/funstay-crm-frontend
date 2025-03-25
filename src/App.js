@@ -98,6 +98,18 @@ import M_Myoppleads from "./Components/Pages/Manager/Potentialleads/MyOpp/MyOppl
 import M_Myleads from "./Components/Pages/Manager/Leads/Myleads/Myleads";
 import M_MYCreateCustomerOpportunity from "./Components/Pages/Manager/Leads/Myleads/CreateCustomerOpportinity/CreateandOpportunity"
 import EmailHistory from "./Components/Pages/Admin/Potentialleads/Email/Email_new";
+import H_Dashboard from "./Components/Pages/SalesHead/Dashboard/Dashboard";
+import H_ViewLeads from "./Components/Pages/SalesHead/Leads/ViewLeads/ViewLeads";
+import HeadOpportunity from "./Components/Pages/SalesHead/Potentialleads/Potentialleads";
+import H_Customer from "./Components/Pages/SalesHead/Customer/Customer";
+import H_Destinations from "./Components/Pages/SalesHead/Destinations/Destinations";
+import H_Tags from "./Components/Pages/SalesHead/Tags/Tag";
+import H_AllTeams from "./Components/Pages/SalesHead/AllTeams/AllTeams";
+import H_TeamMembers from "./Components/Pages/SalesHead/AllTeams/TeamMembersTable";
+import H_Customerdetails from "./Components/Pages/SalesHead/Customer/LeadOptions";
+import H_LeadDetailss from "./Components/Pages/SalesHead/Potentialleads/LeadDetails";
+import H_InDetailViewLeads from "./Components/Pages/SalesHead/Leads/ViewLeads/ViewLead/InDetailViewLeads";
+import H_Profile from "./Components/Pages/SalesHead/Profile/Profile";
 
 
 function App() {
@@ -303,6 +315,19 @@ function App() {
                 
 
                 <Route path="/email-history/:leadid" element={<EmailHistory />} />
+
+                <Route path="h-dashboard" element={<H_Dashboard />} />
+                <Route path="/h-view-lead" element={<H_ViewLeads />} />
+                <Route path="/h-potential-leads" element={<HeadOpportunity />} />
+                <Route path="/h-customers" element={<H_Customer />} />
+                <Route path="/h-destinations" element={<H_Destinations />} />
+                <Route path="/h-tags" element={<H_Tags/>} />
+                <Route path="/h-allteams" element={<H_AllTeams />} />
+                <Route path="/h-team-members" element={<H_TeamMembers />} />
+                <Route path="/h-customerdetails/:customerId" element={<H_Customerdetails />} />
+                <Route path="/h-details/:leadid" element={<H_LeadDetailss />} />
+                <Route path="/h-view-lead/:leadid" element={<H_InDetailViewLeads />} />
+                <Route path="/h-profile" element={<H_Profile />} />
                 </Route>
             </Routes>
 

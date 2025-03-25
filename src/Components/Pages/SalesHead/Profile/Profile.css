@@ -1,6 +1,6 @@
 .profile-form-container {
     width: 100%;
-    /* max-width: 600px; */
+    
     margin: 20px auto;
     background: white;
     border-radius: 8px;
@@ -9,7 +9,7 @@
   }
   
   .profile-form-header {
-    background:  var(--theme-color);
+    background: var(--theme-color)    ;
     color: white;
     padding: 15px 20px;
     border-radius: 8px 8px 0 0;

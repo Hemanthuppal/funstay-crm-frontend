@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import "./Profile.css";
-import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
+import Navbar from "../../../Shared/SalesHeadNavbar/Navbar";
 import { AuthContext } from "../../../AuthContext/AuthContext";
 import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from "react-router-dom";
@@ -81,12 +81,13 @@ const ProfileForm = () => {
       });
 
       const result = await response.json();
+      console.log("Response JSON:", JSON.stringify(result, null, 2));
+
       if (response.ok) {
         setMessage("Profile updated successfully!");
-        setTimeout(() => setMessage(""), 3000);
+        setTimeout(() => setMessage(""), 1000);
         setIsEditing(false);
 
-        // Update UI with new data
         setFormData((prevData) => ({
           ...prevData,
           ...result,
@@ -95,9 +96,8 @@ const ProfileForm = () => {
 
         // If "Update & Close" was clicked, navigate to another page
         if (navigateToProfile) {
-          setTimeout(() => navigate("/s-dashboard"), 1000);
+          setTimeout(() => navigate("/h-dashboard"), 1000);
         }
-
       } else {
         setMessage(result.message || "Error updating profile");
         setTimeout(() => setMessage(""), 3000);
@@ -141,7 +141,7 @@ const ProfileForm = () => {
                   id="email"
                   name="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={handleChange} readOnly
                   disabled={!isEditing}
                 />
               </div>
@@ -173,18 +173,19 @@ const ProfileForm = () => {
             </div>
 
             <div className="profile-form-grid">
-              <div className="profile-input-group">
-                <label htmlFor="role">Role</label>
-                <input
-                  type="text"
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  readOnly
-                />
-              </div>
+            <div className="profile-input-group">
+  <label htmlFor="role">Role</label>
+  <input
+    type="text"
+    id="role"
+    name="role"
+    value={formData.role === "admin" ? "Head of Sales" : formData.role}
+    onChange={handleChange}
+    disabled={!isEditing}
+    readOnly
+  />
+</div>
+
               <div className="profile-input-group">
                 <label htmlFor="image">Upload Image</label>
                 <input
@@ -257,4 +258,5 @@ const ProfileForm = () => {
     </div>
   );
 };
+
 export default ProfileForm;

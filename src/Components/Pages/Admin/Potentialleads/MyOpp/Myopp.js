@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../../Shared/Navbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit, FaDownload, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../../Apiservices/Api";
@@ -11,6 +11,7 @@ import axios from "axios";
 import { AuthContext } from "../../../../AuthContext/AuthContext";
 import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 import { FontSizeContext } from "../../../../Shared/Font/FontContext";
+import * as XLSX from 'xlsx';
 
 
 const Potentialleads = () => {
@@ -34,10 +35,71 @@ const Potentialleads = () => {
   const [showDateRange, setShowDateRange] = useState(false);
   const [data, setData] = useState([]);
   const [managers, setManagers] = useState([]);
+
+  
+    const downloadExcel = () => {
+      if (!filteredData || filteredData.length === 0) {
+        alert("No data available to export.");
+        return;
+      }
+  
+      // Define the fields to export
+      const fields = [
+        { key: "leadid", label: "LEAD ID", width: 15 },
+        { key: "name", label: "NAME", width: 20 },
+        { key: "email", label: "EMAIL", width: 25 },
+        { key: "country_code", label: "COUNTRY CODE", width: 10 },
+        { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+        { key: "sources", label: "SOURCES", width: 20 },
+        { key: "another_name", label: "ANOTHER NAME", width: 20 },
+        { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+        { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+        //  { key: "description", label: "DESCRIPTION", width: 30 },
+        //  { key: "origincity", label: "ORIGIN CITY", width: 15 },
+        //  { key: "destination", label: "DESTINATION", width: 15 },
+        //  { key: "created_at", label: "CREATED AT", width: 20 },
+        { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+        { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+        { key: "channel", label: "CHANNEL", width: 15 },
+        { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
+        { key: "travel_destination", label: "DESTINATION", width: 15 },
+        { key: "travel_created_at", label: "CREATED AT", width: 20 },
+        { key: "start_date", label: "START DATE", width: 20 },
+        { key: "end_date", label: "END DATE", width: 20 },
+        { key: "duration", label: "DURATION", width: 15 },
+        { key: "adults_count", label: "ADULTS COUNT", width: 15 },
+        { key: "children_count", label: "CHILDREN COUNT", width: 15 },
+        { key: "child_ages", label: "CHILD AGES", width: 20 },
+        { key: "approx_budget", label: "BUDGET", width: 15 },
+        { key: "travel_description", label: "DESCRIPTION", width: 20 },
+      ];
+  
+      // Transform the data to only include specified fields
+      const exportData = filteredData.map(row => {
+        let newRow = {};
+        fields.forEach(field => {
+          newRow[field.label] = row[field.key] || ""; // Use field label as header
+        });
+        return newRow;
+      });
+  
+      // Create a new workbook and worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+  
+      // Apply column widths
+      ws["!cols"] = fields.map(field => ({ width: field.width }));
+  
+      // Append sheet and save file
+      XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
+      const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+    };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
-      setTimeout(() => setMessage(""), 1000);  
+      setTimeout(() => setMessage(""), 1000);
     }).catch(err => {
       console.error('Failed to copy: ', err);
     });
@@ -48,7 +110,7 @@ const Potentialleads = () => {
     try {
       const response = await axios.get(`${baseURL}/api/fetch-data`);
       if (response.status == 200) {
-        const filteredLeads = response.data.filter((enquiry) =>enquiry.adminAssign == 'admin' &&  enquiry.status == "opportunity");
+        const filteredLeads = response.data.filter((enquiry) => enquiry.adminAssign == 'admin' && enquiry.status == "opportunity");
         setData(filteredLeads);
       }
     } catch (error) {
@@ -161,7 +223,7 @@ const Potentialleads = () => {
     navigate(`/a-myedit-opportunity/${rowId}`, { state: { leadid: rowId } });
   };
 
-  
+
 
 
   const handleArchive = async (leadid) => {
@@ -191,7 +253,7 @@ const Potentialleads = () => {
     }
   };
 
-  
+
 
   useEffect(() => {
     localStorage.setItem("searchTerm-op1", searchTerm);
@@ -293,9 +355,9 @@ const Potentialleads = () => {
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between", 
+            justifyContent: "space-between",
             width: "100%",
-            maxWidth: "200px", 
+            maxWidth: "200px",
           }}
         >
           <div
@@ -305,7 +367,7 @@ const Potentialleads = () => {
               textOverflow: "ellipsis",
               maxWidth: "150px",
             }}
-            title={row.original.email} 
+            title={row.original.email}
           >
             {row.original.email}
           </div>
@@ -331,11 +393,12 @@ const Potentialleads = () => {
 
         return (
           <div className="d-flex align-items-center gap-2"
-           style={{
-            fontSize: fontSize, }}
-            >
+            style={{
+              fontSize: fontSize,
+            }}
+          >
             <select value={primaryStatus} onChange={(e) => handlePrimaryStatusChange(e.target.value, row.original.leadid)} className="form-select"
-            style={{ fontSize: fontSize }}
+              style={{ fontSize: fontSize }}
             >
               <option value="">Select Primary Status</option>
               {dropdownOptions.primary.map((option) => (
@@ -343,7 +406,7 @@ const Potentialleads = () => {
               ))}
             </select>
             <select value={secondaryStatus} onChange={(e) => handleSecondaryStatusChange(e.target.value, row.original.leadid)} className="form-select" disabled={isSecondaryDisabled}
-            style={{ fontSize: fontSize }}
+              style={{ fontSize: fontSize }}
             >
               <option value="">Select Secondary Status</option>
               {secondaryOptions.map((option) => (
@@ -354,7 +417,7 @@ const Potentialleads = () => {
         );
       },
     },
-   
+
     {
       Header: "Action",
       Cell: ({ row }) => (
@@ -366,21 +429,21 @@ const Potentialleads = () => {
         </div>
       ),
     },
-    
+
   ], [dropdownOptions]);
 
 
-   const uniqueDestinations = useMemo(() => {
-       
-        const normalizedDestinations = data
-          .map(item => item.travel_destination?.trim()) 
-          .filter(dest => dest)
-          .map(dest => dest.toLowerCase()); 
-    
-        
-        return [...new Set(normalizedDestinations)]
-          .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1)); 
-      }, [data]);
+  const uniqueDestinations = useMemo(() => {
+
+    const normalizedDestinations = data
+      .map(item => item.travel_destination?.trim())
+      .filter(dest => dest)
+      .map(dest => dest.toLowerCase());
+
+
+    return [...new Set(normalizedDestinations)]
+      .map(dest => dest.charAt(0).toUpperCase() + dest.slice(1));
+  }, [data]);
 
 
 
@@ -393,6 +456,8 @@ const Potentialleads = () => {
             <Col className="d-flex justify-content-between align-items-center fixed">
               <h3>My Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>}
+              <button className="btn btn-success" onClick={downloadExcel}>
+                <FaDownload /> Download Excel</button>
             </Col>
           </Row>
           <Row className="mb-3 align-items-center">
@@ -423,7 +488,7 @@ const Potentialleads = () => {
               )}
             </Col>
             <Col md={6} className="d-flex justify-content-end">
-        <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
           </Row>
           <Row className="mb-3">
             <Col md={3}>
@@ -450,7 +515,7 @@ const Potentialleads = () => {
                 ))}
               </select>
             </Col>
-          
+
           </Row>
           {data.length == 0 ? (
             <div>No data available</div>

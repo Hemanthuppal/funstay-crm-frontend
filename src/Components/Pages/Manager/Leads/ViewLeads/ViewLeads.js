@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayoutOpp";
 import { Button, Row, Col, Form } from "react-bootstrap";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaSyncAlt, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment,FaDownload, FaSyncAlt, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
 import "./ViewLeads.css";
 import axios from "axios";
@@ -11,6 +11,7 @@ import { AuthContext } from "../../../../AuthContext/AuthContext";
 import { baseURL } from "../../../../Apiservices/Api";
 import { webhookUrl } from "../../../../Apiservices/Api";
 import { FontSizeContext } from "../../../../Shared/Font/FontContext";
+import * as XLSX from 'xlsx';
 
 const ViewLeads = () => {
   const [message, setMessage] = useState('');
@@ -19,18 +20,18 @@ const ViewLeads = () => {
 
 
 
-   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
-    const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
-    const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
-      const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "new");
-    const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
-   
-    const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
-    const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-1") || "");
-    const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-1") || "");
-    const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-1") || "");
-    const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-1") || "");
-    const [showDateRange, setShowDateRange] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
+  const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
+  const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "new");
+  const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
+
+  const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
+  const [filterStartDate, setFilterStartDate] = useState(localStorage.getItem("filterStartDate-1") || "");
+  const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-1") || "");
+  const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-1") || "");
+  const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-1") || "");
+  const [showDateRange, setShowDateRange] = useState(false);
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -43,6 +44,56 @@ const ViewLeads = () => {
     });
   };
 
+const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Define the fields to export
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      { key: "description", label: "DESCRIPTION", width: 30 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "destination", label: "DESTINATION", width: 15 },
+      { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primaryStatus", label: "PRIMARY STATUS", width: 15 },
+      { key: "secondaryStatus", label: "SECONDARY STATUS", width: 15 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 }
+    ];
+
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Leads");
+    const fileName = `Filtered_Leads_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+  
   useEffect(() => {
     const fetchEnquiries = async () => {
       try {
@@ -179,102 +230,102 @@ const ViewLeads = () => {
   };
 
 
-  const handleAssignLead = async (leadid, employeeId,status) => {
-      const selectedEmp = employees.find((emp) => emp.id === parseInt(employeeId));
-      const employeeName = selectedEmp ? selectedEmp.name : "";
-  
-      if (!employeeName) {
-        setMessage("Please select a valid employee.");
-        setTimeout(() => setMessage(""), 3000);
-        return;
-      }
-      console.log(leadid, employeeId, employeeName, userName,status);
-      try {
-        const response = await axios.post(`${baseURL}/api/assign-lead`, {
-          leadid,
-          employeeId,
-  
-          employeeName,
-          status,
-          userId,
-          userName
-        });
+  const handleAssignLead = async (leadid, employeeId, status) => {
+    const selectedEmp = employees.find((emp) => emp.id === parseInt(employeeId));
+    const employeeName = selectedEmp ? selectedEmp.name : "";
+
+    if (!employeeName) {
+      setMessage("Please select a valid employee.");
+      setTimeout(() => setMessage(""), 3000);
+      return;
+    }
+    console.log(leadid, employeeId, employeeName, userName, status);
+    try {
+      const response = await axios.post(`${baseURL}/api/assign-lead`, {
+        leadid,
+        employeeId,
+
+        employeeName,
+        status,
+        userId,
+        userName
+      });
+      setMessage(response.data.message);
+      setTimeout(() => setMessage(""), 3000);
+
+      setData((prevData) =>
+        prevData.map((lead) =>
+          lead.leadid === leadid ? { ...lead, assignedSalesName: employeeName } : lead
+        )
+      );
+    } catch (error) {
+      console.error("Error assigning lead:", error);
+    }
+  };
+
+  const handleSelfAssign = async (leadid) => {
+    try {
+      const response = await axios.post(`${baseURL}/api/assign-manager`, {
+        leadid,
+        userId, // Use the userId from context
+      });
+
+      if (response.status === 200) {
         setMessage(response.data.message);
         setTimeout(() => setMessage(""), 3000);
-  
+        window.location.reload();
+
+        // Update the local state to reflect the assignment
         setData((prevData) =>
           prevData.map((lead) =>
-            lead.leadid === leadid ? { ...lead, assignedSalesName: employeeName } : lead
+            lead.leadid === leadid ? { ...lead, managerAssign: userId } : lead
           )
         );
-      } catch (error) {
-        console.error("Error assigning lead:", error);
-      }
-    };
-
-   const handleSelfAssign = async (leadid) => {
-      try {
-        const response = await axios.post(`${baseURL}/api/assign-manager`, {
-          leadid,
-          userId, // Use the userId from context
-        });
-    
-        if (response.status === 200) {
-          setMessage(response.data.message);
-          setTimeout(() => setMessage(""), 3000);
-          window.location.reload();
-    
-          // Update the local state to reflect the assignment
-          setData((prevData) =>
-            prevData.map((lead) =>
-              lead.leadid === leadid ? { ...lead, managerAssign: userId } : lead
-            )
-          );
-        } else {
-          setMessage('Failed to assign the lead. Please try again.');
-          setTimeout(() => setMessage(""), 3000);
-        }
-      } catch (error) {
-        console.error("Error assigning lead:", error);
-        setMessage('An error occurred while assigning the lead. Please try again.');
+      } else {
+        setMessage('Failed to assign the lead. Please try again.');
         setTimeout(() => setMessage(""), 3000);
       }
-    };
+    } catch (error) {
+      console.error("Error assigning lead:", error);
+      setMessage('An error occurred while assigning the lead. Please try again.');
+      setTimeout(() => setMessage(""), 3000);
+    }
+  };
 
-  
-    useEffect(() => {
-      localStorage.setItem("searchTerm-1", searchTerm);
-      localStorage.setItem("filterStatus-1", filterStatus);
-      localStorage.setItem("filterDestination-1", filterDestination);
-      localStorage.setItem("filterOppStatus1-1", filterOppStatus1);
-      localStorage.setItem("filterOppStatus2-1", filterOppStatus2);
-     
-      localStorage.setItem("filterAssignee-1", filterAssignee);
-      localStorage.setItem("filterStartDate-1", filterStartDate);
-      localStorage.setItem("filterEndDate-1", filterEndDate);
-      localStorage.setItem("appliedFilterStartDate-1", appliedFilterStartDate);
-      localStorage.setItem("appliedFilterEndDate-1", appliedFilterEndDate);
-    }, [
-      searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
-      filterAssignee, filterStartDate, filterEndDate,
-      appliedFilterStartDate, appliedFilterEndDate
-    ]);
-  
-    const clearFilters = () => {
-      setSearchTerm("");
-      setFilterStatus("");
-      setFilterDestination("");
-      setFilterOppStatus1("new"); // Reset to "new" when filters are cleared
-      setFilterOppStatus2("");
-      
-      setFilterAssignee("");
-      setFilterStartDate("");
-      setFilterEndDate("");
-      setAppliedFilterStartDate("");
-      setAppliedFilterEndDate("");
-      localStorage.removeItem("potentialLeadsFilters");
-    };
-  
+
+  useEffect(() => {
+    localStorage.setItem("searchTerm-1", searchTerm);
+    localStorage.setItem("filterStatus-1", filterStatus);
+    localStorage.setItem("filterDestination-1", filterDestination);
+    localStorage.setItem("filterOppStatus1-1", filterOppStatus1);
+    localStorage.setItem("filterOppStatus2-1", filterOppStatus2);
+
+    localStorage.setItem("filterAssignee-1", filterAssignee);
+    localStorage.setItem("filterStartDate-1", filterStartDate);
+    localStorage.setItem("filterEndDate-1", filterEndDate);
+    localStorage.setItem("appliedFilterStartDate-1", appliedFilterStartDate);
+    localStorage.setItem("appliedFilterEndDate-1", appliedFilterEndDate);
+  }, [
+    searchTerm, filterStatus, filterDestination, filterOppStatus1, filterOppStatus2,
+    filterAssignee, filterStartDate, filterEndDate,
+    appliedFilterStartDate, appliedFilterEndDate
+  ]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setFilterStatus("");
+    setFilterDestination("");
+    setFilterOppStatus1("new"); // Reset to "new" when filters are cleared
+    setFilterOppStatus2("");
+
+    setFilterAssignee("");
+    setFilterStartDate("");
+    setFilterEndDate("");
+    setAppliedFilterStartDate("");
+    setAppliedFilterEndDate("");
+    localStorage.removeItem("potentialLeadsFilters");
+  };
+
 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -407,7 +458,7 @@ const ViewLeads = () => {
                 onChange={(e) =>
                   handlePrimaryStatusChange(e.target.value, row.original.leadid)
                 }
-                className="form-select me-2"style={{ fontSize: fontSize }}
+                className="form-select me-2" style={{ fontSize: fontSize }}
               >
                 {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
@@ -421,7 +472,7 @@ const ViewLeads = () => {
                 onChange={(e) =>
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
-                className="form-select"style={{ fontSize: fontSize }}
+                className="form-select" style={{ fontSize: fontSize }}
                 disabled={isSecondaryDisabled}
               >
                 {!secondaryStatus && <option value="">Select Secondary Status</option>}
@@ -447,61 +498,61 @@ const ViewLeads = () => {
 
 
       },
-       {
-            Header: "Assign",
-            accessor: "id",
-            Cell: ({ cell: { row } }) => {
-              const { fontSize } = useContext(FontSizeContext);
-              const assignedSalesId = row.original.assignedSalesId || "";
-              const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
-              const [showIcon, setShowIcon] = useState(false);
-          
-              const handleChange = (e) => {
-                const newValue = e.target.value;
-                setSelectedEmployee(newValue);
-                setShowIcon(newValue !== assignedSalesId); 
-              };
-          
-              const handleAssignClick = async () => {
-                if (selectedEmployee) {
-                  if (selectedEmployee === "self") {
-                    // Call the new API for self assignment
-                    await handleSelfAssign(row.original.leadid);
-                  } else {
-                    handleAssignLead(row.original.leadid, selectedEmployee,row.original.status);
-                  }
-                  setShowIcon(false); // Hide icon after assignment
-                } else {
-                  setMessage("Please select an employee to assign the lead.");
-                  setTimeout(() => setMessage(""), 3000);
-                }
-              };
-          
-              return (
-                <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-                  <Form.Select
-                    value={selectedEmployee}
-                    onChange={handleChange}
-                    className="me-2" style={{ fontSize: fontSize }}
-                  >
-                    <option value="">Select Employee</option>
-                    <option value="self">Self</option> {/* Add Self option */}
-                    {employees.map((employee) => (
-                      <option key={employee.id} value={employee.id}>
-                        {employee.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  {showIcon && (
-                    <HiUserGroup
-                      style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
-                      onClick={handleAssignClick}
-                    />
-                  )}
-                </div>
-              );
-            },
-          },
+      {
+        Header: "Assign",
+        accessor: "id",
+        Cell: ({ cell: { row } }) => {
+          const { fontSize } = useContext(FontSizeContext);
+          const assignedSalesId = row.original.assignedSalesId || "";
+          const [selectedEmployee, setSelectedEmployee] = useState(assignedSalesId);
+          const [showIcon, setShowIcon] = useState(false);
+
+          const handleChange = (e) => {
+            const newValue = e.target.value;
+            setSelectedEmployee(newValue);
+            setShowIcon(newValue !== assignedSalesId);
+          };
+
+          const handleAssignClick = async () => {
+            if (selectedEmployee) {
+              if (selectedEmployee === "self") {
+                // Call the new API for self assignment
+                await handleSelfAssign(row.original.leadid);
+              } else {
+                handleAssignLead(row.original.leadid, selectedEmployee, row.original.status);
+              }
+              setShowIcon(false); // Hide icon after assignment
+            } else {
+              setMessage("Please select an employee to assign the lead.");
+              setTimeout(() => setMessage(""), 3000);
+            }
+          };
+
+          return (
+            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
+              <Form.Select
+                value={selectedEmployee}
+                onChange={handleChange}
+                className="me-2" style={{ fontSize: fontSize }}
+              >
+                <option value="">Select Employee</option>
+                <option value="self">Self</option> {/* Add Self option */}
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name}
+                  </option>
+                ))}
+              </Form.Select>
+              {showIcon && (
+                <HiUserGroup
+                  style={{ color: "#ff9966", cursor: "pointer", fontSize: "20px" }}
+                  onClick={handleAssignClick}
+                />
+              )}
+            </div>
+          );
+        },
+      },
 
 
 
@@ -574,8 +625,8 @@ const ViewLeads = () => {
                   </div>
                 )}
               </Col>
-               <Col md={6} className="d-flex justify-content-end">
-                                  <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
+              <Col md={6} className="d-flex justify-content-end">
+                <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>
             </Row>
             <Row className="mb-3">
               <Col md={3}>
@@ -586,7 +637,7 @@ const ViewLeads = () => {
                   ))}
                 </select>
               </Col>
-              <Col md={3}>
+              <Col md={2}>
                 <select
                   className="form-select"
                   value={filterOppStatus1}
@@ -595,7 +646,7 @@ const ViewLeads = () => {
                     setFilterOppStatus2(""); // Reset secondary filter when primary changes
                   }}
                 >
-                   <option value="">Primary Status</option>
+                  <option value="">Primary Status</option>
                   <option value="new">New</option> {/* Pre-select New */}
                   {dropdownOptions.primary
                     .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
@@ -603,7 +654,7 @@ const ViewLeads = () => {
                       <option key={status} value={status}>
                         {status}
                       </option>
-                  ))}
+                    ))}
                 </select>
               </Col>
               <Col md={3}>
@@ -620,13 +671,17 @@ const ViewLeads = () => {
                   ))}
                 </select>
               </Col>
-              <Col md={3}>
+              <Col md={2}>
                 <select className="form-select" value={filterAssignee} onChange={(e) => setFilterAssignee(e.target.value)}>
                   <option value="">Associates</option>
                   {employees.map((employee) => (
                     <option key={employee.id} value={employee.name}>{employee.name}</option>
                   ))}
                 </select>
+              </Col>
+              <Col md={2}>
+                <button className="btn btn-success" onClick={downloadExcel}>
+                  <FaDownload /> Download Excel</button>
               </Col>
             </Row>
             <DataTable columns={columns} data={filteredData} />

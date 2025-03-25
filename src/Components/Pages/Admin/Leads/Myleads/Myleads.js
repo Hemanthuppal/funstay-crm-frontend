@@ -1,13 +1,14 @@
 import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DataTable from './../../../../Layout/Table/TableLayoutOpp';
-import { FaEdit, FaTrash, FaEye, FaComment, FaUserPlus, FaCopy, FaCalendarAlt, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaDownload, FaComment, FaUserPlus, FaCopy, FaCalendarAlt, FaTimes } from 'react-icons/fa';
 import { Button, Row, Col, Modal } from 'react-bootstrap';
 import Navbar from '../../../../Shared/Navbar/Navbar';
 import { baseURL, webhookUrl } from '../../../../Apiservices/Api';
 import axios from 'axios';
 import { AuthContext } from "../../../../AuthContext/AuthContext";
 import { FontSizeContext } from '../../../../Shared/Font/FontContext';
+import * as XLSX from 'xlsx';
 
 import { HiUserGroup } from "react-icons/hi"; // Import icon
 
@@ -18,11 +19,6 @@ const AdminViewLeads = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { authToken, userId } = useContext(AuthContext);
   const [message, setMessage] = useState(null);
-
-
-
-
-
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-l1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-l1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-l1") || "");
@@ -38,6 +34,57 @@ const AdminViewLeads = () => {
   const [showDateRange, setShowDateRange] = useState(false);
 
   const [data, setData] = useState([]); // Initialize to an empty array
+
+  const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Define the fields to export
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+      { key: "description", label: "DESCRIPTION", width: 30 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "destination", label: "DESTINATION", width: 15 },
+      { key: "created_at", label: "CREATED AT", width: 20 },
+      { key: "primaryStatus", label: "PRIMARY STATUS", width: 15 },
+      { key: "secondaryStatus", label: "SECONDARY STATUS", width: 15 },
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 }
+    ];
+
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Leads");
+    const fileName = `Filtered_Leads_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
+
 
   const handleEdit = (leadId) => {
     navigate(`/a-myedit-lead/${leadId}`, {
@@ -88,7 +135,7 @@ const AdminViewLeads = () => {
   };
 
   const handleArchive = async (leadid) => {
-     const confirmDelete = window.confirm("Are you sure you want to archive this Lead?");
+    const confirmDelete = window.confirm("Are you sure you want to archive this Lead?");
     if (!confirmDelete) return;
     try {
       const response = await fetch(`${baseURL}/api/archiveByLeadId/${leadid}`, {
@@ -180,7 +227,7 @@ const AdminViewLeads = () => {
         const response = await fetch(`${webhookUrl}/api/enquiries`);
         const data = await response.json();
 
-        const filteredData = data.filter((enquiry) =>enquiry.adminAssign == 'admin' &&  enquiry.status == 'lead');
+        const filteredData = data.filter((enquiry) => enquiry.adminAssign == 'admin' && enquiry.status == 'lead');
         setData(filteredData);
       } catch (error) {
         console.error('Error fetching enquiries:', error);
@@ -268,12 +315,12 @@ const AdminViewLeads = () => {
   const handleSelfAssign = async (leadid) => {
     try {
       const response = await axios.post(`${baseURL}/api/assign-admin`, { leadid });
-  
+
       if (response.status === 200) {
         setMessage(response.data.message);
         setTimeout(() => setMessage(""), 3000);
         window.location.reload();
-  
+
         // Update the local state to reflect the assignment
         setData((prevData) =>
           prevData.map((lead) =>
@@ -333,9 +380,9 @@ const AdminViewLeads = () => {
             val &&
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
-        const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
+      const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
       const matchesPrimaryStatus =
-      !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
+        !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesSecondaryStatus =
         !filterOppStatus2 || (item.secondaryStatus && item.secondaryStatus.toLowerCase() === filterOppStatus2.toLowerCase());
       const matchesAssignee = !filterAssignee || (item.assignedSalesName && item.assignedSalesName.toLowerCase() == filterAssignee.toLowerCase());
@@ -479,7 +526,7 @@ const AdminViewLeads = () => {
 
           return (
             <div className="d-flex align-items-center"
-             style={{ fontSize: fontSize }}
+              style={{ fontSize: fontSize }}
             >
               <select
                 value={primaryStatus}
@@ -487,7 +534,7 @@ const AdminViewLeads = () => {
                   handlePrimaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select me-2"
-                 style={{ fontSize: fontSize }}
+                style={{ fontSize: fontSize }}
               >
                 {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
@@ -502,7 +549,7 @@ const AdminViewLeads = () => {
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select"
-                disabled={isSecondaryDisabled} 
+                disabled={isSecondaryDisabled}
                 style={{ fontSize: fontSize }}
               >
                 {!secondaryStatus && <option value="">Select Secondary Status</option>}
@@ -529,157 +576,157 @@ const AdminViewLeads = () => {
       },
 
 
-    //   {
-    //     Header: "Manager ",
-    //     Cell: ({ row }) => {
-    //       const assignedManagerId = row.original.managerid || "";
-    //       const assignedManagerName = row.original.assign_to_manager || "";
+      //   {
+      //     Header: "Manager ",
+      //     Cell: ({ row }) => {
+      //       const assignedManagerId = row.original.managerid || "";
+      //       const assignedManagerName = row.original.assign_to_manager || "";
 
-    //       const [selectedManager, setSelectedManager] = useState(
-    //         assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-    //       );
-    //       const [showIcon, setShowIcon] = useState(false);
+      //       const [selectedManager, setSelectedManager] = useState(
+      //         assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
+      //       );
+      //       const [showIcon, setShowIcon] = useState(false);
 
-    //       useEffect(() => {
-    //         setSelectedManager(
-    //           assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-    //         );
-    //         setShowIcon(false);
-    //       }, [assignedManagerId, assignedManagerName]);
+      //       useEffect(() => {
+      //         setSelectedManager(
+      //           assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
+      //         );
+      //         setShowIcon(false);
+      //       }, [assignedManagerId, assignedManagerName]);
 
-    //       const handleChange = (e) => {
-    //         const newValue = e.target.value;
-    //         setSelectedManager(newValue);
-    //         setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
-    //       };
+      //       const handleChange = (e) => {
+      //         const newValue = e.target.value;
+      //         setSelectedManager(newValue);
+      //         setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
+      //       };
 
-    //       const handleAssignClick = async () => {
-    //         if (selectedManager) {
-    //           const [managerid, assignee] = selectedManager.split("|");
+      //       const handleAssignClick = async () => {
+      //         if (selectedManager) {
+      //           const [managerid, assignee] = selectedManager.split("|");
 
-    //           if (selectedManager === "self") {
-    //             // Call the new API for self assignment
-    //             await handleSelfAssign(row.original.leadid);
-    //           } else {
-    //             handleAssignToChange(assignee, row.original.leadid, managerid);
-    //           }
+      //           if (selectedManager === "self") {
+      //             // Call the new API for self assignment
+      //             await handleSelfAssign(row.original.leadid);
+      //           } else {
+      //             handleAssignToChange(assignee, row.original.leadid, managerid);
+      //           }
 
-    //           // await handleAssignToChange(assignee, row.original.leadid, managerid);
+      //           // await handleAssignToChange(assignee, row.original.leadid, managerid);
 
-    //           // ✅ Update row data manually to trigger re-render
-    //           row.original.managerid = managerid;
-    //           row.original.assign_to_manager = assignee;
+      //           // ✅ Update row data manually to trigger re-render
+      //           row.original.managerid = managerid;
+      //           row.original.assign_to_manager = assignee;
 
-    //           // ✅ Update state to reflect change instantly
-    //           setSelectedManager(`${managerid}|${assignee}`);
-    //           setShowIcon(false);
-    //         }
-    //       };
+      //           // ✅ Update state to reflect change instantly
+      //           setSelectedManager(`${managerid}|${assignee}`);
+      //           setShowIcon(false);
+      //         }
+      //       };
 
-    //       return (
-    //         <div className="d-flex align-items-center">
-    //           <select
-    //             value={selectedManager}
-    //             onChange={handleChange}
-    //             className="form-select me-2"
-    //             style={{ maxWidth: "150px" }}
-    //           >
-    //             <option value="">Select Assignee</option>
-    //             <option value="self">Self</option>
-    //             {managers.map((manager, index) => (
-    //               <option key={index} value={`${manager.id}|${manager.name}`}>
-    //                 {manager.name}
-    //               </option>
-    //             ))}
-    //           </select>
-    //           {showIcon && (
-    //             <HiUserGroup
-    //               style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-    //               onClick={handleAssignClick}
-    //             />
-    //           )}
-    //         </div>
-    //       );
-    //     },
-    //   },
+      //       return (
+      //         <div className="d-flex align-items-center">
+      //           <select
+      //             value={selectedManager}
+      //             onChange={handleChange}
+      //             className="form-select me-2"
+      //             style={{ maxWidth: "150px" }}
+      //           >
+      //             <option value="">Select Assignee</option>
+      //             <option value="self">Self</option>
+      //             {managers.map((manager, index) => (
+      //               <option key={index} value={`${manager.id}|${manager.name}`}>
+      //                 {manager.name}
+      //               </option>
+      //             ))}
+      //           </select>
+      //           {showIcon && (
+      //             <HiUserGroup
+      //               style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
+      //               onClick={handleAssignClick}
+      //             />
+      //           )}
+      //         </div>
+      //       );
+      //     },
+      //   },
 
-    //   {
-    //     Header: "Associate",
-    //     Cell: ({ row }) => {
-    //       // Create a string value combining the associate id and name.
-    //       const initialAssociateValue = row.original.assignedSalesId
-    //         ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
-    //         : "";
+      //   {
+      //     Header: "Associate",
+      //     Cell: ({ row }) => {
+      //       // Create a string value combining the associate id and name.
+      //       const initialAssociateValue = row.original.assignedSalesId
+      //         ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
+      //         : "";
 
-    //       const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
-    //       const [associates, setAssociates] = useState([]);
-    //       const { fontSize } = useContext(FontSizeContext);
-    //       const [showIcon, setShowIcon] = useState(false);
+      //       const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
+      //       const [associates, setAssociates] = useState([]);
+      //       const { fontSize } = useContext(FontSizeContext);
+      //       const [showIcon, setShowIcon] = useState(false);
 
-    //       // Get the manager id to fetch the list of associates.
-    //       const managerId = row.original.managerid;
+      //       // Get the manager id to fetch the list of associates.
+      //       const managerId = row.original.managerid;
 
-    //       useEffect(() => {
-    //         if (managerId) {
-    //           fetch(`${baseURL}/associates/${managerId}`)
-    //             .then((response) => response.json())
-    //             .then((data) => setAssociates(data))
-    //             .catch((error) => console.error("Error fetching associates: ", error));
-    //         }
-    //       }, [managerId]);
+      //       useEffect(() => {
+      //         if (managerId) {
+      //           fetch(`${baseURL}/associates/${managerId}`)
+      //             .then((response) => response.json())
+      //             .then((data) => setAssociates(data))
+      //             .catch((error) => console.error("Error fetching associates: ", error));
+      //         }
+      //       }, [managerId]);
 
-    //       // When the row data changes, reset the select state and hide the icon.
-    //       useEffect(() => {
-    //         setSelectedAssociate(initialAssociateValue);
-    //         setShowIcon(false);
-    //       }, [row.original.assignedSalesId, row.original.assignedSalesName]);
+      //       // When the row data changes, reset the select state and hide the icon.
+      //       useEffect(() => {
+      //         setSelectedAssociate(initialAssociateValue);
+      //         setShowIcon(false);
+      //       }, [row.original.assignedSalesId, row.original.assignedSalesName]);
 
-    //       // When the user selects a different associate.
-    //       const handleChange = (e) => {
-    //         const newValue = e.target.value;
-    //         setSelectedAssociate(newValue);
-    //         // Show the reassign icon if the value is different than the original.
-    //         setShowIcon(newValue !== initialAssociateValue);
-    //       };
+      //       // When the user selects a different associate.
+      //       const handleChange = (e) => {
+      //         const newValue = e.target.value;
+      //         setSelectedAssociate(newValue);
+      //         // Show the reassign icon if the value is different than the original.
+      //         setShowIcon(newValue !== initialAssociateValue);
+      //       };
 
-    //       // When the reassign icon is clicked, update the DB and local state.
-    //       const handleAssignClick = async () => {
-    //         if (selectedAssociate) {
-    //           const [associateId, associateName] = selectedAssociate.split("|");
-    //           await handleAssignLead(row.original.leadid, { id: associateId, name: associateName });
-    //           // Update the row data manually
-    //           row.original.assignedSalesId = associateId;
-    //           row.original.assignedSalesName = associateName;
-    //           setSelectedAssociate(`${associateId}|${associateName}`);
-    //           setShowIcon(false);
-    //         }
-    //       };
+      //       // When the reassign icon is clicked, update the DB and local state.
+      //       const handleAssignClick = async () => {
+      //         if (selectedAssociate) {
+      //           const [associateId, associateName] = selectedAssociate.split("|");
+      //           await handleAssignLead(row.original.leadid, { id: associateId, name: associateName });
+      //           // Update the row data manually
+      //           row.original.assignedSalesId = associateId;
+      //           row.original.assignedSalesName = associateName;
+      //           setSelectedAssociate(`${associateId}|${associateName}`);
+      //           setShowIcon(false);
+      //         }
+      //       };
 
-    //       return (
-    //         <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-    //           <select
-    //             value={selectedAssociate}
-    //             onChange={handleChange}
-    //             className="form-select me-2"
-    //             style={{ maxWidth: "150px" , fontSize: fontSize}}
-    //           >
-    //             <option value="">Select Associate</option>
-    //             {associates.map((associate, index) => (
-    //               <option key={index} value={`${associate.id}|${associate.name}`}>
-    //                 {associate.name}
-    //               </option>
-    //             ))}
-    //           </select>
-    //           {showIcon && (
-    //             <HiUserGroup
-    //               style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-    //               onClick={handleAssignClick}
-    //             />
-    //           )}
-    //         </div>
-    //       );
-    //     },
-    //   },
+      //       return (
+      //         <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
+      //           <select
+      //             value={selectedAssociate}
+      //             onChange={handleChange}
+      //             className="form-select me-2"
+      //             style={{ maxWidth: "150px" , fontSize: fontSize}}
+      //           >
+      //             <option value="">Select Associate</option>
+      //             {associates.map((associate, index) => (
+      //               <option key={index} value={`${associate.id}|${associate.name}`}>
+      //                 {associate.name}
+      //               </option>
+      //             ))}
+      //           </select>
+      //           {showIcon && (
+      //             <HiUserGroup
+      //               style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
+      //               onClick={handleAssignClick}
+      //             />
+      //           )}
+      //         </div>
+      //       );
+      //     },
+      //   },
 
       {
         Header: "Actions",
@@ -746,6 +793,8 @@ const AdminViewLeads = () => {
                 <h3>My Lead Details</h3>
                 {message && <div className="alert alert-info">{message}</div>}
                 {/* <Button onClick={handleAddLead}>Add Leads</Button> */}
+                <button className="btn btn-success" onClick={downloadExcel}>
+                  <FaDownload /> Download Excel</button>
               </Col>
             </Row>
             <Row className="mb-3 align-items-center">
@@ -816,25 +865,25 @@ const AdminViewLeads = () => {
                 </select>
               </Col>
               <Col md={2}>
-                             <select
-                               className="form-select"
-                               value={filterOppStatus1}
-                               onChange={(e) => {
-                                 setFilterOppStatus1(e.target.value);
-                                 setFilterOppStatus2(""); // Reset secondary filter when primary changes
-                               }}
-                             >
-                               <option value="">Primary Status</option>
-                               <option value="new">New</option> {/* Pre-select New */}
-                               {dropdownOptions.primary
-                                 .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
-                                 .map((status) => (
-                                   <option key={status} value={status}>
-                                     {status}
-                                   </option>
-                                 ))}
-                             </select>
-                           </Col>
+                <select
+                  className="form-select"
+                  value={filterOppStatus1}
+                  onChange={(e) => {
+                    setFilterOppStatus1(e.target.value);
+                    setFilterOppStatus2(""); // Reset secondary filter when primary changes
+                  }}
+                >
+                  <option value="">Primary Status</option>
+                  <option value="new">New</option> {/* Pre-select New */}
+                  {dropdownOptions.primary
+                    .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
+                    .map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                </select>
+              </Col>
               <Col md={2}>
                 <select
                   className="form-select"

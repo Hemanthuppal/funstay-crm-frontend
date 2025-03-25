@@ -69,6 +69,13 @@ const EditOppLead = () => {
   });
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
+  const [isOriginCityValid, setIsOriginCityValid] = useState(true);
+  
+  const validateOriginCity = (value) => {
+    const regex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/; // Regex for "city, state, country"
+    return regex.test(value);
+  };  
+
 
   useEffect(() => {
     const checkDataExists = async () => {
@@ -120,6 +127,7 @@ const EditOppLead = () => {
           primarySource: leadData.primarySource || '',
           secondarysource: leadData.secondarysource || '',
         }));
+          
       } catch (err) {
         console.error("Error fetching lead data:", err);
         setError("Failed to fetch lead data.");
@@ -149,6 +157,9 @@ const EditOppLead = () => {
           notes: opportunityData.notes || '',
           reminder_setting: reminder,
         }));
+        // Validate the origincity after setting the form data
+        const isValid = validateOriginCity(opportunityData.origincity);
+        setIsOriginCityValid(isValid);
       } catch (err) {
         console.error("Error fetching opportunity data:", err);
         setError("Failed to fetch opportunity data.");
@@ -236,7 +247,11 @@ const EditOppLead = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
+    // Validate origincity field
+    if (name === "origincity") {
+      const isValid = validateOriginCity(value);
+      setIsOriginCityValid(isValid);
+    }
     if (name === "start_date") {
       const newStartDate = new Date(value);
       const today = new Date();
@@ -646,6 +661,11 @@ const EditOppLead = () => {
                       value={formData.origincity}
                       onChange={handleChange}
                     />
+                    {!isOriginCityValid && (
+      <div className="text-danger mt-2 small">
+        Warning: Please enter a valid city, state, and country format (e.g., "City, State, Country").
+      </div>
+    )}
                   </Form.Group>
                 </Col>
                 <Col md={4}>

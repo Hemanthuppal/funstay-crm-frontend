@@ -77,7 +77,7 @@ const EditOppLead = () => { //look
         const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
         // Check if the response status is 404
         if (response.status === 404) {
-          navigate("/not-found");
+          // navigate("/not-found");
           return;
         }
         const leadData = response.data;
@@ -105,7 +105,7 @@ const EditOppLead = () => { //look
       } catch (err) {
         console.error("Error fetching lead data:", err);
         if (err.response && err.response.status === 404) {
-          navigate("/not-found");
+          // navigate("/not-found");
         } else {
           setError("Failed to fetch lead data.");
         }

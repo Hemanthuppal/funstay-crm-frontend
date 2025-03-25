@@ -6,11 +6,14 @@ import "./AddLeads.css";
 import Navbar from "../../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../../../Apiservices/Api";
-import { AuthContext } from '../../../../AuthContext/AuthContext';
-import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
+import { AuthContext } from "../../../../AuthContext/AuthContext";
+import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 
 const DynamicForm = () => {
+  const [suggestions, setSuggestions] = useState([]); // Store matching customers
+  const [customers, setCustomers] = useState([]); // Store all customers from API
+  const [phoneSuggestions, setPhoneSuggestions] = useState([]);
   const [countryCodeOptions, setCountryCodeOptions] = useState([]);
   useEffect(() => {
     // Get all country codes and their calling codes
@@ -25,31 +28,48 @@ const DynamicForm = () => {
 
     setCountryCodeOptions(uniqueCodes);
   }, []);
-  const { userId, userName, userMobile, userEmail, userRole, assignManager, managerId, } = useContext(AuthContext);
+  const {
+    userId,
+    userName,
+    userMobile,
+    userEmail,
+    authToken,
+    userRole,
+    assignManager,
+    managerId,
+  } = useContext(AuthContext);
   const { themeColor } = useContext(ThemeContext);
   const [formData, setFormData] = useState({
     lead_type: "group",
-    name: '',
-    email: '',
-    phone_number: '',
-    country_code: '+91', // Default country code
-    primarySource: '',
-    secondarysource: '',
-    origincity: '',
+    name: "",
+    email: "",
+    phone_number: "",
+    country_code: "+91", // Default country code
+    primarySource: "",
+    secondarysource: "",
+    origincity: "",
     destination: [], // Now correctly initialized as an array
-    another_name: '',
-    another_email: '',
-    another_phone_number: '',
+    another_name: "",
+    another_email: "",
+    another_phone_number: "",
     corporate_id: 1,
-    description: '',
+    description: "",
     assignedSalesId: userId,
     assignedSalesName: userName,
     assign_to_manager: assignManager,
     managerid: managerId,
-    employee_id: null
+    employee_id: null,
   });
 
-  console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
+  console.log(
+    userId,
+    userName,
+    userMobile,
+    userEmail,
+    userRole,
+    assignManager,
+    managerId
+  );
   const [message, setMessage] = useState(""); // State for success/error message
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
@@ -64,56 +84,165 @@ const DynamicForm = () => {
     const { name, value } = e.target;
 
     if (name === "phone_number") {
-      // Allow only numeric input and limit to 10 digits
-      const formattedValue = value.replace(/\D/g, ""); // Remove non-numeric characters
+      const formattedValue = value.replace(/\D/g, "");
       if (formattedValue.length <= 10) {
         setFormData({ ...formData, [name]: formattedValue });
+        handlePhoneAutocomplete(formattedValue);
       }
+    } else if (name === "country_code") {
+      setFormData({ ...formData, country_code: value });
     } else {
       setFormData({ ...formData, [name]: value });
+
+      if (name === "name") {
+        handleAutocomplete(value);
+      }
     }
   };
 
-  
-      useEffect(() => {
-      const loadScript = (url, callback) => {
-        let script = document.createElement("script");
-        script.src = url;
-        script.async = true;
-        script.defer = true;
-        script.onload = callback;
-        document.body.appendChild(script);
-      };
-  
-      loadScript(
-        "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
-        () => {
-          if (window.google) {
-            const autocomplete = new window.google.maps.places.Autocomplete(
-              document.getElementById("origincity"),
-              { types: ["(cities)"] }
-            );
-  
-            autocomplete.addListener("place_changed", () => {
-              const place = autocomplete.getPlace();
-              if (place && place.address_components) {
-                let city = "", state = "", country = "";
-                place.address_components.forEach((component) => {
-                  if (component.types.includes("locality")) {
-                    city = component.long_name;
-                  } else if (component.types.includes("administrative_area_level_1")) {
-                    state = component.long_name;
-                  } else if (component.types.includes("country")) {
-                    country = component.long_name;
-                  }
-                });
-                handleChange({ target: { name: "origincity", value: `${city}, ${state}, ${country}` } });
-              }
-            });
-          }
-        }
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      console.log("Fetching customers..."); // Debugging step
+
+      const response = await axios.get(`${baseURL}/api/customers`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      console.log("API Response:", response); // Check entire response structure
+
+      // Ensure response.data exists and is an array before using map
+      if (response.status === 200 && Array.isArray(response.data)) {
+        const existingCustomers = response.data
+          .filter((customer) => customer.customer_status === "existing")
+          .map((customer) => ({
+            ...customer,
+            formattedId: `CUS${String(customer.id).padStart(4, "0")}`,
+          }));
+
+        console.log("Processed Customers:", existingCustomers); // Debugging
+        setCustomers(existingCustomers);
+      } else {
+        console.warn("Unexpected API response format:", response.data);
+        setCustomers([]); // Prevent undefined issues
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+
+      // More informative error handling
+      alert(
+        error.response?.data?.message ||
+          "Failed to fetch customers. Please check your internet connection or try again later."
       );
-    }, [handleChange]);
+
+      setCustomers([]); // Ensure state is updated on failure
+    }
+  };
+
+  // Filter matching names for autocomplete
+  const handleAutocomplete = (input) => {
+    if (!input.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const matches = customers.filter((customer) =>
+      customer.name.toLowerCase().includes(input.toLowerCase())
+    );
+    setSuggestions(matches);
+  };
+  const handlePhoneAutocomplete = (input) => {
+    if (!input.trim()) {
+      setPhoneSuggestions([]);
+      return;
+    }
+
+    const matches = customers.filter((customer) =>
+      customer.phone_number.includes(input)
+    );
+    setPhoneSuggestions(matches);
+  };
+
+  // const handleSelect = (customer) => {
+  //   setFormData({
+  //     name: customer.name,
+  //     email: customer.email,
+  //     phone_number: customer.phone_number || "",
+  //     country_code: customer.country_code || "+1",
+  //   });
+  //   setSuggestions([]);
+  // };
+
+  const handleSelect = (customer) => {
+    setFormData({
+      ...formData,
+      name: customer.name,
+      email: customer.email,
+      phone_number: customer.phone_number || "",
+      country_code: customer.country_code || "+1",
+      // assign_to_manager: userName,
+      // managerid: userId,
+      // manager_id: userId,
+      assignedSalesId: userId,
+      assignedSalesName: userName,
+    });
+    setSuggestions([]);
+    setPhoneSuggestions([]);
+  };
+
+  useEffect(() => {
+    const loadScript = (url, callback) => {
+      let script = document.createElement("script");
+      script.src = url;
+      script.async = true;
+      script.defer = true;
+      script.onload = callback;
+      document.body.appendChild(script);
+    };
+
+    loadScript(
+      "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+      () => {
+        if (window.google) {
+          const autocomplete = new window.google.maps.places.Autocomplete(
+            document.getElementById("origincity"),
+            { types: ["(cities)"] }
+          );
+
+          autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (place && place.address_components) {
+              let city = "",
+                state = "",
+                country = "";
+              place.address_components.forEach((component) => {
+                if (component.types.includes("locality")) {
+                  city = component.long_name;
+                } else if (
+                  component.types.includes("administrative_area_level_1")
+                ) {
+                  state = component.long_name;
+                } else if (component.types.includes("country")) {
+                  country = component.long_name;
+                }
+              });
+              handleChange({
+                target: {
+                  name: "origincity",
+                  value: `${city}, ${state}, ${country}`,
+                },
+              });
+            }
+          });
+        }
+      }
+    );
+  }, [handleChange]);
 
   const validateEmail = (email) => {
     // Basic email validation
@@ -137,7 +266,6 @@ const DynamicForm = () => {
     fetchDestinations();
   }, []);
 
-
   const handleDestinationChange = (selectedOptions) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -145,7 +273,15 @@ const DynamicForm = () => {
     }));
   };
 
-  console.log(userId, userName, userMobile, userEmail, userRole, assignManager, managerId,);
+  console.log(
+    userId,
+    userName,
+    userMobile,
+    userEmail,
+    userRole,
+    assignManager,
+    managerId
+  );
 
   const handleSubmit = async (e, action = "save") => {
     setLoading(true);
@@ -157,8 +293,6 @@ const DynamicForm = () => {
       setLoading(false);
       return;
     }
-
-
 
     // Validate email
     if (!validateEmail(formData.email)) {
@@ -173,47 +307,61 @@ const DynamicForm = () => {
       setLoading(false);
       return;
     }
-    const formattedDestinations = formData.destination.map((dest) => dest.label);
+
+    // Ensure destination is an array before mapping
+    const formattedDestinations = Array.isArray(formData.destination)
+      ? formData.destination.map((dest) => dest.label)
+      : [];
 
     try {
       const response = await axios.post(`${baseURL}/api/leads`, {
         ...formData,
         destination: formattedDestinations, // ✅ Send only labels to the backend
       });
+
       console.log(response.data);
       console.log(JSON.stringify(formData));
+
       // Set success message
       setMessage("Lead added successfully!");
       setTimeout(() => setMessage(""), 3000);
 
       // Reset form data
       setFormData({
-        name: '',
-        email: '',
-        phone_number: '',
-        country_code: '+91', // Reset to default country code
-        primarySource: '',
-        secondarysource: '',
-        another_name: '',
-        another_email: '',
-        another_phone_number: '',
-        origincity: '',
+        name: "",
+        email: "",
+        phone_number: "",
+        country_code: "+91",
+        primarySource: "",
+        secondarysource: "",
+        another_name: "",
+        another_email: "",
+        another_phone_number: "",
+        origincity: "",
         destination: [],
-        description: '',
+        description: "",
+        assignedSalesId: userId,
+        assignedSalesName: userName,
+        // assign_to_manager: "",
+        // managerid: "",
+        // manager_id: "",
       });
+
       if (action === "saveAndClose") {
         navigate("/View-lead");
       }
     } catch (error) {
       console.error("Error adding lead:", error);
-      // Set error message
-      setMessage("Error: Failed to add lead. Please try again.");
+
+      const errorMessage =
+        error.response?.data?.message ||
+        "Error: Failed to add lead. Please try again.";
+      setMessage(errorMessage);
       setTimeout(() => setMessage(""), 3000);
     } finally {
       setLoading(false);
     }
   };
-
 
   const renderForm = () => {
     const subDropdownOptions = {
@@ -222,7 +370,12 @@ const DynamicForm = () => {
       Community: ["BNI", "Rotary", "Lions", "Association", "Others"],
       "Purchased Leads": ["Tripcrafter", "Others"],
       "Social Media": ["Linkedin", "Others"],
-      Google: ["Google Organic", "Google Ad", "Youtube Organic", "Youtube Paid"],
+      Google: [
+        "Google Organic",
+        "Google Ad",
+        "Youtube Organic",
+        "Youtube Paid",
+      ],
       Meta: [
         "Facebook Organic",
         "Instagram Organic",
@@ -242,7 +395,6 @@ const DynamicForm = () => {
         setFormData({ ...formData, [name]: value, secondarysource: "" });
       }
     };
-
 
     return (
       <div className="addleads-form-grid">
@@ -268,10 +420,25 @@ const DynamicForm = () => {
             }}
             className={nameError ? "error-input" : ""} // Add class if error exists
           />
-          {nameError && <span style={{ color: "red", fontSize: "12px" }}>{nameError}</span>}
+          {nameError && (
+            <span style={{ color: "red", fontSize: "12px" }}>{nameError}</span>
+          )}
+          {suggestions.length > 0 && (
+            <div className="autocomplete-dropdown">
+              <ul>
+                {suggestions.map((customer) => (
+                  <li key={customer.id} onClick={() => handleSelect(customer)}>
+                    {customer.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div className="addleads-input-group">
-          <label>Email<span style={{ color: "red" }}> *</span></label>
+          <label>
+            Email<span style={{ color: "red" }}> *</span>
+          </label>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <input
               type="email"
@@ -289,7 +456,11 @@ const DynamicForm = () => {
               }}
             />
             {/* Show email error message below the input */}
-            {emailError && <span style={{ color: "red", fontSize: "12px" }}>{emailError}</span>}
+            {emailError && (
+              <span style={{ color: "red", fontSize: "12px" }}>
+                {emailError}
+              </span>
+            )}
           </div>
         </div>
         <div className="addleads-input-group">
@@ -351,6 +522,17 @@ const DynamicForm = () => {
           {phoneError && (
             <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>
           )}
+          {phoneSuggestions.length > 0 && (
+            <div className="autocomplete-dropdown">
+              <ul>
+                {phoneSuggestions.map((customer) => (
+                  <li key={customer.id} onClick={() => handleSelect(customer)}>
+                    {customer.phone_number} - {customer.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div className="addleads-input-group">
           <label>Primary Source</label>
@@ -375,23 +557,24 @@ const DynamicForm = () => {
         </div>
 
         {/* Conditionally render the subdropdown */}
-        {formData.primarySource && subDropdownOptions[formData.primarySource] && (
-          <div className="addleads-input-group">
-            <label>{formData.primarySource} SubSource</label>
-            <select
-              name="secondarysource"
-              value={formData.secondarysource || ""}
-              onChange={handleChange}
-            >
-              <option value="">Select SubSource</option>
-              {subDropdownOptions[formData.primarySource].map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        {formData.primarySource &&
+          subDropdownOptions[formData.primarySource] && (
+            <div className="addleads-input-group">
+              <label>{formData.primarySource} SubSource</label>
+              <select
+                name="secondarysource"
+                value={formData.secondarysource || ""}
+                onChange={handleChange}
+              >
+                <option value="">Select SubSource</option>
+                {subDropdownOptions[formData.primarySource].map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         {/* <div className="addleads-input-group">
           <label>Another Name</label>
           <input
@@ -438,7 +621,7 @@ const DynamicForm = () => {
           <label>Destination</label>
           <Select
             isMulti
-            options={destinationOptions} // 
+            options={destinationOptions} //
             value={formData.destination}
             onChange={handleDestinationChange}
           />
@@ -462,16 +645,29 @@ const DynamicForm = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="addleads-form-container">
-          <h2 className="addleads-form-header"style={{ "--theme-color": themeColor }}>Add Leads</h2>
+          <h2
+            className="addleads-form-header"
+            style={{ "--theme-color": themeColor }}
+          >
+            Add Leads
+          </h2>
           {error && <div className="alert alert-danger">{error}</div>}
-          {message && <div className="alert alert-info">{message}</div>}{/* Display message */}
+          {message && <div className="alert alert-info">{message}</div>}
+          {/* Display message */}
           <form onSubmit={handleSubmit} className="addleads-form">
             {renderForm()}
             <div className="addleads-form-footer">
-              <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => navigate(-1)}
+              >
                 Back
               </button>
-              <button className="btn btn-primary" type="submit" disabled={loading}>
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={loading}
+              >
                 {loading ? "Saving..." : "Save"}
               </button>
               <button
@@ -484,7 +680,6 @@ const DynamicForm = () => {
               </button>
             </div>
           </form>
-
         </div>
       </div>
     </div>
@@ -492,4 +687,3 @@ const DynamicForm = () => {
 };
 
 export default DynamicForm;
-

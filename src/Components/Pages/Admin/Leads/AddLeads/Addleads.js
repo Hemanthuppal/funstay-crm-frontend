@@ -51,7 +51,11 @@ const DynamicForm = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const [suggestions, setSuggestions] = useState([]); // Store matching customers
+  const [customers, setCustomers] = useState([]); // Store all customers from API
+  const [phoneSuggestions, setPhoneSuggestions] = useState([]);
   const nameInputRef = useRef(null);
+  const [data, setData] = useState([]);
   const [nameError, setNameError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -59,27 +63,172 @@ const DynamicForm = () => {
   const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "phone_number") {
+  //     // Remove non-numeric characters
+  //     const formattedValue = value.replace(/\D/g, "");
+  //     if (formattedValue.length <= 10) {
+  //       setFormData({ ...formData, [name]: formattedValue });
+  //     }
+  //   } else if (name === "managerid") {
+  //     const selectedEmployeeId = Number(value);
+  //     const selectedEmployee = managers.find(employee => employee.id === selectedEmployeeId);
+  //     setFormData({
+  //       ...formData,
+  //       managerid: selectedEmployeeId,
+  //       assign_to_manager: selectedEmployee ? selectedEmployee.name : "",
+  //     });
+  //   } else {
+  //     setFormData({ ...formData, [name]: value });
+
+  //     if (name === "name") {
+  //       handleAutocomplete(value); // Trigger autocomplete for name field
+  //     }
+  //   }
+  // };
+
+
+  // Fetch existing customer data from API when component mounts
+
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+
+  //   if (name === "phone_number") {
+  //     const formattedValue = value.replace(/\D/g, "");
+  //     if (formattedValue.length <= 10) {
+  //       setFormData({ ...formData, [name]: formattedValue });
+  //     }
+  //   } else if (name === "country_code") {
+  //     setFormData({ ...formData, country_code: value });
+  //   } else if (name === "managerid") {
+  //     const selectedEmployeeId = Number(value);
+  //     const selectedEmployee = managers.find(employee => employee.id === selectedEmployeeId);
+  //     setFormData({
+  //       ...formData,
+  //       managerid: selectedEmployeeId,
+  //       assign_to_manager: selectedEmployee ? selectedEmployee.name : "",
+  //     });
+  //   } else {
+  //     setFormData({ ...formData, [name]: value });
+  //     if (name === "name") {
+  //       handleAutocomplete(value);
+  //     }
+  //   }
+  // };
+  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     if (name === "phone_number") {
       const formattedValue = value.replace(/\D/g, "");
       if (formattedValue.length <= 10) {
         setFormData({ ...formData, [name]: formattedValue });
+        handlePhoneAutocomplete(formattedValue);
       }
-    } else if (name === "managerid") {
-      const selectedEmployeeId = Number(value);
-      const selectedEmployee = managers.find(employee => employee.id === selectedEmployeeId);
-      setFormData({
-        ...formData,
-        managerid: selectedEmployeeId,
-        assign_to_manager: selectedEmployee ? selectedEmployee.name : '',
-      });
+    } else if (name === "country_code") {
+      setFormData({ ...formData, country_code: value });
     } else {
       setFormData({ ...formData, [name]: value });
+
+      if (name === "name") {
+        handleAutocomplete(value);
+      }
     }
   };
-  
-    useEffect(() => {
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      console.log("Fetching customers..."); // Debugging step
+
+      const response = await axios.get(`${baseURL}/api/customers`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      console.log("API Response:", response); // Check entire response structure
+
+      // Ensure response.data exists and is an array before using map
+      if (response.status === 200 && Array.isArray(response.data)) {
+        const existingCustomers = response.data
+          .filter(customer => customer.customer_status === "existing")
+          .map(customer => ({
+            ...customer,
+            formattedId: `CUS${String(customer.id).padStart(4, '0')}`,
+          }));
+
+        console.log("Processed Customers:", existingCustomers); // Debugging
+        setCustomers(existingCustomers);
+      } else {
+        console.warn("Unexpected API response format:", response.data);
+        setCustomers([]); // Prevent undefined issues
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+
+      // More informative error handling
+      alert(
+        error.response?.data?.message ||
+        "Failed to fetch customers. Please check your internet connection or try again later."
+      );
+
+      setCustomers([]); // Ensure state is updated on failure
+    }
+  };
+
+
+  // Filter matching names for autocomplete
+  const handleAutocomplete = (input) => {
+    if (!input.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    const matches = customers.filter((customer) =>
+      customer.name.toLowerCase().includes(input.toLowerCase())
+    );
+    setSuggestions(matches);
+  };
+  const handlePhoneAutocomplete = (input) => {
+    if (!input.trim()) {
+      setPhoneSuggestions([]);
+      return;
+    }
+
+    const matches = customers.filter(customer =>
+      customer.phone_number.includes(input)
+    );
+    setPhoneSuggestions(matches);
+  };
+
+  // const handleSelect = (customer) => {
+  //   setFormData({
+  //     name: customer.name,
+  //     email: customer.email,
+  //     phone_number: customer.phone_number || "",
+  //     country_code: customer.country_code || "+1",
+  //   });
+  //   setSuggestions([]);
+  // };
+  const handleSelect = (customer) => {
+    setFormData({
+      name: customer.name,
+      email: customer.email,
+      phone_number: customer.phone_number || "",
+      country_code: customer.country_code || "+1",
+    });
+    setSuggestions([]);
+    setPhoneSuggestions([]);
+  };
+
+
+  useEffect(() => {
     const loadScript = (url, callback) => {
       let script = document.createElement("script");
       script.src = url;
@@ -160,10 +309,10 @@ const DynamicForm = () => {
         console.error("Error fetching destinations:", error);
       }
     };
-  
+
     fetchDestinations();
   }, []);
-  
+
 
   const handleDestinationChange = (selectedOptions) => {
     setFormData((prevData) => ({
@@ -184,8 +333,6 @@ const DynamicForm = () => {
       return;
     }
 
-   
-
     // Validate email
     if (!validateEmail(formData.email)) {
       setEmailError("Please enter a valid email address.");
@@ -193,46 +340,47 @@ const DynamicForm = () => {
       return;
     }
 
-     // Validate phone number
-     if (formData.phone_number.length !== 10) {
+    // Validate phone number
+    if (!formData.phone_number || formData.phone_number.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits.");
       setLoading(false);
       return;
     }
+
+    // ✅ Ensure `destination` exists and is an array before using `.map()`
+    const formattedDestinations = Array.isArray(formData.destination)
+      ? formData.destination.map((dest) => dest.label)
+      : [];
 
     const dataToSubmit = {
       ...formData,
       assign_to_manager: formData.assign_to_manager,
       manager_id: formData.managerid,
       admin: userName,
+      destination: formattedDestinations, // ✅ Send only labels to the backend
     };
 
-    const formattedDestinations = formData.destination.map((dest) => dest.label); 
-
     try {
-      const response = await axios.post(`${baseURL}/api/adminleads`, {
-        ...formData,
-        dataToSubmit,
-        destination: formattedDestinations, // ✅ Send only labels to the backend
-      });
+      const response = await axios.post(`${baseURL}/api/adminleads`, dataToSubmit);
+
       console.log(response.data);
       setMessage("Lead added successfully!");
 
-      // Clear form after successful submission
+      // ✅ Clear form after successful submission (Ensure `destination: []` remains)
       setFormData({
         lead_type: "group",
-        name: '',
-        email: '',
-        phone_number: '',
-        country_code: '+91',
-        primarySource: '',
-        secondarysource: '',
-        another_name: '',
-        another_email: '',
-        another_phone_number: '',
-        origincity: '',
-        destination: [],
-        description: '',
+        name: "",
+        email: "",
+        phone_number: "",
+        country_code: "+91",
+        primarySource: "",
+        secondarysource: "",
+        another_name: "",
+        another_email: "",
+        another_phone_number: "",
+        origincity: "",
+        destination: [], // ✅ Ensure it's an empty array
+        description: "",
         managerid: "",
         assign_to_manager: "",
       });
@@ -300,9 +448,22 @@ const DynamicForm = () => {
                 setNameError("");
               }
             }}
-            className={nameError ? "error-input" : ""} // Add class if error exists
+            className={nameError ? "error-input" : ""}
           />
-          {nameError && <span style={{ color: "red", fontSize: "12px" }}>{nameError}</span>}
+           {nameError && <span style={{ color: "red", fontSize: "12px" }}>{nameError}</span>}
+
+          {/* Autocomplete Suggestions - Scrollable Dropdown */}
+          {suggestions.length > 0 && (
+            <div className="autocomplete-dropdown">
+              <ul>
+                {suggestions.map((customer) => (
+                  <li key={customer.id} onClick={() => handleSelect(customer)}>
+                    {customer.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="addleads-input-group">
@@ -353,30 +514,30 @@ const DynamicForm = () => {
               name="phone_number"
               placeholder="Enter Phone Number"
               value={formData.phone_number}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (/^\d*$/.test(value)) {
-                  handleChange(e);
-                }
-              }}
-              onBlur={(e) => {
-                if (formData.phone_number.length !== 10) {
-                  setPhoneError("Please enter a valid number.");
-                } else {
-                  setPhoneError("");
-                }
-              }}
+              onChange={handleChange}
+              maxLength={10}
+              required
               style={{
                 flex: 1,
                 padding: "5px",
                 border: "1px solid #ccc",
                 borderRadius: "4px",
               }}
-              maxLength={10}
-              required
             />
           </div>
           {phoneError && <span style={{ color: "red", fontSize: "12px" }}>{phoneError}</span>}
+
+          {phoneSuggestions.length > 0 && (
+            <div className="autocomplete-dropdown">
+              <ul>
+              {phoneSuggestions.map((customer) => (
+                <li key={customer.id} onClick={() => handleSelect(customer)}>
+                  {customer.phone_number} - {customer.name}
+                </li>
+              ))}
+            </ul>
+            </div>
+          )} 
         </div>
         <div className="addleads-input-group">
           <label>Primary Source</label>
@@ -455,18 +616,18 @@ const DynamicForm = () => {
           />
         </div>
         <div className="addleads-input-group">
-        <label>Origin City</label>
-      <input
-        type="text"
-        id="origincity"
-        name="origincity"
-        placeholder="Enter Origin City"
-        value={formData.origincity}
-        onChange={handleChange}
-      />
+          <label>Origin City</label>
+          <input
+            type="text"
+            id="origincity"
+            name="origincity"
+            placeholder="Enter Origin City"
+            value={formData.origincity}
+            onChange={handleChange}
+          />
         </div>
         <div className="addleads-input-group">
-        <label>Destination</label>
+          <label>Destination</label>
           <Select
             isMulti
             options={destinationOptions} // 
@@ -489,11 +650,11 @@ const DynamicForm = () => {
   };
 
   return (
-    <div className="salesViewLeadsContainer">
+    <div className="salesViewLeadsContainer" >
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
         <div className="addleads-form-container">
-        <h2 className="addleads-form-header"style={{ "--theme-color": themeColor }}>Add Leads</h2>
+          <h2 className="addleads-form-header" style={{ "--theme-color": themeColor }}>Add Leads</h2>
           {error && <div className="alert alert-danger">{error}</div>}
           {message && <div className="alert alert-info">{message}</div>} {/* Display message */}
           <form onSubmit={(e) => handleSubmit(e, "save")} className="addleads-form">

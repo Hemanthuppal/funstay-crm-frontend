@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/Sales-ExecutiveNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit,FaDownload, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit, FaDownload, FaEye, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
 import { baseURL } from "../../../Apiservices/Api";
@@ -27,68 +27,74 @@ const Potentialleads = () => {
   const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate") || "");
   const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate") || "");
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate") || "");
-  const [showDateRange, setShowDateRange] = useState(false);
+  // const [showDateRange, setShowDateRange] = useState(false);
+  const [showDateRange, setShowDateRange] = useState(localStorage.getItem("showDateRange") === "true");
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]); // State for employees
 
- const downloadExcel = () => {
-     if (!filteredData || filteredData.length === 0) {
-       alert("No data available to export.");
-       return;
-     }
-   
-     // Define the fields to export
-     const fields = [ 
-       { key: "leadid", label: "LEAD ID", width: 15 },
-       { key: "name", label: "NAME", width: 20 },
-       { key: "email", label: "EMAIL", width: 25 },
-       { key: "country_code", label: "COUNTRY CODE", width: 10 },
-       { key: "phone_number", label: "PHONE NUMBER", width: 15 },
-       { key: "sources", label: "SOURCES", width: 20 },
-       { key: "another_name", label: "ANOTHER NAME", width: 20 },
-       { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
-       { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
+  // Save state to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem("showDateRange", showDateRange);
+  }, [showDateRange]);
+
+  const downloadExcel = () => {
+    if (!filteredData || filteredData.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+
+    // Define the fields to export
+    const fields = [
+      { key: "leadid", label: "LEAD ID", width: 15 },
+      { key: "name", label: "NAME", width: 20 },
+      { key: "email", label: "EMAIL", width: 25 },
+      { key: "country_code", label: "COUNTRY CODE", width: 10 },
+      { key: "phone_number", label: "PHONE NUMBER", width: 15 },
+      { key: "sources", label: "SOURCES", width: 20 },
+      { key: "another_name", label: "ANOTHER NAME", width: 20 },
+      { key: "another_email", label: "ANOTHER EMAIL", width: 25 },
+      { key: "another_phone_number", label: "ANOTHER PHONE NUMBER", width: 15 },
       //  { key: "description", label: "DESCRIPTION", width: 30 },
       //  { key: "origincity", label: "ORIGIN CITY", width: 15 },
       //  { key: "destination", label: "DESTINATION", width: 15 },
       //  { key: "created_at", label: "CREATED AT", width: 20 },
-       { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
-       { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
-       { key: "channel", label: "CHANNEL", width: 15 },
-       { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
-       { key: "travel_destination", label: "DESTINATION", width: 15 },
-       { key: "travel_created_at", label: "CREATED AT", width: 20 },
-       { key: "start_date", label: "START DATE", width: 20 },
-       { key: "end_date", label: "END DATE", width: 20 },
-       { key: "duration", label: "DURATION", width: 15 },
-       { key: "adults_count", label: "ADULTS COUNT", width: 15 },
-       { key: "children_count", label: "CHILDREN COUNT", width: 15 },
-       { key: "child_ages", label: "CHILD AGES", width: 20 },
-       { key: "approx_budget", label: "BUDGET", width: 15 },
-       { key: "travel_description", label: "DESCRIPTION", width: 20 },
-     ];
-   
-     // Transform the data to only include specified fields
-     const exportData = filteredData.map(row => {
-       let newRow = {};
-       fields.forEach(field => {
-         newRow[field.label] = row[field.key] || ""; // Use field label as header
-       });
-       return newRow;
-     });
-   
-     // Create a new workbook and worksheet
-     const wb = XLSX.utils.book_new();
-     const ws = XLSX.utils.json_to_sheet(exportData);
-   
-     // Apply column widths
-     ws["!cols"] = fields.map(field => ({ width: field.width }));
-   
-     // Append sheet and save file
-     XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
-     const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
-     XLSX.writeFile(wb, fileName);
-   };
+      { key: "primarySource", label: "PRIMARY SOURCE", width: 20 },
+      { key: "secondarysource", label: "SECONDARY SOURCE", width: 20 },
+      { key: "channel", label: "CHANNEL", width: 15 },
+      { key: "travel_origincity", label: "ORIGIN CITY", width: 15 },
+      { key: "travel_destination", label: "DESTINATION", width: 15 },
+      { key: "travel_created_at", label: "CREATED AT", width: 20 },
+      { key: "start_date", label: "START DATE", width: 20 },
+      { key: "end_date", label: "END DATE", width: 20 },
+      { key: "duration", label: "DURATION", width: 15 },
+      { key: "adults_count", label: "ADULTS COUNT", width: 15 },
+      { key: "children_count", label: "CHILDREN COUNT", width: 15 },
+      { key: "child_ages", label: "CHILD AGES", width: 20 },
+      { key: "approx_budget", label: "BUDGET", width: 15 },
+      { key: "travel_description", label: "DESCRIPTION", width: 20 },
+    ];
+
+    // Transform the data to only include specified fields
+    const exportData = filteredData.map(row => {
+      let newRow = {};
+      fields.forEach(field => {
+        newRow[field.label] = row[field.key] || ""; // Use field label as header
+      });
+      return newRow;
+    });
+
+    // Create a new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Apply column widths
+    ws["!cols"] = fields.map(field => ({ width: field.width }));
+
+    // Append sheet and save file
+    XLSX.utils.book_append_sheet(wb, ws, "Filtered Opportunities");
+    const fileName = `Filtered_Opportunities_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
 
   const fetchLeads = async () => {
@@ -455,23 +461,34 @@ const Potentialleads = () => {
               <h3>Opportunity Details</h3>
               {message && <div className="alert alert-info">{message}</div>}
               <button className="btn btn-success" onClick={downloadExcel}>
-              <FaDownload /> Download Excel</button>
+                <FaDownload /> Download Excel</button>
             </Col>
           </Row>
           <Row className="mb-3 align-items-center">
             <Col md={6} className="d-flex align-items-center gap-2">
-              <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => {
+                setSearchTerm(e.target.value);
+                localStorage.setItem("searchTerm", e.target.value);
+              }} />
               {showDateRange ? (
                 <FaTimes
                   onClick={() => {
                     setShowDateRange(false);
+                    localStorage.setItem("showDateRange", "false");
                     setFilterStartDate("");
                     setFilterEndDate("");
                     setAppliedFilterStartDate("");
                     setAppliedFilterEndDate("");
+                    localStorage.removeItem("filterStartDate");
+                    localStorage.removeItem("filterEndDate");
+                    localStorage.removeItem("appliedFilterStartDate");
+                    localStorage.removeItem("appliedFilterEndDate");
                   }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
               ) : (
-                <FaCalendarAlt onClick={() => setShowDateRange(true)} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
+                <FaCalendarAlt  onClick={() => {
+                  setShowDateRange(true);
+                  localStorage.setItem("showDateRange", "true");
+                }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
               )}
               {showDateRange && (
                 <div className="d-flex align-items-center gap-2">

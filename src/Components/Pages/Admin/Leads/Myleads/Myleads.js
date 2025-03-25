@@ -30,11 +30,19 @@ const AdminViewLeads = () => {
   const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-l1") || "");
   const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-l1") || "");
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-l1") || "");
-
-  const [showDateRange, setShowDateRange] = useState(false);
+  // const [showDateRange, setShowDateRange] = useState(false);
 
   const [data, setData] = useState([]); // Initialize to an empty array
 
+    const [showDateRange, setShowDateRange] = useState(
+      localStorage.getItem("showDateRange-l1") === "true"
+    );
+   
+    // Save state to localStorage when values change
+    useEffect(() => {
+      localStorage.setItem("showDateRange-l1", showDateRange);
+    }, [showDateRange]);
+  
   const downloadExcel = () => {
     if (!filteredData || filteredData.length === 0) {
       alert("No data available to export.");
@@ -804,23 +812,34 @@ const AdminViewLeads = () => {
                   className="form-control"
                   placeholder="Free Text Search..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    localStorage.setItem("searchTerm-l1", e.target.value);
+                  }}
                 />
                 {showDateRange ? (
                   <FaTimes
                     onClick={() => {
                       setShowDateRange(false);
+                      localStorage.setItem("showDateRange-l1", "false");
                       setFilterStartDate("");
                       setFilterEndDate("");
                       setAppliedFilterStartDate("");
                       setAppliedFilterEndDate("");
+                      localStorage.removeItem("filterStartDate-l1");
+                      localStorage.removeItem("filterEndDate-l1");
+                      localStorage.removeItem("appliedFilterStartDate-l1");
+                      localStorage.removeItem("appliedFilterEndDate-l1");
                     }}
                     style={{ cursor: "pointer", fontSize: "1.5rem" }}
                     title="Hide Date Range"
                   />
                 ) : (
                   <FaCalendarAlt
-                    onClick={() => setShowDateRange(true)}
+                  onClick={() => {
+                    setShowDateRange(true);
+                    localStorage.setItem("showDateRange-l1", "true");
+                  }}
                     style={{ cursor: "pointer", fontSize: "1.5rem" }}
                     title="Show Date Range"
                   />

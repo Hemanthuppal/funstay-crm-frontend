@@ -69,13 +69,18 @@ const EditOppLead = () => {
   };
 
   const [destinationOptions, setDestinationOptions] = useState([]); // Multi-select options
+  const [isOriginCityValid, setIsOriginCityValid] = useState(true);
 
+  const validateOriginCity = (value) => {
+    const regex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/; // Regex for "city, state, country"
+    return regex.test(value);
+  };
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/leads/${leadid}`);
         const leadData = response.data;
-
+  
         setFormData((prev) => ({
           ...prev,
           lead_type: leadData.lead_type || '',
@@ -98,6 +103,11 @@ const EditOppLead = () => {
           primarySource: leadData.primarySource || '',
           secondarysource: leadData.secondarysource || '',
         }));
+  
+        // Validate the origincity after setting the form data
+        const isValid = validateOriginCity(leadData.origincity);
+        setIsOriginCityValid(isValid);
+  
       } catch (err) {
         console.error("Error fetching lead data:", err);
         // If 404 error, navigate to Not Found page
@@ -107,9 +117,7 @@ const EditOppLead = () => {
           setError("Failed to fetch lead data.");
         }
       }
-    };
-
-    const fetchDestinationOptions = async () => {
+    }; const fetchDestinationOptions = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/destinations`);
         const options = response.data.map((dest) => ({
@@ -177,6 +185,12 @@ const EditOppLead = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  
+    // Validate origincity field
+    if (name === "origincity") {
+      const isValid = validateOriginCity(value);
+      setIsOriginCityValid(isValid);
+    }
   };
 
   useEffect(() => {
@@ -425,19 +439,27 @@ const EditOppLead = () => {
                     </Form.Group>
                   </Col>
                 )}
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Origin City</Form.Label>
-                    <Form.Control
-                      type="text"
-                      id="origincity"
-                      name="origincity"
-                      value={formData.origincity}
-                      onChange={handleChange}
-                      placeholder="Enter Origin City"
-                    />
-                  </Form.Group>
-                </Col>
+                
+                
+            
+<Col md={4}>
+  <Form.Group className="mb-3">
+    <Form.Label>Origin City</Form.Label>
+    <Form.Control
+      type="text"
+      id="origincity"
+      name="origincity"
+      value={formData.origincity}
+      onChange={handleChange}
+      placeholder="Enter Origin City"
+    />
+    {!isOriginCityValid && (
+      <div className="text-danger mt-2 small">
+        Warning: Please enter a valid city, state, and country format (e.g., "City, State, Country").
+      </div>
+    )}
+  </Form.Group>
+</Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Destination</Form.Label>

@@ -566,18 +566,15 @@ const Potentialleads = () => {
             alert("Please choose a file before saving.");
             return;
           }
-
           const formData = new FormData();
           formData.append("file", selectedFile);
           formData.append("email", row.original.email);
           formData.append("leadid", row.original.leadid);
-
           try {
             await axios.post(`${baseURL}/api/upload-quotation`, formData);
             await axios.post(`${baseURL}/api/update-email-status`, {
               leadid: row.original.leadid,
             });
-
             alert("File uploaded and email sent successfully!");
           } catch (error) {
             console.error("Error uploading file:", error);

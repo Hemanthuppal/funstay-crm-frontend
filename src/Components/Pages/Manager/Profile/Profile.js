@@ -4,9 +4,12 @@ import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import { AuthContext } from "../../../AuthContext/AuthContext";
 import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from "react-router-dom";
+import { ThemeContext } from "../../../Shared/Themes/ThemeContext";
+
 
 const ProfileForm = () => {
   const { authToken, userId } = useContext(AuthContext);
+  const { themeColor } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -114,7 +117,7 @@ const ProfileForm = () => {
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`SaleCustomer ${collapsed ? "collapsed" : ""}`}>
         <div className="profile-form-container">
-          <div className="profile-form-header">
+          <div className="profile-form-header"style={{ "--theme-color": themeColor }}>
             <h2>Profile Details</h2>
 
           </div>

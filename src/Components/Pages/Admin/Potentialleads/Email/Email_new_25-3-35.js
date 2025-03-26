@@ -7,7 +7,6 @@ import "./Email.css"; // Ensure this file exists
 
 const EmailHistory = () => {
   const { leadid } = useParams();
-  console.log("leadid", leadid);
   const location = useLocation();
   const { email } = location.state || {};
   const [emailHistory, setEmailHistory] = useState([]);
@@ -19,30 +18,20 @@ const EmailHistory = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    if (email && leadid) {
-      fetchEmailHistory(email, leadid);
+    if (email) {
+      fetchEmailHistory(email);
     }
-  }, [email, leadid]);
-  
+  }, [email]);
 
-  const fetchEmailHistory = async (email, leadid) => {
-    console.log("Fetching emails for:", email, leadid); // Check if leadid is correct before calling API
-
+  const fetchEmailHistory = async (email) => {
     try {
-        const response = await axios.get(`${baseURL}/api/email-history`, {
-            params: { email, leadid }
-        });
-
-        console.log("API Response:", response.data); // Verify response from backend
-        setEmailHistory(response.data);
+      const response = await axios.get(`${baseURL}/api/email-history?email=${email}`);
+      const sortedEmails = response.data.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      setEmailHistory(sortedEmails);
     } catch (error) {
-        console.error("Error fetching email history:", error);
+      console.error("Error fetching email history:", error);
     }
-};
-
-  
-  
-  
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });

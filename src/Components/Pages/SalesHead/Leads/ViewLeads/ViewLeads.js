@@ -544,13 +544,13 @@ const AdminViewLeads = () => {
       },
 
       {
-        Header: "Lead Primary Status",
+        Header: " Primary Status",
         accessor: "primaryStatus",
         
        
       },
       {
-        Header: "Lead Secondary Status",
+        Header: " Secondary Status",
       
         accessor: "secondaryStatus",
        

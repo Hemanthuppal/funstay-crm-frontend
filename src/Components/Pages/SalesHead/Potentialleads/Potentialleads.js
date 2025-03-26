@@ -518,11 +518,11 @@ const Potentialleads = () => {
 
 
     {
-      Header: "Opportunity Status 1",
+      Header: "Primary Status ",
       accessor: "opportunity_status1",
     },
     {
-      Header: "Opportunity Status 2",
+      Header: "Secondary Status ",
       accessor: "opportunity_status2",
       
     },

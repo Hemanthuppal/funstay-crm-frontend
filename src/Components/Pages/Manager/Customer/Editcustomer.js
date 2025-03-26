@@ -31,6 +31,10 @@ const EditLeadOppView = () => {
     // const customerId = location.state?.id || null;
     const { customerId } = useParams();
     const [countryCodeOptions, setCountryCodeOptions] = useState([]);
+    const validateOriginCity = (value) => {
+        const regex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/; // Regex for "city, state, country"
+        return regex.test(value);
+      };
 
 
     useEffect(() => {
@@ -127,6 +131,10 @@ const EditLeadOppView = () => {
 
     const handleOpportunityChange = (index, e) => {
         const { name, value } = e.target;
+        if (name === "origincity") {
+            const isValid = validateOriginCity(value);
+            setIsOriginCityValid(isValid);
+          }
         const updatedOpportunities = [...travelOpportunity];
         const currentTrip = updatedOpportunities[index];
 
@@ -279,6 +287,60 @@ const EditLeadOppView = () => {
             return updatedOpportunities;
         });
     };
+
+    const [isOriginCityValid, setIsOriginCityValid] = useState(true);
+    
+        useEffect(() => {
+            const loadScript = (url, callback) => {
+                let script = document.createElement("script");
+                script.src = url;
+                script.async = true;
+                script.defer = true;
+                script.onload = callback;
+                document.body.appendChild(script);
+            };
+    
+            loadScript(
+                "https://maps.googleapis.com/maps/api/js?key=AIzaSyB-AttzsuR48YIyyItx6x2JSN_aigxcC0E&libraries=places",
+                () => {
+                    if (window.google) {
+                        travelOpportunity.forEach((trip, index) => {
+                            const autocomplete = new window.google.maps.places.Autocomplete(
+                                document.getElementById(`origincity-${index}`),
+                                { types: ["(cities)"] }
+                            );
+    
+                            autocomplete.addListener("place_changed", () => {
+                                const place = autocomplete.getPlace();
+                                if (place && place.address_components) {
+                                    let city = "", state = "", country = "";
+                                    place.address_components.forEach((component) => {
+                                        if (component.types.includes("locality")) {
+                                            city = component.long_name;
+                                        } else if (component.types.includes("administrative_area_level_1")) {
+                                            state = component.long_name;
+                                        } else if (component.types.includes("country")) {
+                                            country = component.long_name;
+                                        }
+                                    });
+    
+                                    // Create a synthetic event object
+                                    const syntheticEvent = {
+                                        target: {
+                                            name: "origincity",
+                                            value: `${city}, ${state}, ${country}`
+                                        }
+                                    };
+    
+                                    // Call the handleOpportunityChange with the synthetic event
+                                    handleOpportunityChange(index, syntheticEvent);
+                                }
+                            });
+                        });
+                    }
+                }
+            );
+        }, [travelOpportunity]);
 
     return (
         <div className="salesViewLeadsContainer">
@@ -501,15 +563,21 @@ const EditLeadOppView = () => {
                                                             <Row>
                                                                 <Col md={6}>
                                                                     <Form.Group>
-                                                                        <Form.Label>Origin City</Form.Label>
-                                                                        <Form.Control
-                                                                            type="text"
-                                                                            name="origincity"
-                                                                            value={trip.origincity || ""}
-                                                                            onChange={(e) => handleOpportunityChange(index, e)}
-                                                                            disabled={!editOpportunityMode[index]}
-                                                                        />
-                                                                    </Form.Group>
+                                                                                                                        <Form.Label>Origin City</Form.Label>
+                                                                                                                        <Form.Control
+                                                                                                                            type="text"
+                                                                                                                            name="origincity"
+                                                                                                                            id={`origincity-${index}`} // Unique ID for each input
+                                                                                                                            value={trip.origincity || ""}
+                                                                                                                            onChange={(e) => handleOpportunityChange(index, e)}
+                                                                                                                            disabled={!editOpportunityMode[index]}
+                                                                                                                        />
+                                                                                                                        {!isOriginCityValid && (
+                                                                                                                            <div className="text-danger mt-2 small">
+                                                                                                                                Warning: Please enter a valid city, state, and country format (e.g., "City, State, Country").
+                                                                                                                            </div>
+                                                                                                                        )}
+                                                                                                                    </Form.Group>
                                                                 </Col>
                                                                 <Col md={6}>
                                                                     <Form.Group>

@@ -26,7 +26,7 @@ const AdminViewLeads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("filterDestination-1") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "new");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("filterOppStatus1-1") || "New");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("filterOppStatus2-1") || "");
   const [filterManager, setFilterManager] = useState(localStorage.getItem("filterManager-1") || "");
   const [filterAssignee, setFilterAssignee] = useState(localStorage.getItem("filterAssignee-1") || "");
@@ -395,7 +395,7 @@ const AdminViewLeads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("new"); // Reset to "new" when filters are cleared
+    setFilterOppStatus1("New"); // Reset to "new" when filters are cleared
     setFilterOppStatus2("");
     setFilterManager("");
     setFilterAssignee("");
@@ -416,7 +416,7 @@ const AdminViewLeads = () => {
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-      const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
+      const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "New";
 
       const matchesPrimaryStatus =
         !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
@@ -903,7 +903,7 @@ const AdminViewLeads = () => {
                   }}
                 >
                   <option value="">Primary Status</option>
-                  <option value="new">New</option> {/* Pre-select New */}
+                  <option value="New">New</option> {/* Pre-select New */}
                   {dropdownOptions.primary
                     .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
                     .map((status) => (

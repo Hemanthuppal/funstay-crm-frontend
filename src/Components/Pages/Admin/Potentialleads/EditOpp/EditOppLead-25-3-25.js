@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect,useContext } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import Select from "react-select";
@@ -11,8 +11,9 @@ import { baseURL } from "../../../../Apiservices/Api";
 import { getCountries, getCountryCallingCode } from "libphonenumber-js";
 import { ThemeContext } from "../../../../Shared/Themes/ThemeContext";
 
-const EditOppLead = () => {
-
+const EditOppLead = () => { //look
+  const location = useLocation();
+  // const { leadid } = location.state;
   const { leadid } = useParams();
   const navigate = useNavigate();
   const { themeColor } = useContext(ThemeContext);
@@ -48,9 +49,9 @@ const EditOppLead = () => {
     another_phone_number: '',
     corporate_id: '',
     primaryStatus: '',
-    secondaryStatus: '',
+    secondaryStatus: '', 
     origincity: '',
-    destination: [],
+    destination: [], 
     start_date: '',
     end_date: '',
     duration: '',
@@ -61,7 +62,7 @@ const EditOppLead = () => {
 
     notes: '',
     comments: '',
-    reminder_setting: '',
+    reminder_setting: '', 
     opportunity_status1: '',
     opportunity_status2: '',
     primarySource: '',
@@ -69,27 +70,23 @@ const EditOppLead = () => {
   });
   const [error, setError] = useState(null);
   const [message, setMessage] = useState("");
-  const [isOriginCityValid, setIsOriginCityValid] = useState(true);
-
-  const validateOriginCity = (value) => {
-    const regex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/; // Regex for "city, state, country"
-    return regex.test(value);
-  };
+   const [isOriginCityValid, setIsOriginCityValid] = useState(true);
+  
+    const validateOriginCity = (value) => {
+      const regex = /^[a-zA-Z\s]+,\s*[a-zA-Z\s]+,\s*[a-zA-Z\s]+$/; // Regex for "city, state, country"
+      return regex.test(value);
+    };
 
   useEffect(() => {
     const fetchLeadData = async () => {
       try {
         const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
-        console.log(`Fetching: ${baseURL}/api/get-lead-data/${leadid}`);
         // Check if the response status is 404
         if (response.status === 404) {
           // navigate("/not-found");
           return;
         }
-
         const leadData = response.data;
-        console.log("Lead ID from params:", leadid);
-
 
         setFormData((prev) => ({
           ...prev,
@@ -114,6 +111,7 @@ const EditOppLead = () => {
         // Validate the origincity after setting the form data
         const isValid = validateOriginCity(leadData.origincity);
         setIsOriginCityValid(isValid);
+  
       } catch (err) {
         console.error("Error fetching lead data:", err);
         if (err.response && err.response.status === 404) {
@@ -171,60 +169,56 @@ const EditOppLead = () => {
     fetchDestinationOptions();
   }, [leadid]);
 
-  const [destinationOptions, setDestinationOptions] = useState([]);
-  const [invalidDestinations, setInvalidDestinations] = useState([]);
-
-  // Update your existing useEffect that fetches opportunity data
-  useEffect(() => {
-    const fetchOpportunityData = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
-        const opportunityData = response.data;
-
-        // Convert stored destinations to select format
-        const initialDestinations = opportunityData.destination
-          ? opportunityData.destination.split(", ").map(item => ({ value: item, label: item }))
-          : [];
-
-        // Check for invalid destinations after options are loaded
-        if (destinationOptions.length > 0 && initialDestinations.length > 0) {
-          const invalid = initialDestinations.filter(dest =>
-            !destinationOptions.some(option => option.value === dest.value)
-          ).map(dest => dest.value);
-
-          setInvalidDestinations(invalid);
-        }
-
-        // Rest of your existing data setting...
-      } catch (err) {
-        console.error("Error fetching opportunity data:", err);
-        setError("Failed to fetch opportunity data.");
-      }
-    };
-
-    fetchOpportunityData();
-  }, [leadid, destinationOptions]);
-
-
-  useEffect(() => {
-    // Check destinations when either destinations or options change
+ const [destinationOptions, setDestinationOptions] = useState([]);
+ const [invalidDestinations, setInvalidDestinations] = useState([]);
+ 
+ 
+ useEffect(() => {
+   const fetchOpportunityData = async () => {
+     try {
+       const response = await axios.get(`${baseURL}/api/get-lead-data/${leadid}`);
+       const opportunityData = response.data;
+       
+       
+       const initialDestinations = opportunityData.destination 
+         ? opportunityData.destination.split(", ").map(item => ({ value: item, label: item }))
+         : [];
+ 
+       
+       if (destinationOptions.length > 0 && initialDestinations.length > 0) {
+         const invalid = initialDestinations.filter(dest => 
+           !destinationOptions.some(option => option.value === dest.value)
+         ).map(dest => dest.value);
+         
+         setInvalidDestinations(invalid);
+       }
+ 
+     } catch (err) {
+       console.error("Error fetching opportunity data:", err);
+       setError("Failed to fetch opportunity data.");
+     }
+   };
+ 
+   fetchOpportunityData();
+ }, [leadid, destinationOptions]);
+useEffect(() => {
+    
     const invalid = formData.destination
-      .filter(dest =>
+      .filter(dest => 
         !destinationOptions.some(option => option.value === dest.value)
       )
       .map(dest => dest.value);
-
+    
     setInvalidDestinations(invalid);
   }, [formData.destination, destinationOptions]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Validate origincity field
-    if (name === "origincity") {
-      const isValid = validateOriginCity(value);
-      setIsOriginCityValid(isValid);
-    }
-
+ // Validate origincity field
+ if (name === "origincity") {
+  const isValid = validateOriginCity(value);
+  setIsOriginCityValid(isValid);
+}
     if (name === "start_date") {
       const newStartDate = new Date(value);
       const today = new Date();
@@ -370,7 +364,7 @@ const EditOppLead = () => {
   const handleMultiSelectChange = (selectedOptions) => {
     setFormData((prev) => ({
       ...prev,
-      destination: selectedOptions || [], // ✅ Always an array, never undefined
+      destination: selectedOptions || [], 
     }));
   };
 
@@ -430,12 +424,12 @@ const EditOppLead = () => {
 
   const [loading, setLoading] = useState(false);
   const handleSubmitAndClose = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault(); 
     setLoading(true);
 
     try {
-      await handleSubmit(e); // Call the original handleSubmit function
-      navigate("/a-potential-leads"); // Redirect to leads list page after saving
+      await handleSubmit(e); 
+      navigate("/a-potential-leads"); 
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -642,31 +636,31 @@ const EditOppLead = () => {
                       value={formData.origincity}
                       onChange={handleChange}
                     />
-                    {!isOriginCityValid && (
-                      <div className="text-danger mt-2 small">
-                        Warning: Please enter a valid city, state, and country format (e.g., "City, State, Country").
-                      </div>
-                    )}
+                     {!isOriginCityValid && (
+      <div className="text-danger mt-2 small">
+        Warning: Please enter a valid city, state, and country format (e.g., "City, State, Country").
+      </div>
+    )}
                   </Form.Group>
                 </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Destination</Form.Label>
-                    <Select
-                      isMulti
-                      name="destination"
-                      options={destinationOptions}
-                      value={formData.destination}
-                      onChange={handleMultiSelectChange}
-                    />
-                    {invalidDestinations.length > 0 && (
-                      <div className="text-danger mt-2">
-                        Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
-                        Please verify or update them.
-                      </div>
-                    )}
-                  </Form.Group>
-                </Col>
+                 <Col md={4}>
+                               <Form.Group className="mb-3">
+                 <Form.Label>Destination</Form.Label>
+                 <Select
+                   isMulti
+                   name="destination"
+                   options={destinationOptions}
+                   value={formData.destination}
+                   onChange={handleMultiSelectChange}
+                 />
+                 {invalidDestinations.length > 0 && (
+                   <div className="text-danger mt-2">
+                     Warning: These destinations are not in our system: {invalidDestinations.join(', ')}.
+                     Please verify or update them.
+                   </div>
+                 )}
+               </Form.Group>
+                               </Col>
                 <Col md={4}>
                   <Form.Group className="mb-3">
                     <Form.Label>Start Date</Form.Label>

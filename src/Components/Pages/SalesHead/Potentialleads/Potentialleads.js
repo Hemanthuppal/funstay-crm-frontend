@@ -518,249 +518,35 @@ const Potentialleads = () => {
 
 
     {
-      Header: "Opportunity Status",
-      accessor: "opportunityStatus",
-      Cell: ({ row }) => {
-        const { fontSize } = useContext(FontSizeContext);
-        const primaryStatus = row.original.opportunity_status1;
-        const secondaryStatus = row.original.opportunity_status2;
-        const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
-        const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
-
-        return (
-          <div className="d-flex align-items-center gap-2" style={{ fontSize: fontSize }}>
-            <select value={primaryStatus}  className="form-select" style={{ fontSize: fontSize }} >
-              <option value="">Select Primary Status</option>
-              {dropdownOptions.primary.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-            <select value={secondaryStatus}  className="form-select" disabled={isSecondaryDisabled} style={{ fontSize: fontSize }}>
-              <option value="">Select Secondary Status</option>
-              {secondaryOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
-        );
-      },
+      Header: "Primary Status ",
+      accessor: "opportunity_status1",
+    },
+    {
+      Header: "Secondary Status ",
+      accessor: "opportunity_status2",
+      
     },
     {
       Header: "Quotation",
       accessor: "quotation_id",
-      // minWidth: 150, // Reduce width (adjust as needed)
-      // maxWidth: 180, // Limit max width
-      // width: 160, // Set an approximate fixed width
-      // Cell: ({ row }) => {
-      //   const navigate = useNavigate();
-      //   const [selectedFile, setSelectedFile] = useState(null);
-      //   const [emailSent, setEmailSent] = useState(row.original.email_sent);
-
-
-      //   const handleFileChange = (event) => {
-      //     setSelectedFile(event.target.files[0]);
-      //   };
-
-      //   const handleUpload = async () => {
-      //     if (!selectedFile) {
-      //       alert("Please choose a file before saving.");
-      //       return;
-      //     }
-      //     const formData = new FormData();
-      //     formData.append("file", selectedFile);
-      //     formData.append("email", row.original.email);
-      //     formData.append("leadid", row.original.leadid);
-      //     try {
-      //       await axios.post(`${baseURL}/api/upload-quotation`, formData);
-      //       await axios.post(`${baseURL}/api/update-email-status`, {
-      //         leadid: row.original.leadid,
-      //       });
-      //       alert("File uploaded and email sent successfully!");
-      //     } catch (error) {
-      //       console.error("Error uploading file:", error);
-      //       alert("Error sending email.");
-      //     }
-      //   };
-
-      //   const handleViewHistory = () => {
-      //     navigate(`/email-history/${row.original.leadid}`, { state: { email: row.original.email } });
-      //   };
-
-
-      //   return (
-      //     <div style={{ display: "flex", alignItems: "center", gap: "5px", flexWrap: "nowrap" }}>
-      //       {emailSent ? (
-      //         <button
-      //           onClick={handleViewHistory}
-      //           style={{ background: "none", border: "none", cursor: "pointer", padding: "5px" }}
-      //         >
-      //           <FaHistory size={16} color="blue" />
-      //         </button>
-      //       ) : (
-      //         <>
-      //           <input type="file" onChange={handleFileChange} style={{ width: "100px" }} />
-      //           <button
-      //             onClick={handleUpload}
-      //             style={{ background: "none", border: "none", cursor: "pointer", padding: "5px" }}
-      //           >
-      //             <FaSave size={16} color="green" /> {/* Reduced icon size */}
-      //           </button>
-      //         </>
-      //       )}
-      //     </div>
-      //   );
-      // },
+      
     },
     {
       Header: "Manager ",
-      Cell: ({ row }) => {
-        const assignedManagerId = row.original.managerid || "";
-        const assignedManagerName = row.original.assign_to_manager || "";
-
-        const [selectedManager, setSelectedManager] = useState(
-          assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-        );
-        const [showIcon, setShowIcon] = useState(false);
-
-        useEffect(() => {
-          setSelectedManager(
-            assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-          );
-          setShowIcon(false);
-        }, [assignedManagerId, assignedManagerName]);
-
-        // const handleChange = (e) => {
-        //   const newValue = e.target.value;
-        //   setSelectedManager(newValue);
-        //   setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
-        // };
-
-        // const handleAssignClick = async () => {
-        //   if (selectedManager) {
-        //     const [managerid, assignee] = selectedManager.split("|");
-
-        //     if (selectedManager == "self") {
-        //       // Call the new API for self assignment
-        //       await handleSelfAssign(row.original.leadid);
-        //     } else {
-        //       handleAssignToChange(assignee, row.original.leadid, managerid, row.original.status,);
-        //     }
-
-        //     // await handleAssignToChange(assignee, row.original.leadid, managerid);
-
-        //     // ✅ Update row data manually to trigger re-render
-        //     row.original.managerid = managerid;
-        //     row.original.assign_to_manager = assignee;
-
-        //     // ✅ Update state to reflect change instantly
-        //     setSelectedManager(`${managerid}|${assignee}`);
-        //     setShowIcon(false);
-        //   }
-        // };
-
-        return (
-          <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-            <select
-              value={selectedManager}
-              // onChange={handleChange}
-              className="form-select me-2"
-              style={{ maxWidth: "150px", fontSize: fontSize }}
-            >
-              <option value="">Select Assignee</option>
-              <option value="self">Self</option>
-              {managers.map((manager, index) => (
-                <option key={index} value={`${manager.id}|${manager.name}`}>
-                  {manager.name}
-                </option>
-              ))}
-            </select>
-            {/* {showIcon && (
-              <HiUserGroup
-                style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-                onClick={handleAssignClick}
-              />
-            )} */}
-          </div>
-        );
-      },
+      accessor: "assign_to_manager",
+      
     },
 
     {
       Header: "Associate",
-      Cell: ({ row }) => {
-        const initialAssociateValue = row.original.assignedSalesId
-          ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
-          : "";
-
-        const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
-        const [showIcon, setShowIcon] = useState(false);
-
-        const managerId = row.original.managerid;
-        const associates = managerId ? associatesByManager[managerId] || [] : [];
-
-        useEffect(() => {
-          setSelectedAssociate(initialAssociateValue);
-          setShowIcon(false);
-        }, [row.original.assignedSalesId, row.original.assignedSalesName]);
-
-        // const handleChange = (e) => {
-        //   const newValue = e.target.value;
-        //   setSelectedAssociate(newValue);
-        //   setShowIcon(newValue !== initialAssociateValue);
-        // };
-
-        // const handleAssignClick = async () => {
-        //   if (selectedAssociate) {
-        //     const [associateId, associateName] = selectedAssociate.split("|");
-        //     await handleAssignLead(row.original.leadid, { id: associateId, name: associateName }, row.original.status);
-        //     // No need to update row.original directly; state is already updated in handleAssignLead
-        //     setShowIcon(false);
-        //   }
-        // };
-
-        return (
-          <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-            <select
-              value={selectedAssociate}
-              // onChange={handleChange}
-              className="form-select me-2" style={{ fontSize: fontSize }}
-            >
-              <option value="">Select Associate</option>
-              {associates.map((associate, index) => (
-                <option key={index} value={`${associate.id}|${associate.name}`}>
-                  {associate.name}
-                </option>
-              ))}
-            </select>
-            {/* {showIcon && (
-              <HiUserGroup
-                style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-                onClick={handleAssignClick}
-              />
-            )} */}
-          </div>
-        );
-      },
+      accessor: "assignedSalesName",
+     
     },
-    // {
-    //   Header: "Action",
-    //   Cell: ({ row }) => (
-    //     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-    //       {/* <FaEdit style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleEdit(row.original.leadid)} /> */}
-    //       {/* <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/a-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
-    //       <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleArchive(row.original.leadid)} />
-    //       <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/a-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} /> */}
-    //     </div>
-    //   ),
-    // },
+    
 
   ], [dropdownOptions]);
 
-  // const uniqueDestinations = useMemo(() => {
-  //   const normalizedDestinations = data.map((item) => item.travel_destination.trim().toLowerCase());
-  //   const uniqueNormalizedDestinations = [...new Set(normalizedDestinations)];
-  //   return uniqueNormalizedDestinations.map((dest) => dest.charAt(0).toUpperCase() + dest.slice(1));
-  // }, [data]);
+  
 
   const uniqueDestinations = useMemo(() => {
     // Filter out empty destinations and normalize valid ones

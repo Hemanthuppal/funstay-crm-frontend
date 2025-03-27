@@ -233,7 +233,7 @@ const AdminViewLeads = () => {
         const response = await fetch(`${webhookUrl}/api/enquiries`);
         const data = await response.json();
 
-        const filteredData = data.filter((enquiry) => enquiry.adminAssign !== 'admin' && enquiry.status == 'lead');
+        const filteredData = data.filter((enquiry) =>  enquiry.status == 'lead');
         setData(filteredData);
       } catch (error) {
         console.error('Error fetching enquiries:', error);
@@ -544,49 +544,16 @@ const AdminViewLeads = () => {
       },
 
       {
-        Header: "Lead Status",
-        Cell: ({ row }) => {
-          const { fontSize } = useContext(FontSizeContext);
-          const primaryStatus = row.original.primaryStatus;
-          const secondaryStatus = row.original.secondaryStatus;
-          const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
-          const isSecondaryDisabled = !primaryStatus || secondaryOptions.length == 0;
-
-          return (
-            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}
-            >
-              <select
-                value={primaryStatus}
-                // onChange={(e) =>
-                //   handlePrimaryStatusChange(e.target.value, row.original.leadid)
-                // }
-                className="form-select me-2" style={{ fontSize: fontSize }}
-              >
-                {!primaryStatus && <option value="">Select Primary Status</option>}
-                {dropdownOptions.primary.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={secondaryStatus}
-                // onChange={(e) =>
-                //   handleSecondaryStatusChange(e.target.value, row.original.leadid)
-                // }
-                className="form-select" style={{ fontSize: fontSize }}
-                disabled={isSecondaryDisabled}
-              >
-                {!secondaryStatus && <option value="">Select Secondary Status</option>}
-                {secondaryOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-          );
-        },
+        Header: " Primary Status",
+        accessor: "primaryStatus",
+        
+       
+      },
+      {
+        Header: " Secondary Status",
+      
+        accessor: "secondaryStatus",
+       
       },
 
       {
@@ -602,161 +569,17 @@ const AdminViewLeads = () => {
 
       {
         Header: "Manager ",
-        Cell: ({ row }) => {
-          const { fontSize } = useContext(FontSizeContext);
-          const assignedManagerId = row.original.managerid || "";
-          const assignedManagerName = row.original.assign_to_manager || "";
-
-          const [selectedManager, setSelectedManager] = useState(
-            assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-          );
-          const [showIcon, setShowIcon] = useState(false);
-
-          useEffect(() => {
-            setSelectedManager(
-              assignedManagerId ? `${assignedManagerId}|${assignedManagerName}` : ""
-            );
-            setShowIcon(false);
-          }, [assignedManagerId, assignedManagerName]);
-
-          // const handleChange = (e) => {
-          //   const newValue = e.target.value;
-          //   setSelectedManager(newValue);
-          //   setShowIcon(newValue !== `${assignedManagerId}|${assignedManagerName}`);
-          // };
-
-          // const handleAssignClick = async () => {
-          //   if (selectedManager) {
-          //     const [managerid, assignee] = selectedManager.split("|");
-
-          //     if (selectedManager == "self") {
-          //       // Call the new API for self assignment
-          //       await handleSelfAssign(row.original.leadid);
-          //     } else {
-          //       handleAssignToChange(assignee, row.original.leadid, managerid, row.original.status,);
-          //     }
-
-          //     // await handleAssignToChange(assignee, row.original.leadid, managerid);
-
-          //     // ✅ Update row data manually to trigger re-render
-          //     row.original.managerid = managerid;
-          //     row.original.assign_to_manager = assignee;
-
-          //     // ✅ Update state to reflect change instantly
-          //     setSelectedManager(`${managerid}|${assignee}`);
-          //     setShowIcon(false);
-          //   }
-          // };
-
-          return (
-            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
-              <select
-                value={selectedManager}
-                // onChange={handleChange}
-                className="form-select me-2"
-                style={{ maxWidth: "150px", fontSize: fontSize }}
-              >
-                <option value="">Select Assignee</option>
-                <option value="self">Self</option>
-                {managers.map((manager, index) => (
-                  <option key={index} value={`${manager.id}|${manager.name}`}>
-                    {manager.name}
-                  </option>
-                ))}
-              </select>
-              {/* {showIcon && (
-                <HiUserGroup
-                  style={{ color: "#ff9966", cursor: "pointer", fontSize: "18px" }}
-                  onClick={handleAssignClick}
-                />
-              )} */}
-            </div>
-          );
-        },
+        accessor: row => row.adminAssign || row.assign_to_manager,
       },
+      
 
       {
         Header: "Associate",
-        Cell: ({ row }) => {
-          const { fontSize } = useContext(FontSizeContext);
-          const initialAssociateValue = row.original.assignedSalesId
-            ? `${row.original.assignedSalesId}|${row.original.assignedSalesName}`
-            : "";
-
-          const [selectedAssociate, setSelectedAssociate] = useState(initialAssociateValue);
-          const [showIcon, setShowIcon] = useState(false);
-
-          const managerId = row.original.managerid;
-          const associates = managerId ? associatesByManager[managerId] || [] : [];
-
-          useEffect(() => {
-            setSelectedAssociate(initialAssociateValue);
-            setShowIcon(false);
-          }, [row.original.assignedSalesId, row.original.assignedSalesName]);
-
-          // const handleChange = (e) => {
-          //   const newValue = e.target.value;
-          //   setSelectedAssociate(newValue);
-          //   setShowIcon(newValue !== initialAssociateValue);
-          // };
-
-          // const handleAssignClick = async () => {
-          //   if (selectedAssociate) {
-          //     const [associateId, associateName] = selectedAssociate.split("|");
-          //     await handleAssignLead(row.original.leadid, { id: associateId, name: associateName }, row.original.status);
-          //     // No need to update row.original directly; state is already updated in handleAssignLead
-          //     setShowIcon(false);
-          //   }
-          // };
-
-          return (
-            <div className="d-flex align-items-center" style={{ fontSize: fontSize }} >
-              <select
-                value={selectedAssociate}
-                // onChange={handleChange}
-                className="form-select me-2" style={{ fontSize: fontSize }}
-
-              >
-                <option value="">Select Associate</option>
-                {associates.map((associate, index) => (
-                  <option key={index} value={`${associate.id}|${associate.name}`}>
-                    {associate.name}
-                  </option>
-                ))}
-              </select>
-              
-            </div>
-          );
-        },
+        accessor: "assignedSalesName",
+       
       },
 
-      // {
-      //   Header: "Actions",
-      //   Cell: ({ row }) => (
-      //     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      //       <FaEdit
-      //         style={{ color: "#ff9966", cursor: "pointer" }}
-      //         onClick={() => handleEdit(row.original.leadid)}
-      //       />
-      //       <FaTrash
-      //         style={{ color: "ff9966", cursor: "pointer" }}
-      //         onClick={() => handleArchive(row.original.leadid)}
-      //       />
-      //       <FaEye
-      //         style={{ color: "ff9966", cursor: "pointer" }}
-      //         onClick={() => handleViewLeads(row.original)}
-      //       />
-      //       <FaUserPlus
-      //         style={{ color: "ff9966", cursor: "pointer" }}
-      //         onClick={() => handleAddUser(row.original)}
-      //       />
-      //       <FaComment
-      //         style={{ color: "#ff9966", cursor: "pointer" }}
-      //         onClick={() => navigate(`/a-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })}
-      //       />
-      //     </div>
-      //   ),
-      // },
+      
 
 
     ],

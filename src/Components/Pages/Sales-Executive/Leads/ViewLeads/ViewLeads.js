@@ -26,7 +26,7 @@ const ViewLeads = () => {
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-1") || "");
   const [filterStatus, setFilterStatus] = useState(localStorage.getItem("filterStatus-1") || "");
   const [filterDestination, setFilterDestination] = useState(localStorage.getItem("destination-1") || "");
-  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("opp1-1") || "new");
+  const [filterOppStatus1, setFilterOppStatus1] = useState(localStorage.getItem("opp1-1") || "New");
   const [filterOppStatus2, setFilterOppStatus2] = useState(localStorage.getItem("opp2-1") || "");
   // 
   const [showDateRange, setShowDateRange] = useState(
@@ -280,7 +280,7 @@ const ViewLeads = () => {
     setSearchTerm("");
     setFilterStatus("");
     setFilterDestination("");
-    setFilterOppStatus1("new");
+    setFilterOppStatus1("New");
     setFilterOppStatus2("");
     
    
@@ -302,7 +302,7 @@ const ViewLeads = () => {
             val.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "new";
+        const actualPrimaryStatus = item.primaryStatus ? item.primaryStatus.toLowerCase() : "New";
         const matchesPrimaryStatus =
           !filterOppStatus1 || actualPrimaryStatus === filterOppStatus1.toLowerCase();
       const matchesSecondaryStatus =
@@ -587,7 +587,7 @@ const ViewLeads = () => {
                   }}
                 >
                   <option value="">Primary Status</option>
-                  <option value="new">New</option> {/* Pre-select New */}
+                  <option value="New">New</option> {/* Pre-select New */}
                   {dropdownOptions.primary
                     .filter((status) => status.toLowerCase() !== "new") // Prevent duplicate "New"
                     .map((status) => (

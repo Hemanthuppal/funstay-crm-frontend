@@ -215,23 +215,8 @@ const LeadOppView = () => {
                                     {lead.travelOpportunities && lead.travelOpportunities.length > 0 && (
                                         <>
                                             <p><strong>Origin City:</strong> {lead.travelOpportunities[0].origincity || 'N/A'}</p>
-                                            <p style={{ display: "flex", alignItems: "center", gap: "10px" }}><strong>Tag:</strong>
-                                                                                           <select value={selectedTag} onChange={handleTagChange} style={{ width: "50%", padding: "5px" }}>
-                                                                                               <option value="">Select a tag</option>
-                                                                                               {tags.map(tag => (
-                                                                                                   <option key={tag.id} value={tag.value}>
-                                                                                                       {tag.label}
-                                                                                                   </option>
-                                                                                               ))}
-                                                                                           </select>
-                                                                                           {tagChanged && (
-                                                                                               <FaCheck 
-                                                                                                   onClick={applyTag} 
-                                                                                                   style={{ cursor: "pointer", color: "green", fontSize: "20px" }} 
-                                                                                                   title="Apply Tag"
-                                                                                               />
-                                                                                           )}
-                                                                                       </p>
+                                            <p><strong>Tag:</strong> {lead.travelOpportunities[0].tag || 'N/A'}</p>
+                                           
 
                                             <p><strong>Destination:</strong> {lead.travelOpportunities[0].destination || 'N/A'}</p>
                                             <p>

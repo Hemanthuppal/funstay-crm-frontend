@@ -35,9 +35,19 @@ const AdminViewLeads = () => {
   const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-1") || "");
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-1") || "");
 
-  const [showDateRange, setShowDateRange] = useState(false);
+  // const [showDateRange, setShowDateRange] = useState(false);
 
   const [data, setData] = useState([]); // Initialize to an empty array
+
+
+  const [showDateRange, setShowDateRange] = useState(
+    localStorage.getItem("showDateRange-1") === "true"
+  );
+
+  // Save state to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem("showDateRange-1", showDateRange);
+  }, [showDateRange]);
 
   const downloadExcel = () => {
     if (!filteredData || filteredData.length === 0) {
@@ -804,58 +814,69 @@ const AdminViewLeads = () => {
             </Row>
             <Row className="mb-3 align-items-center">
               <Col md={6} className="d-flex align-items-center gap-2">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Free Text Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                {showDateRange ? (
-                  <FaTimes
-                    onClick={() => {
-                      setShowDateRange(false);
-                      setFilterStartDate("");
-                      setFilterEndDate("");
-                      setAppliedFilterStartDate("");
-                      setAppliedFilterEndDate("");
-                    }}
-                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                    title="Hide Date Range"
-                  />
-                ) : (
-                  <FaCalendarAlt
-                    onClick={() => setShowDateRange(true)}
-                    style={{ cursor: "pointer", fontSize: "1.5rem" }}
-                    title="Show Date Range"
-                  />
-                )}
-                {showDateRange && (
-                  <div className="d-flex align-items-center gap-2">
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={filterStartDate}
-                      onChange={(e) => setFilterStartDate(e.target.value)}
-                    />
-                    <span>to</span>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={filterEndDate}
-                      onChange={(e) => setFilterEndDate(e.target.value)}
-                    />
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => {
-                        setAppliedFilterStartDate(filterStartDate);
-                        setAppliedFilterEndDate(filterEndDate);
-                      }}
-                    >
-                      OK
-                    </button>
-                  </div>
-                )}
+              <input
+        type="text"
+        className="form-control"
+        placeholder="Free Text Search..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          localStorage.setItem("searchTerm-1", e.target.value);
+        }}
+      />
+      {showDateRange ? (
+        <FaTimes
+          onClick={() => {
+            setShowDateRange(false);
+            localStorage.setItem("showDateRange-1", "false");
+            setFilterStartDate("");
+            setFilterEndDate("");
+            setAppliedFilterStartDate("");
+            setAppliedFilterEndDate("");
+            localStorage.removeItem("filterStartDate-1");
+            localStorage.removeItem("filterEndDate-1");
+            localStorage.removeItem("appliedFilterStartDate-1");
+            localStorage.removeItem("appliedFilterEndDate-1");
+          }}
+          style={{ cursor: "pointer", fontSize: "1.5rem" }}
+          title="Hide Date Range"
+        />
+      ) : (
+        <FaCalendarAlt
+          onClick={() => {
+            setShowDateRange(true);
+            localStorage.setItem("showDateRange-1", "true");
+          }}
+          style={{ cursor: "pointer", fontSize: "1.5rem" }}
+          title="Show Date Range"
+        />
+      )}
+      {showDateRange && (
+        <div className="d-flex align-items-center gap-2">
+          <input
+            type="date"
+            className="form-control"
+            value={filterStartDate}
+            onChange={(e) => setFilterStartDate(e.target.value)}
+          />
+          <span>to</span>
+          <input
+            type="date"
+            className="form-control"
+            value={filterEndDate}
+            onChange={(e) => setFilterEndDate(e.target.value)}
+          />
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setAppliedFilterStartDate(filterStartDate);
+              setAppliedFilterEndDate(filterEndDate);
+            }}
+          >
+            OK
+          </button>
+        </div>
+      )}
               </Col>
               <Col md={3} className="d-flex justify-content-end">
                 <button className="btn btn-secondary" onClick={clearFilters}>Clear Filters</button></Col>

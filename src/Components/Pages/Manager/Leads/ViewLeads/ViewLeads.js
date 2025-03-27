@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "./../../../../Layout/Table/TableLayoutOpp";
 import { Button, Row, Col, Form } from "react-bootstrap";
 import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
-import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment,FaDownload, FaSyncAlt, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye, FaUserPlus, FaComment, FaDownload, FaSyncAlt, FaCopy, FaCalendarAlt, FaTimes } from "react-icons/fa";
 import { HiUserGroup } from "react-icons/hi";
 import "./ViewLeads.css";
 import axios from "axios";
@@ -31,10 +31,19 @@ const ViewLeads = () => {
   const [filterEndDate, setFilterEndDate] = useState(localStorage.getItem("filterEndDate-1") || "");
   const [appliedFilterStartDate, setAppliedFilterStartDate] = useState(localStorage.getItem("appliedFilterStartDate-1") || "");
   const [appliedFilterEndDate, setAppliedFilterEndDate] = useState(localStorage.getItem("appliedFilterEndDate-1") || "");
-  const [showDateRange, setShowDateRange] = useState(false);
+  // const [showDateRange, setShowDateRange] = useState(false);
+  const [showDateRange, setShowDateRange] = useState(
+    localStorage.getItem("showDateRange-1") === "true"
+  );
   const [employees, setEmployees] = useState([]);
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+
+  // Save state to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem("showDateRange-1", showDateRange);
+  }, [showDateRange]); 
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text).then(() => {
       setMessage("Copied to clipboard!");
@@ -44,7 +53,7 @@ const ViewLeads = () => {
     });
   };
 
-const downloadExcel = () => {
+  const downloadExcel = () => {
     if (!filteredData || filteredData.length === 0) {
       alert("No data available to export.");
       return;
@@ -93,7 +102,7 @@ const downloadExcel = () => {
     const fileName = `Filtered_Leads_${new Date().toISOString().slice(0, 10)}.xlsx`;
     XLSX.writeFile(wb, fileName);
   };
-  
+
   useEffect(() => {
     const fetchEnquiries = async () => {
       try {
@@ -603,18 +612,31 @@ const downloadExcel = () => {
             </Row>
             <Row className="mb-3 align-items-center">
               <Col md={6} className="d-flex align-items-center gap-2">
-                <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  localStorage.setItem("searchTerm-1", e.target.value);
+                }} />
                 {showDateRange ? (
                   <FaTimes
                     onClick={() => {
                       setShowDateRange(false);
+                      localStorage.setItem("showDateRange-1", "false");
                       setFilterStartDate("");
                       setFilterEndDate("");
                       setAppliedFilterStartDate("");
                       setAppliedFilterEndDate("");
+                      localStorage.removeItem("filterStartDate-1");
+                      localStorage.removeItem("filterEndDate-1");
+                      localStorage.removeItem("appliedFilterStartDate-1");
+                      localStorage.removeItem("appliedFilterEndDate-1");
                     }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
                 ) : (
-                  <FaCalendarAlt onClick={() => setShowDateRange(true)} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
+                  <FaCalendarAlt 
+                  onClick={() => {
+                    setShowDateRange(true);
+                    localStorage.setItem("showDateRange-1", "true");
+                  }}style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />
                 )}
                 {showDateRange && (
                   <div className="d-flex align-items-center gap-2">

@@ -307,7 +307,8 @@ const Sales = ({ onToggleSidebar }) => {
                 className={`sales-nav-item ${location.pathname.startsWith("/potential-leads") ||
                     location.pathname.startsWith("/edit-opportunity") ||
                     location.pathname.startsWith("/opportunity-comments") ||
-                    location.pathname.startsWith("/details")
+                    location.pathname.startsWith("/details") ||
+                    location.pathname.startsWith("/s_email-history") 
                     ? "active"
                     : ""
                   }`}

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaDownload, FaComment, FaTrash, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit, FaEye, FaDownload, FaComment, FaTrash,FaSpinner,FaSave, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col, Form } from "react-bootstrap";
 import { HiUserGroup } from "react-icons/hi";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
@@ -489,6 +489,169 @@ const Potentialleads = () => {
         );
       },
     },
+    {
+      Header: "Quotation",
+      accessor: "quotation_id",
+      minWidth: 150,
+      maxWidth: 180,
+      width: 160,
+      Cell: ({ row }) => {
+        const navigate = useNavigate();
+        const [selectedFile, setSelectedFile] = useState(null);
+        const [isUploading, setIsUploading] = useState(false);
+        const [showQuotationId, setShowQuotationId] = useState(row.original.quotation_id);
+    
+        const handleFileChange = (event) => {
+          const file = event.target.files[0];
+        
+          if (file && file.size > 2 * 1024 * 1024) { // 2MB limit
+            alert("File size must be less than 2MB.");
+            return;
+          }
+        
+          setSelectedFile(file);
+        };
+        
+    
+        const handleUpload = async () => {
+          if (!selectedFile) {
+            alert("Please choose a file before saving.");
+            return;
+          }
+    
+          setIsUploading(true);
+          const formData = new FormData();
+          formData.append("file", selectedFile);
+          formData.append("email", row.original.email);
+          formData.append("leadid", row.original.leadid);
+    
+          try {
+            // 1. Upload the file
+            const uploadResponse = await axios.post(`${baseURL}/api/upload-quotation`, formData);
+            
+            // 2. Update email status and get the quotation_id
+            const statusResponse = await axios.post(`${baseURL}/api/update-email-status`, {
+              leadid: row.original.leadid,
+            });
+    
+            // 3. Immediately update the UI
+            setShowQuotationId(statusResponse.data.quotation_id || row.original.quotation_id);
+    
+            // 4. Update the main data state
+            setData(prevData => 
+              prevData.map(item => 
+                item.leadid === row.original.leadid 
+                  ? { 
+                      ...item, 
+                      email_sent: true,
+                      quotation_id: statusResponse.data.quotation_id || item.quotation_id
+                    } 
+                  : item
+              )
+            );
+    
+            alert("File uploaded and email sent successfully!");
+          } catch (error) {
+            console.error("Error uploading file:", error);
+            alert("Error sending email.");
+          } finally {
+            setIsUploading(false);
+          }
+        };
+    
+        const handleNavigate = () => {
+          navigate(`/m_email-history/${row.original.leadid}`, { 
+            state: { email: row.original.email } 
+          });
+        };
+    
+        return (
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            gap: "5px", 
+            flexWrap: "nowrap" 
+          }}>
+            {showQuotationId || row.original.email_sent ? (
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigate();
+                }}
+                style={{ 
+                  textDecoration: "underline", 
+                  color: "blue", 
+                  cursor: "pointer" 
+                }}
+              >
+                {showQuotationId || "View"}
+              </a>
+            ) : (
+              <>
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                  id={`fileInput-${row.original.leadid}`}
+                  disabled={isUploading}
+                />
+                
+                {/* Clickable File Name OR File Input */}
+                {selectedFile ? (
+                  <label 
+                    htmlFor={`fileInput-${row.original.leadid}`} 
+                    style={{ 
+                      fontSize: "12px", 
+                      color: "blue", 
+                      textDecoration: "underline", 
+                      cursor: "pointer", 
+                      maxWidth: "100px", 
+                      overflow: "hidden", 
+                      textOverflow: "ellipsis", 
+                      whiteSpace: "nowrap" 
+                    }}
+                  >
+                    {selectedFile.name}
+                  </label>
+                ) : (
+                  <label 
+                    htmlFor={`fileInput-${row.original.leadid}`} 
+                    style={{ cursor: "pointer", border: "1px solid #ccc", padding: "2px 5px", borderRadius: "4px" }}
+                  >
+                    Choose 
+                  </label>
+                )}
+        
+                {/* Upload Button with Loader */}
+                <button
+                  onClick={handleUpload}
+                  disabled={isUploading}
+                  style={{ 
+                    background: "none", 
+                    border: "none", 
+                    cursor: isUploading ? "not-allowed" : "pointer", 
+                    padding: "5px" 
+                  }}
+                >
+                  {isUploading ? (
+                    <FaSpinner size={16} color="blue" className="spin-animation" />
+                  ) : (
+                    <FaSave size={16} color="green" />
+                  )}
+                </button>
+        
+                
+              </>
+            )}
+          </div>
+        );
+      },
+    }
+    
+  ,
     {
       Header: "Assign",
       accessor: "id",

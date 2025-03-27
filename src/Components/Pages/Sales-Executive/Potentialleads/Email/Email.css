@@ -1,0 +1,114 @@
+
+
+
+.email-chat-container {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .chat-content {
+    margin-top: 60px; /* Adjust based on header height */
+    margin-left: 220px; /* Adjust based on sidebar width */
+    padding: 20px;
+    width: calc(100% - 220px); /* Adjust width based on sidebar width */
+    transition: margin-left 0.3s ease, width 0.3s ease;
+  }
+  
+  .chat-content.collapsed {
+    margin-left: 100px; /* Adjust based on collapsed sidebar width */
+    width: calc(100% - 50px); /* Adjust width based on collapsed sidebar width */
+  }
+  
+
+  /* Responsive Design */
+  @media (max-width: 767px) {
+    .email-chat-container {
+      flex-direction: column;
+    }
+  
+    .chat-content {
+      margin-left: 0;
+      width: 100%;
+    }
+  
+    .chat-content.collapsed {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+  
+
+  .email-header {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .chat-container {
+    max-height: 340px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+  }
+  
+  .message {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+  }
+  
+  .message.sent {
+    justify-content: flex-end;
+  }
+  
+  .message-bubble {
+    max-width: 60%;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #e3f2fd;
+    color: #333;
+  }
+  
+  .message.received .message-bubble {
+    background-color: #f1f1f1;
+  }
+  
+  .timestamp {
+    display: block;
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: 5px;
+  }
+  
+  .email-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .input-field,
+  .textarea-field,
+  .file-input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .send-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .send-button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }

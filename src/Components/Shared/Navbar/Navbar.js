@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar,FaPalette, FaBriefcase, FaArchive, FaUserCheck,FaTags, FaTachometerAlt, FaMapMarkerAlt, FaBell, FaEnvelope, FaCaretDown, FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry, FaHSquare } from "react-icons/fa";
+import { FaUsers, FaCalendarCheck, FaUmbrellaBeach, FaWalking, FaFileInvoiceDollar, FaPalette, FaBriefcase, FaArchive, FaUserCheck, FaTags, FaTachometerAlt, FaMapMarkerAlt, FaBell, FaEnvelope, FaCaretDown, FaRegAddressBook, FaCalendarAlt, FaBullhorn, FaUsersCog, FaHome, FaClipboardList, FaChartLine, FaUserFriends, FaPeopleCarry, FaHSquare } from "react-icons/fa";
 import { IoHomeOutline, IoMenu } from "react-icons/io5";
 import "./Navbar.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -181,11 +181,11 @@ const Navbar = ({ onToggleSidebar }) => {
                 <span className="admin-nav-badge">24</span>
               </div> */}
               <div className="admin-nav-icon-container">
-              <Link className="nav-link" to="/themes">
- 
-  <FaPalette className="admin-nav-icon" style={{ marginLeft: "10px", cursor: "pointer" }} />
-  </Link>
-</div>
+                <Link className="nav-link" to="/themes">
+
+                  <FaPalette className="admin-nav-icon" style={{ marginLeft: "10px", cursor: "pointer" }} />
+                </Link>
+              </div>
 
               <div className="admin-nav-icon-container" onClick={handleProfileClick}>
                 <div className="admin-nav-profile">
@@ -280,7 +280,8 @@ const Navbar = ({ onToggleSidebar }) => {
                 className={`admin-nav-item ${location.pathname.startsWith("/a-potential-leads") ||
                   location.pathname.startsWith("/a-edit-opportunity") ||
                   location.pathname.startsWith("/a-opportunity-comments") ||
-                  location.pathname.startsWith("/a-details")
+                  location.pathname.startsWith("/a-details") ||
+                  location.pathname.startsWith("/email-history") 
                   ? "active"
                   : ""
                   }`}
@@ -294,7 +295,8 @@ const Navbar = ({ onToggleSidebar }) => {
                 className={`admin-nav-item ${location.pathname.startsWith("/a-myopp") ||
                   location.pathname.startsWith("/a-myedit-opportunity") ||
                   location.pathname.startsWith("/a-myopportunity-comments") ||
-                  location.pathname.startsWith("/a-mydetails")
+                  location.pathname.startsWith("/a-mydetails") ||
+                  location.pathname.startsWith("/a_myemail-history") 
                   ? "active"
                   : ""
                   }`}
@@ -308,7 +310,8 @@ const Navbar = ({ onToggleSidebar }) => {
                 className={`admin-nav-item ${location.pathname.startsWith("/a-customers") ||
                   location.pathname.startsWith("/a-customer-details") ||
                   location.pathname.startsWith("/a-customerdetails") ||
-                  location.pathname.startsWith("/a-editcustomerdetails")
+                  location.pathname.startsWith("/a-editcustomerdetails") 
+                 
                   ? "active"
                   : ""
                   }`}
@@ -335,15 +338,14 @@ const Navbar = ({ onToggleSidebar }) => {
 
               </li>
               <li
-  className={`admin-nav-item ${
-    location.pathname.startsWith("/a-tags") ? "active" : ""
-  }`}
->
-  <Link className="nav-link" to="/a-tags" onClick={handleNavItemClick}>
-    <FaTags className="admin-nav-icon" /> 
-    {!collapsed && <span className="link_text">All Tags</span>}
-  </Link>
-</li>
+                className={`admin-nav-item ${location.pathname.startsWith("/a-tags") ? "active" : ""
+                  }`}
+              >
+                <Link className="nav-link" to="/a-tags" onClick={handleNavItemClick}>
+                  <FaTags className="admin-nav-icon" />
+                  {!collapsed && <span className="link_text">All Tags</span>}
+                </Link>
+              </li>
               <li
                 className={`admin-nav-item ${location.pathname.startsWith("/a-archivedata")
 

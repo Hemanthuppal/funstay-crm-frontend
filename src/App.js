@@ -110,6 +110,8 @@ import H_Customerdetails from "./Components/Pages/SalesHead/Customer/LeadOptions
 import H_LeadDetailss from "./Components/Pages/SalesHead/Potentialleads/LeadDetails";
 import H_InDetailViewLeads from "./Components/Pages/SalesHead/Leads/ViewLeads/ViewLead/InDetailViewLeads";
 import H_Profile from "./Components/Pages/SalesHead/Profile/Profile";
+import M_EmailHistory from "./Components/Pages/Manager/Potentialleads/Email/Email_new";
+import S_EmailHistory from "./Components/Pages/Sales-Executive/Potentialleads/Email/Email_new";
 
 
 function App() {
@@ -315,6 +317,7 @@ function App() {
                 
 
                 <Route path="/email-history/:leadid" element={<EmailHistory />} />
+                <Route path="/a_myemail-history/:leadid" element={<EmailHistory />} />
 
                 <Route path="h-dashboard" element={<H_Dashboard />} />
                 <Route path="/h-view-lead" element={<H_ViewLeads />} />
@@ -328,6 +331,13 @@ function App() {
                 <Route path="/h-details/:leadid" element={<H_LeadDetailss />} />
                 <Route path="/h-view-lead/:leadid" element={<H_InDetailViewLeads />} />
                 <Route path="/h-profile" element={<H_Profile />} />
+
+
+
+
+                <Route path="/m_email-history/:leadid" element={<M_EmailHistory />} />
+                <Route path="/m_myemail-history/:leadid" element={<M_EmailHistory />} />
+                <Route path="/s_email-history/:leadid" element={<S_EmailHistory />} />
                 </Route>
             </Routes>
 

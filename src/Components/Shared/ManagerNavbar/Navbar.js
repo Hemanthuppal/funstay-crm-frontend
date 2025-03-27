@@ -278,14 +278,14 @@ const Manager = ({ onToggleSidebar }) => {
     </Link>
   </li>
 
-  <li className={`manager-nav-item ${["/m-potential-leads", "/m-edit-opportunity", "/m-opportunity-comments", "/m-details"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
+  <li className={`manager-nav-item ${["/m-potential-leads", "/m-edit-opportunity","/m_email-history", "/m-opportunity-comments", "/m-details"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
     <Link className="nav-link" to="/m-potential-leads" onClick={handleNavItemClick}>
       <FaChartBar className="manager-nav-icon" />
       {!collapsed && <span className="link_text">My Team's Opportunities</span>}
     </Link>
   </li>
 
-  <li className={`manager-nav-item ${["/m-myoppleads", "/m-myedit-opportunity", "/m-myopportunity-comments", "/m-mydetails"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
+  <li className={`manager-nav-item ${["/m-myoppleads", "/m-myedit-opportunity", "/m-myopportunity-comments","/m_myemail-history", "/m-mydetails"].some(path => location.pathname.startsWith(path)) ? "active" : ""}`}>
     <Link className="nav-link" to="/m-myoppleads" onClick={handleNavItemClick}>
       <FaChartLine className="manager-nav-icon" />
       {!collapsed && <span className="link_text">My Opportunities</span>}

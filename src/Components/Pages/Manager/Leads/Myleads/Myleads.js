@@ -11,12 +11,13 @@ import { AuthContext } from "../../../../AuthContext/AuthContext";
 import { baseURL } from "../../../../Apiservices/Api";
 import { webhookUrl } from "../../../../Apiservices/Api";
 import * as XLSX from 'xlsx';
+import { FontSizeContext } from "../../../../Shared/Font/FontContext";
 
 const ViewLeads = () => {
   const [message, setMessage] = useState('');
   const { authToken, userId, managerId, userName } = useContext(AuthContext);
   const [data, setData] = useState([]);
-
+ 
 
 
   const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm-m1") || "");
@@ -392,19 +393,21 @@ const ViewLeads = () => {
       {
         Header: "Lead Status",
         Cell: ({ row }) => {
+          const { fontSize } = useContext(FontSizeContext);
           const primaryStatus = row.original.primaryStatus;
           const secondaryStatus = row.original.secondaryStatus;
           const secondaryOptions = dropdownOptions.secondary[primaryStatus] || [];
           const isSecondaryDisabled = !primaryStatus || secondaryOptions.length === 0;
 
           return (
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center" style={{ fontSize: fontSize }}>
               <select
                 value={primaryStatus}
                 onChange={(e) =>
                   handlePrimaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select me-2"
+                style={{ fontSize: fontSize }}
               >
                 {!primaryStatus && <option value="">Select Primary Status</option>}
                 {dropdownOptions.primary.map((option) => (
@@ -419,6 +422,7 @@ const ViewLeads = () => {
                   handleSecondaryStatusChange(e.target.value, row.original.leadid)
                 }
                 className="form-select"
+                style={{ fontSize: fontSize }}
                 disabled={isSecondaryDisabled}
               >
                 {!secondaryStatus && <option value="">Select Secondary Status</option>}

@@ -19,8 +19,6 @@ const Sales = ({ onToggleSidebar }) => {
   const { themeColor } = useContext(ThemeContext);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-   const [emailNotifications, setEmailNotifications] = useState([]);
-      const [showEmailNotificationDropdown, setShowEmailNotificationDropdown] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
@@ -71,12 +69,6 @@ const Sales = ({ onToggleSidebar }) => {
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
-    setShowEmailNotificationDropdown(false); // Close email dropdown if open
-  };
-
-  const toggleEmailNotificationDropdown = () => {
-    setShowEmailNotificationDropdown(!showEmailNotificationDropdown);
-    setShowNotificationDropdown(false); // Close bell dropdown if open
   };
 
   const markNotificationAsRead = async (notificationId) => {
@@ -130,82 +122,21 @@ const Sales = ({ onToggleSidebar }) => {
       window.location.reload();
     }, 0);
   };
-  // useEffect(() => {
-  //   const fetchNotifications = async () => {
-  //     try {
-  //       const response = await fetch(`${baseURL}/sales/notifications?managerid=${userId}`);
-  //       const data = await response.json();
-  //       if (data.notifications) setNotifications(data.notifications);
-  //     } catch (error) {
-  //       console.error("Error fetching notifications:", error);
-  //     }
-  //   };
-
-  //   fetchNotifications();
-  //   const interval = setInterval(fetchNotifications, 5000);
-  //   return () => clearInterval(interval);
-  // }, [userId]);
-
-  const fetchNotifications = async () => {
+  useEffect(() => {
+    const fetchNotifications = async () => {
       try {
-        const response = await fetch(`${baseURL}/api/sales/email/notifications?managerid=${userId}`);
+        const response = await fetch(`${baseURL}/sales/notifications?managerid=${userId}`);
         const data = await response.json();
-        setNotifications(data.notifications || []); // Fallback to empty array if undefined
+        if (data.notifications) setNotifications(data.notifications);
       } catch (error) {
         console.error("Error fetching notifications:", error);
-        setNotifications([]); // Set to empty array on error
       }
     };
-  
-    const fetchEmailNotifications = async () => {
-      try {
-        const response = await fetch(`${baseURL}/api/sales/email/notifications?managerid=${userId}`);
-        const data = await response.json();
-        const emails = data.emailnotifications || []; // Fallback to empty array if undefined
-        setEmailNotifications(emails);
-        // setEmailCount(emails.length);
-      } catch (error) {
-        console.error("Error fetching email notifications:", error);
-        setEmailNotifications([]); // Set to empty array on error
-        // setEmailCount(0);
-      }
-    };
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        await fetchNotifications();
-        await fetchEmailNotifications();
-      };
-  
-      fetchData();
-      const interval = setInterval(fetchData, 5000);
-      return () => clearInterval(interval);
-    }, [userId]);
-  
-    const markEmailNotificationAsRead = async (emailnotificationId) => {
-      try {
-        await fetch(`${baseURL}/api/email/notifications/${emailnotificationId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ read: true }),
-        });
-      } catch (error) {
-        console.error("Error marking email notification as read:", error);
-      }
-    };
-  
-    const handleEmailNotificationClick = async (emailnotification) => {
-      await markEmailNotificationAsRead(emailnotification.id);
-      setEmailNotifications((prev) => prev.filter((n) => n.id !== emailnotification.id));
-      setShowEmailNotificationDropdown(false);
-  
-      // Navigate based on whether the notification has a leadid
-      if (emailnotification.leadid) {
-        navigate(`/s_email-history/${emailnotification.leadid}`, { state: { email: emailnotification.email } });
-      } else {
-        navigate('/potential-leads');
-      }
-    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 5000);
+    return () => clearInterval(interval);
+  }, [userId]);
 
   return (
     <>
@@ -231,14 +162,12 @@ const Sales = ({ onToggleSidebar }) => {
                 <FaBell className="sales-nav-icon" />
                 {/* <span className="sales-nav-badge">12</span> */}
 
-                 {(notifications?.length || 0) > 0 && (
-                  <span className="admin-nav-badge">{notifications?.length || 0}</span>
-                )}
+                {notifications.length > 0 && <span className="sales-nav-badge">{notifications.length}</span>}
                       {showNotificationDropdown && (
                         <div className="notification-dropdown">
                           <div className="notification-dropdown-header">Notifications</div>
                           <div className="notification-dropdown-body">
-                          {!notifications || notifications.length === 0 ? (
+                            {notifications.length === 0 ? (
                               <div className="notification-item">No new notifications</div>
                             ) : (
                               notifications.map((notification) => (
@@ -275,41 +204,10 @@ const Sales = ({ onToggleSidebar }) => {
 
 
               </div>
-              
-              <div className="admin-nav-icon-container" onClick={toggleEmailNotificationDropdown}>
-                                            <FaEnvelope className="admin-nav-icon" />
-                                            {(emailNotifications?.length || 0) > 0 && (
-                                              <span className="admin-nav-badge">{emailNotifications.length}</span>
-                                            )}
-                                            {showEmailNotificationDropdown && (
-                                              <div className="notification-dropdown">
-                                                <div className="notification-dropdown-header">Email Notifications</div>
-                                                <div className="notification-dropdown-body">
-                                                  {(!emailNotifications || emailNotifications.length === 0) ? (
-                                                    <div className="notification-item">No new email notifications</div>
-                                                  ) : (
-                                                    emailNotifications.map((emailnotification) => (
-                                                      <div
-                                                        key={emailnotification.id}
-                                                        className="notification-item"
-                                                        onClick={() => handleEmailNotificationClick(emailnotification)}
-                                                        style={{ padding: "8px", cursor: "pointer" }}
-                                                      >
-                                                        <div style={{ fontWeight: emailnotification.read ? "normal" : "bold" }}>
-                                                          {emailnotification.text?.length > 40
-                                                            ? `${emailnotification.text.slice(0, 40)}...`
-                                                            : emailnotification.text}
-                                                        </div>
-                                                        <div style={{ fontSize: "0.8em", color: "#888" }}>
-                                                          {new Date(emailnotification.created_at).toLocaleString()}
-                                                        </div>
-                                                      </div>
-                                                    ))
-                                                  )}
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
+              {/* <div className="sales-nav-icon-container">
+                <FaEnvelope className="sales-nav-icon" />
+                <span className="sales-nav-badge">24</span>
+              </div> */}
 
               <div className="sales-nav-icon-container" onClick={handleProfileClick}>
                 <div className="sales-nav-profile">

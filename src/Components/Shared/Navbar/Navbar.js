@@ -23,7 +23,11 @@ const Navbar = ({ onToggleSidebar }) => {
   const { logout, userName, userId, authToken } = useContext(AuthContext);
   const { themeColor } = useContext(ThemeContext);
   const [notifications, setNotifications] = useState([]);
+  const [emailNotifications, setEmailNotifications] = useState([]);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [showEmailNotificationDropdown, setShowEmailNotificationDropdown] = useState(false);
+  const [emailCount, setEmailCount] = useState(0);
+
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
     onToggleSidebar(!collapsed);
@@ -61,7 +65,6 @@ const Navbar = ({ onToggleSidebar }) => {
     setShowDropdown(!showDropdown);
   };
 
-
   const handleLogout = () => {
     logout(); // Clears authToken, userRole, and userId
     console.log('Logged out');
@@ -70,6 +73,12 @@ const Navbar = ({ onToggleSidebar }) => {
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
+    setShowEmailNotificationDropdown(false); // Close email dropdown if open
+  };
+
+  const toggleEmailNotificationDropdown = () => {
+    setShowEmailNotificationDropdown(!showEmailNotificationDropdown);
+    setShowNotificationDropdown(false); // Close bell dropdown if open
   };
 
   const markNotificationAsRead = async (notificationId) => {
@@ -102,22 +111,66 @@ const Navbar = ({ onToggleSidebar }) => {
     }, 0);
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`${baseURL}/email/notifications?managerid=${adminMail}`);
+      const data = await response.json();
+      setNotifications(data.notifications || []); // Fallback to empty array if undefined
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setNotifications([]); // Set to empty array on error
+    }
+  };
+
+  const fetchEmailNotifications = async () => {
+    try {
+      const response = await fetch(`${baseURL}/api/email/notifications`);
+      const data = await response.json();
+      const emails = data.emailnotifications || []; // Fallback to empty array if undefined
+      setEmailNotifications(emails);
+      // setEmailCount(emails.length);
+    } catch (error) {
+      console.error("Error fetching email notifications:", error);
+      setEmailNotifications([]); // Set to empty array on error
+      // setEmailCount(0);
+    }
+  };
+
   useEffect(() => {
-    const email = `${adminMail}`;
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch(`${baseURL}/email/notifications?managerid=${email}`);
-        const data = await response.json();
-        if (data.notifications) setNotifications(data.notifications);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
+    const fetchData = async () => {
+      await fetchNotifications();
+      await fetchEmailNotifications();
     };
 
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 5000);
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, [userId]);
+
+  const markEmailNotificationAsRead = async (emailnotificationId) => {
+    try {
+      await fetch(`${baseURL}/api/email/notifications/${emailnotificationId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ read: true }),
+      });
+    } catch (error) {
+      console.error("Error marking email notification as read:", error);
+    }
+  };
+
+  const handleEmailNotificationClick = async (emailnotification) => {
+    await markEmailNotificationAsRead(emailnotification.id);
+    setEmailNotifications((prev) => prev.filter((n) => n.id !== emailnotification.id));
+    setShowEmailNotificationDropdown(false);
+
+    // Navigate based on whether the notification has a leadid
+    if (emailnotification.leadid) {
+      navigate(`/email-history/${emailnotification.leadid}`, { state: { email: emailnotification.email } });
+    } else {
+      navigate('/a-potential-leads');
+    }
+  };
 
   return (
     <>
@@ -135,19 +188,18 @@ const Navbar = ({ onToggleSidebar }) => {
           <h2 className="text-center user-admin" style={{ color: 'white' }}>{userName}</h2>
 
           <div className="admin-header-right">
-            {/* Add Leads Button */}
-
-
             <div className="admin-header-icons">
+              {/* Bell Notifications */}
               <div className="admin-nav-icon-container" onClick={toggleNotificationDropdown}>
                 <FaBell className="admin-nav-icon" />
-                {/* <span className="admin-nav-badge">12</span> */}
-                {notifications.length > 0 && <span className="admin-nav-badge">{notifications.length}</span>}
+                {(notifications?.length || 0) > 0 && (
+                  <span className="admin-nav-badge">{notifications?.length || 0}</span>
+                )}
                 {showNotificationDropdown && (
                   <div className="notification-dropdown">
                     <div className="notification-dropdown-header">Notifications</div>
                     <div className="notification-dropdown-body">
-                      {notifications.length === 0 ? (
+                      {!notifications || notifications.length === 0 ? (
                         <div className="notification-item">No new notifications</div>
                       ) : (
                         notifications.map((notification) => (
@@ -157,10 +209,6 @@ const Navbar = ({ onToggleSidebar }) => {
                             onClick={() => handleNotificationClick(notification)}
                             style={{ padding: "8px", cursor: "pointer" }}
                           >
-                            {/* <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
-                                    {notification.message}
-                                    
-                                  </div> */}
                             <div style={{ fontWeight: notification.read ? "normal" : "bold" }}>
                               {notification.message.length > 40
                                 ? `${notification.message.slice(0, 40)}...`
@@ -176,16 +224,53 @@ const Navbar = ({ onToggleSidebar }) => {
                   </div>
                 )}
               </div>
-              {/* <div className="admin-nav-icon-container">
+
+              {/* Email Notifications */}
+
+
+              <div className="admin-nav-icon-container" onClick={toggleEmailNotificationDropdown}>
                 <FaEnvelope className="admin-nav-icon" />
-                <span className="admin-nav-badge">24</span>
-              </div> */}
+                {(emailNotifications?.length || 0) > 0 && (
+                  <span className="admin-nav-badge">{emailNotifications.length}</span>
+                )}
+                {showEmailNotificationDropdown && (
+                  <div className="notification-dropdown">
+                    <div className="notification-dropdown-header">Email Notifications</div>
+                    <div className="notification-dropdown-body">
+                      {(!emailNotifications || emailNotifications.length === 0) ? (
+                        <div className="notification-item">No new email notifications</div>
+                      ) : (
+                        emailNotifications.map((emailnotification) => (
+                          <div
+                            key={emailnotification.id}
+                            className="notification-item"
+                            onClick={() => handleEmailNotificationClick(emailnotification)}
+                            style={{ padding: "8px", cursor: "pointer" }}
+                          >
+                            <div style={{ fontWeight: emailnotification.read ? "normal" : "bold" }}>
+                              {emailnotification.text?.length > 40
+                                ? `${emailnotification.text.slice(0, 40)}...`
+                                : emailnotification.text}
+                            </div>
+                            <div style={{ fontSize: "0.8em", color: "#888" }}>
+                              {new Date(emailnotification.created_at).toLocaleString()}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+
               <div className="admin-nav-icon-container">
                 <Link className="nav-link" to="/themes">
 
-                  <FaPalette className="admin-nav-icon" style={{ marginLeft: "10px", cursor: "pointer" }} />
+                  <FaPalette className="admin-nav-icon" style={{  cursor: "pointer" }} />
                 </Link>
               </div>
+
 
               <div className="admin-nav-icon-container" onClick={handleProfileClick}>
                 <div className="admin-nav-profile">
@@ -231,161 +316,161 @@ const Navbar = ({ onToggleSidebar }) => {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`} style={{ "--theme-color": themeColor }}>
-          <div className="admin-position-sticky">
-            <ul className="nav flex-column">
-              <li className={`admin-nav-item ${location.pathname.startsWith("/dashboard") ? "active"
+      <div className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`} style={{ "--theme-color": themeColor }}>
+        <div className="admin-position-sticky">
+          <ul className="nav flex-column">
+            <li className={`admin-nav-item ${location.pathname.startsWith("/dashboard") ? "active"
+              : ""
+              }`}>
+              <Link className="nav-link" to="/dashboard" onClick={handleNavItemClick}>
+                <FaHome className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">Dashboard</span>}
+              </Link>
+            </li>
+
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-view-lead") ||
+                location.pathname.startsWith("/a-edit-lead") ||
+                location.pathname.startsWith("/a-add-leads") ||
+                location.pathname.startsWith("/a-comments") ||
+                location.pathname.startsWith("/a-view-lead") ||
+                location.pathname.startsWith("/a-create-customer-opportunity")
+                ? "active"
                 : ""
-                }`}>
-                <Link className="nav-link" to="/dashboard" onClick={handleNavItemClick}>
-                  <FaHome className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">Dashboard</span>}
-                </Link>
-              </li>
+                }`}
+            >
+              <Link className="nav-link" to="/a-view-lead" onClick={handleNavItemClick}>
+                <FaClipboardList className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">All Leads</span>}
+              </Link>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-myleads") ||
+                location.pathname.startsWith("/a-myedit-lead") ||
+                location.pathname.startsWith("/a-myadd-leads") ||
+                location.pathname.startsWith("/a-mycomments") ||
+                location.pathname.startsWith("/a-myview-lead") ||
+                location.pathname.startsWith("/a-mycreate-customer-opportunity")
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-myleads" onClick={handleNavItemClick}>
+                <FaUserCheck className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">My Leads</span>}
+              </Link>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-potential-leads") ||
+                location.pathname.startsWith("/a-edit-opportunity") ||
+                location.pathname.startsWith("/a-opportunity-comments") ||
+                location.pathname.startsWith("/a-details") ||
+                location.pathname.startsWith("/email-history")
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-potential-leads" onClick={handleNavItemClick}>
+                <FaChartLine className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">All Opportunities</span>}
+              </Link>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-myopp") ||
+                location.pathname.startsWith("/a-myedit-opportunity") ||
+                location.pathname.startsWith("/a-myopportunity-comments") ||
+                location.pathname.startsWith("/a-mydetails") ||
+                location.pathname.startsWith("/a_myemail-history")
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-myopp" onClick={handleNavItemClick}>
+                <FaBriefcase className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">My Opportunities</span>}
+              </Link>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-customers") ||
+                location.pathname.startsWith("/a-customer-details") ||
+                location.pathname.startsWith("/a-customerdetails") ||
+                location.pathname.startsWith("/a-editcustomerdetails")
 
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-view-lead") ||
-                  location.pathname.startsWith("/a-edit-lead") ||
-                  location.pathname.startsWith("/a-add-leads") ||
-                  location.pathname.startsWith("/a-comments") ||
-                  location.pathname.startsWith("/a-view-lead") ||
-                  location.pathname.startsWith("/a-create-customer-opportunity")
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-view-lead" onClick={handleNavItemClick}>
-                  <FaClipboardList className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">All Leads</span>}
-                </Link>
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-myleads") ||
-                  location.pathname.startsWith("/a-myedit-lead") ||
-                  location.pathname.startsWith("/a-myadd-leads") ||
-                  location.pathname.startsWith("/a-mycomments") ||
-                  location.pathname.startsWith("/a-myview-lead") ||
-                  location.pathname.startsWith("/a-mycreate-customer-opportunity")
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-myleads" onClick={handleNavItemClick}>
-                  <FaUserCheck className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">My Leads</span>}
-                </Link>
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-potential-leads") ||
-                  location.pathname.startsWith("/a-edit-opportunity") ||
-                  location.pathname.startsWith("/a-opportunity-comments") ||
-                  location.pathname.startsWith("/a-details") ||
-                  location.pathname.startsWith("/email-history") 
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-potential-leads" onClick={handleNavItemClick}>
-                  <FaChartLine className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">All Opportunities</span>}
-                </Link>
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-myopp") ||
-                  location.pathname.startsWith("/a-myedit-opportunity") ||
-                  location.pathname.startsWith("/a-myopportunity-comments") ||
-                  location.pathname.startsWith("/a-mydetails") ||
-                  location.pathname.startsWith("/a_myemail-history") 
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-myopp" onClick={handleNavItemClick}>
-                  <FaBriefcase className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">My Opportunities</span>}
-                </Link>
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-customers") ||
-                  location.pathname.startsWith("/a-customer-details") ||
-                  location.pathname.startsWith("/a-customerdetails") ||
-                  location.pathname.startsWith("/a-editcustomerdetails") 
-                 
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-customers" onClick={handleNavItemClick}>
-                  <FaUserFriends className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">All customer</span>}
-                </Link>
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-destinations")
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-customers" onClick={handleNavItemClick}>
+                <FaUserFriends className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">All customer</span>}
+              </Link>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-destinations")
 
 
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-destinations" onClick={handleNavItemClick}>
-                  <FaMapMarkerAlt className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">All Destinations </span>}
-                </Link>
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-destinations" onClick={handleNavItemClick}>
+                <FaMapMarkerAlt className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">All Destinations </span>}
+              </Link>
 
 
 
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-tags") ? "active" : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-tags" onClick={handleNavItemClick}>
-                  <FaTags className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">All Tags</span>}
-                </Link>
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-archivedata")
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-tags") ? "active" : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-tags" onClick={handleNavItemClick}>
+                <FaTags className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">All Tags</span>}
+              </Link>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-archivedata")
 
 
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-archivedata" onClick={handleNavItemClick}>
-                  <FaArchive className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">Archieved Data </span>}
-                </Link>
-
-
-
-              </li>
-              <li
-                className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||
-                  location.pathname.startsWith("/addemployee") ||
-                  location.pathname.startsWith("/team-members") ||
-                  location.pathname.startsWith("/editemployee")
-
-                  ? "active"
-                  : ""
-                  }`}
-              >
-                <Link className="nav-link" to="/a-allteams" onClick={handleNavItemClick}>
-                  <FaPeopleCarry className="admin-nav-icon" />
-                  {!collapsed && <span className="link_text">All Teams </span>}
-                </Link>
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-archivedata" onClick={handleNavItemClick}>
+                <FaArchive className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">Archieved Data </span>}
+              </Link>
 
 
 
-              </li>
+            </li>
+            <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-allteams") ||
+                location.pathname.startsWith("/addemployee") ||
+                location.pathname.startsWith("/team-members") ||
+                location.pathname.startsWith("/editemployee")
+
+                ? "active"
+                : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-allteams" onClick={handleNavItemClick}>
+                <FaPeopleCarry className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">All Teams </span>}
+              </Link>
+
+
+
+            </li>
 
 
 
 
-            </ul>
-          </div>
+          </ul>
         </div>
       </div>
     </>

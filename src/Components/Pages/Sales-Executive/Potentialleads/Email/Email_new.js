@@ -98,8 +98,12 @@ const EmailHistory = () => {
 const cleanEmailText = (text) => {
   if (!text) return "";
 
-  return text
-    .split(/On\s.*?wrote:|--\sThis email has been checked for viruses by Avast antivirus software\./)[0]
+  // Remove quoted email replies
+  const cleanedText = text.split(/\n?On\s.+\s(?:at|wrote:)/i)[0];
+
+  // Remove email disclaimers/signatures (e.g., Avast antivirus message)
+  return cleanedText
+    .replace(/--\sThis email has been checked for viruses.*/is, "")
     .trim();
 };
 

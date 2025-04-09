@@ -1,0 +1,35 @@
+.suppliercontainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.supplier-form-container {
+    width: 100%;
+    margin: 20px auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2%;
+  }
+
+  .supplier-form-header {
+    background: var(--theme-color);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }  
+  .ViewSupplier {
+    margin-top: 60px; /* Adjust based on header height */
+    margin-left: 220px; /* Adjust based on sidebar width */
+    padding: 20px;
+    width: calc(100% - 220px); /* Adjust width based on sidebar width */
+    transition: margin-left 0.3s ease, width 0.3s ease;
+  }
+  
+  .ViewSupplier.collapsed {
+    margin-left: 50px; /* Adjust based on collapsed sidebar width */
+    width: calc(100% - 50px); /* Adjust width based on collapsed sidebar width */
+  }  

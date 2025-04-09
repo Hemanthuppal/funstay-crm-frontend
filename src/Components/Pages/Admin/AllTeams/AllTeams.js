@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import DataTable from './../../../Layout/Table/TableLayout';
 import Navbar from "../../../Shared/Navbar/Navbar";
 import '../Customer/Customer.css';
 import './AllTeams.css';
-
+import { AuthContext } from '../../../AuthContext/AuthContext';
 import axios from 'axios';
 import { baseURL } from "../../../Apiservices/Api";
 import { useNavigate } from "react-router-dom";
 
 const AdminCustomer = () => {
+  const { userName } = useContext(AuthContext);
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -55,24 +56,24 @@ const AdminCustomer = () => {
     { Header: "Name", accessor: "name" },
     { Header: "Mobile No", accessor: "mobile" },
     { Header: "Email", accessor: "email" },
- 
-      {
-        Header: "Designation",
-        accessor: "role",
-        Cell: ({ value }) => (value === "manager" ? "Manager - Sales & Operations" : value),
-      },
-   
-    
+
+    {
+      Header: "Designation",
+      accessor: "role",
+      Cell: ({ value }) => (value === "manager" ? "Manager - Sales & Operations" : value),
+    },
+
+
     {
       Header: "No. of Team Members",
       accessor: "teamMembers",
       Cell: ({ row }) => (
         <button
-  className="btn btn-link"
-  onClick={() => navigate('/team-members', { state: { teamMembers: row.original.teamMembers } })}
->
-  {row.original.employeeCount}
-</button>
+          className="btn btn-link"
+          onClick={() => navigate('/team-members', { state: { teamMembers: row.original.teamMembers } })}
+        >
+          {row.original.employeeCount}
+        </button>
       ),
     },
     {
@@ -84,9 +85,9 @@ const AdminCustomer = () => {
             onClick={() => navigate('/team-members', { state: { teamMembers: row.original.teamMembers } })}
           />
           <FaEdit
-                          style={{ color: "#ff9966", cursor: "pointer" }}
-                          onClick={() => navigate(`/editemployee/${row.original.id}`)}
-                        />
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() => navigate(`/editemployee/${row.original.id}`)}
+          />
           <FaTrash
             style={{ color: "#ff9966", cursor: "pointer" }}
             onClick={() => handleDeleteEmployee(row.original.id)}
@@ -104,12 +105,11 @@ const AdminCustomer = () => {
           <div className="ViewCustomer-table-container">
             <h3 className="d-flex justify-content-between align-items-center w-100">
               <span></span>
-              <button
-                className="btn btn-primary"
-                onClick={handleAddEmployee}
-              >
-                + Add Employee
-              </button>
+              {userName === "Admin" && (
+                <button className="btn btn-primary" onClick={handleAddEmployee}>
+                  + Add Employee
+                </button>
+              )}
             </h3>
             {message && <div className="alert alert-success">{message}</div>}
             <DataTable columns={columns} data={managers} />

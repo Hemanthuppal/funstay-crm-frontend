@@ -112,6 +112,20 @@ import H_InDetailViewLeads from "./Components/Pages/SalesHead/Leads/ViewLeads/Vi
 import H_Profile from "./Components/Pages/SalesHead/Profile/Profile";
 import M_EmailHistory from "./Components/Pages/Manager/Potentialleads/Email/Email_new";
 import S_EmailHistory from "./Components/Pages/Sales-Executive/Potentialleads/Email/Email_new";
+import AdminSupplier from "./Components/Pages/Admin/Suppliers/AdminSupplier";
+import AddSupplier from "./Components/Pages/Admin/Suppliers/AddSupplier";
+import PaymentsPage from "./Components/Pages/Admin/Payments/PaymentsPage";
+import AddPaymentPage from "./Components/Pages/Admin/Payments/PaymentForm";
+import SupplierTable from "./Components/Pages/Admin/Payments/Suppliers/Supplier";
+import PaymentPage from "./Components/Pages/Admin/Payments/Suppliers/PaymentPage";
+import HistoryPage from "./Components/Pages/Admin/Payments/Suppliers/HistoryPage";
+import SupplierForm from "./Components/Pages/Admin/Payments/Suppliers/SupplierForm";
+import M_SupplierTable from "./Components/Pages/Manager/Payments/Suppliers/Supplier";
+import M_PaymentsPage from "./Components/Pages/Manager/Payments/PaymentsPage";
+import M_SupplierForm from "./Components/Pages/Manager/Payments/Suppliers/SupplierForm";
+import M_PaymentPage from "./Components/Pages/Manager/Payments/Suppliers/PaymentPage";
+import M_HistoryPage from "./Components/Pages/Manager/Payments/Suppliers/HistoryPage";
+import M_AddPaymentPage from "./Components/Pages/Manager/Payments/PaymentForm";
 
 
 function App() {
@@ -298,6 +312,23 @@ function App() {
 
                 <Route path="/a-tags" element={<Tags/>} />
                 <Route path="/themes" element={<Themes />} />
+
+                {/* <Route path="/a-supplier" element={<AdminSupplier />} />
+                <Route path="/a-add-supplier" element={<AddSupplier />} /> */}
+                 <Route path="/a-supplier/:leadid" element={<SupplierTable />} /> 
+                <Route path="/a-payments/:leadid" element={<PaymentsPage />} />  
+                <Route path="/a-add-supplier/:leadid" element={<SupplierForm />} />      
+                <Route path="/a-suppliers/:supplierId/:leadid" element={<PaymentPage />} />
+                <Route path="/a-suppliers/:supplierId/history" element={<HistoryPage />} />
+                <Route path="/a-add-payment/:leadid" element={<AddPaymentPage />} />
+
+
+                <Route path="/m-supplier/:leadid" element={<M_SupplierTable />} /> 
+                <Route path="/m-payments/:leadid" element={<M_PaymentsPage />} />  
+                <Route path="/m-add-supplier/:leadid" element={<M_SupplierForm />} />      
+                <Route path="/m-suppliers/:supplierId/:leadid" element={<M_PaymentPage />} />
+                <Route path="/m-suppliers/:supplierId/history" element={<M_HistoryPage />} />
+                <Route path="/m-add-payment/:leadid" element={<M_AddPaymentPage />} />
 
 
 

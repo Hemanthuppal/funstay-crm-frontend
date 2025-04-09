@@ -1,15 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
-import { Tabs, Tab } from "react-bootstrap";
 import { baseURL } from "../../../../Apiservices/Api";
-import Navbar from "../../../../Shared/Navbar/Navbar";
+import Navbar from "../../../../Shared/ManagerNavbar/Navbar";
 import "./Email.css";
 
 const EmailHistory = () => {
   const { leadid, quotation_id } = useParams();
   const location = useLocation();
-  const navigate = useNavigate();
   const { email } = location.state || {};
   const [emailHistory, setEmailHistory] = useState([]);
   const [text, setText] = useState("");
@@ -112,23 +110,10 @@ const cleanEmailText = (text) => {
 
 
 
-
   return (
     <div className="email-container">
       <Navbar onToggleSidebar={setCollapsed} />
       <div className={`chat-content ${collapsed ? "collapsed" : ""}`}>
-
-      <Tabs
-          defaultActiveKey="emails"
-          onSelect={(key) => {
-            if (key === 'comments') navigate(`/a-opportunity-comments/${leadid}`);
-          }}
-          className="mb-3"
-        >
-          <Tab eventKey="comments" title="Comments" />
-          <Tab eventKey="emails" title="Email History" />
-        </Tabs>
-
         <h2 className="email-header">Email History with {email}</h2>
         <div className="chat-container">
   {emailHistory.map((emailItem) => (

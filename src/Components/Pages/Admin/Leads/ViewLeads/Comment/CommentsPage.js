@@ -2,7 +2,7 @@
 import React, { useEffect, useState ,useContext} from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Tab, Tabs } from 'react-bootstrap';
 import './CommentsPage.css';
 import Navbar from '../../../../../Shared/Navbar/Navbar';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ const CommentsPage = () => {
   const [newComment, setNewComment] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [assignedSalesId, setAssignedSalesId] = useState(null);
+  const [email, setEmail] = useState(null);
   const { themeColor } = useContext(ThemeContext);
   const [managerid, setManagerId] = useState(null);
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ const CommentsPage = () => {
 
         setAssignedSalesId(leadResponse.data.assignedSalesId);
         setManagerId(leadResponse.data.managerid);
+        setEmail(leadResponse.data.email);
 
       } catch (error) {
         console.error("Error fetching lead details:", error);
@@ -104,6 +106,16 @@ const CommentsPage = () => {
     <div className="salesViewLeadsContainer">
     <Navbar onToggleSidebar={setCollapsed} />
     <div className={`salesViewLeads ${collapsed ? "collapsed" : ""}`}>
+    <Tabs
+            defaultActiveKey="comments"
+            onSelect={(key) => {
+              if (key === 'emails') navigate(`/email-history/${leadid}`,{ state: { email: email } });
+            }}
+            className="mb-3"
+          >
+            <Tab eventKey="comments" title="Comments" />
+            <Tab eventKey="emails" title="Email History" />
+      </Tabs>
     <div className="comment-form-container">
     <h3 className='comment-form-header' style={{ "--theme-color": themeColor }}>Comments</h3>
 

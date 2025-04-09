@@ -185,8 +185,9 @@ const Navbar = ({ onToggleSidebar }) => {
             </div> &nbsp;&nbsp;
             <img src={'https://primary0101211.s3.ap-south-1.amazonaws.com/v3/assets/images/Logo.png'} alt="Logo" className="admin-company-logo" />
           </div>
-          <h2 className="text-center user-admin" style={{ color: 'white' }}>{userName}</h2>
-
+          <h2 className="text-center user-admin" style={{ color: 'white' }}>
+            {userName === "Sales Head" ? "Head of Sales" : userName}
+          </h2>
           <div className="admin-header-right">
             <div className="admin-header-icons">
               {/* Bell Notifications */}
@@ -267,7 +268,7 @@ const Navbar = ({ onToggleSidebar }) => {
               <div className="admin-nav-icon-container">
                 <Link className="nav-link" to="/themes">
 
-                  <FaPalette className="admin-nav-icon" style={{  cursor: "pointer" }} />
+                  <FaPalette className="admin-nav-icon" style={{ cursor: "pointer" }} />
                 </Link>
               </div>
 
@@ -407,31 +408,29 @@ const Navbar = ({ onToggleSidebar }) => {
                 {!collapsed && <span className="link_text">All customer</span>}
               </Link>
             </li>
-            <li
-              className={`admin-nav-item ${location.pathname.startsWith("/a-destinations")
+            {userName === "Admin" && (
+              <>
+                <li
+                  className={`admin-nav-item ${location.pathname.startsWith("/a-destinations") ? "active" : ""
+                    }`}
+                >
+                  <Link className="nav-link" to="/a-destinations" onClick={handleNavItemClick}>
+                    <FaMapMarkerAlt className="admin-nav-icon" />
+                    {!collapsed && <span className="link_text">All Destinations</span>}
+                  </Link>
+                </li>
 
-
-                ? "active"
-                : ""
-                }`}
-            >
-              <Link className="nav-link" to="/a-destinations" onClick={handleNavItemClick}>
-                <FaMapMarkerAlt className="admin-nav-icon" />
-                {!collapsed && <span className="link_text">All Destinations </span>}
-              </Link>
-
-
-
-            </li>
-            <li
-              className={`admin-nav-item ${location.pathname.startsWith("/a-tags") ? "active" : ""
-                }`}
-            >
-              <Link className="nav-link" to="/a-tags" onClick={handleNavItemClick}>
-                <FaTags className="admin-nav-icon" />
-                {!collapsed && <span className="link_text">All Tags</span>}
-              </Link>
-            </li>
+                <li
+                  className={`admin-nav-item ${location.pathname.startsWith("/a-tags") ? "active" : ""
+                    }`}
+                >
+                  <Link className="nav-link" to="/a-tags" onClick={handleNavItemClick}>
+                    <FaTags className="admin-nav-icon" />
+                    {!collapsed && <span className="link_text">All Tags</span>}
+                  </Link>
+                </li>
+              </>
+            )}
             <li
               className={`admin-nav-item ${location.pathname.startsWith("/a-archivedata")
 
@@ -467,6 +466,15 @@ const Navbar = ({ onToggleSidebar }) => {
 
             </li>
 
+            {/* <li
+              className={`admin-nav-item ${location.pathname.startsWith("/a-supplier") ? "active" : ""
+                }`}
+            >
+              <Link className="nav-link" to="/a-supplier" onClick={handleNavItemClick}>
+                <FaTags className="admin-nav-icon" />
+                {!collapsed && <span className="link_text">Suppliers</span>}
+              </Link>
+            </li> */}
 
 
 

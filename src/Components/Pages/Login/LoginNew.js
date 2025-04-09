@@ -46,15 +46,13 @@ const Login = () => {
           data.managerId
         );
 
-        if (data.email === 'saleshead@funstay.in') {
-          navigate('/h-dashboard');
-        } else if (data.role === 'employee') {
+        if (data.role === 'employee') {
           navigate('/s-dashboard');
         } else if (data.role === 'manager') {
           navigate('/m-dashboard');
         } else {
           navigate('/dashboard');
-        }
+        }
         
       } else {
         alert(data.message || "Login failed. Please check your credentials.");

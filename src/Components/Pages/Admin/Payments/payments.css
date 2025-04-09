@@ -1,0 +1,208 @@
+/* Add Payment Form Styles */
+.addpayment-form-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .customer-info-row div {
+    padding: 5px 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.customer-info-row strong {
+    margin-right: 5px;
+}
+  .addpayment-form-header {
+    color: var(--theme-color);
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .payment-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  
+  .payment-summary p {
+    margin: 0;
+    line-height: 1.6;
+  }
+  .transaction-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .transaction-history-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #f4f4f4;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  }
+  
+  .history-main-row,
+  .history-next-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.25rem;
+  }
+  
+  .history-amount {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #28a745;
+  }
+  
+  .history-date,
+  .next-date {
+    color: #555;
+  }
+  
+  .next-label {
+    font-weight: 500;
+  }
+  
+  .no-history-text {
+    font-style: italic;
+    color: #888;
+    margin-top: 1rem;
+  }
+  
+  .payments-tabs {
+    display: flex;
+    justify-content: center; /* Centers the buttons horizontally */
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .payments-tabs button {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    background-color: #f0f0f0;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.3s, color 0.3s;
+    color: #555;
+    font-weight: 500;
+  }
+
+  .payments-section {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .payments-table-header {
+    display: flex;
+    justify-content: flex-end; /* 👈 Pushes the button to the right */
+    margin-bottom: 1rem;
+  }
+  
+  
+  
+  /* .payments-add-btn:hover {
+    background-color: #3e9c41;
+  } */
+  
+  
+  .payments-tabs button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .payments-tabs button.active {
+    background-color: var(--theme-color, #4CAF50);
+    color: white;
+    font-weight: 600;
+  }
+  
+  
+  .addpayment-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+  .addpayment-input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+  }
+  
+  .addpayment-input-group label {
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .addpayment-input-group input,
+  .addpayment-input-group textarea,
+  .addpayment-input-group select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .addpayment-input-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  .readonly-input {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+  
+  .addpayment-input-group.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .addpayment-form-footer {
+    padding: 15px 0;
+    text-align: right;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .addpayment-form-footer .btn {
+    padding: 8px 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+  }
+  
+  .addpayment-form-footer .btn-primary {
+    background: #f7941e;
+    color: white;
+  }
+  
+  .addpayment-form-footer .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .addpayment-form-footer .btn-primary:hover {
+    background: #d6791b;
+  }
+  
+  .addpayment-form-footer .btn-secondary:hover {
+    background: #5a6268;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
+    .addpayment-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }

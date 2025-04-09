@@ -1,114 +1,180 @@
+/* Layout */
+.email-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
+.chat-content {
+  margin-top: 60px; /* Adjust for navbar */
+  margin-left: 220px; /* Adjust for sidebar */
+  padding: 25px;
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  background-color: #f5f7fa;
+}
 
+.chat-content.collapsed {
+  margin-left: 80px;
+  width: calc(100% - 80px);
+}
 
-.email-chat-container {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .chat-content {
-    margin-top: 60px; /* Adjust based on header height */
-    margin-left: 220px; /* Adjust based on sidebar width */
-    padding: 20px;
-    width: calc(100% - 220px); /* Adjust width based on sidebar width */
-    transition: margin-left 0.3s ease, width 0.3s ease;
-  }
-  
+/* Responsive */
+@media (max-width: 767px) {
+  .chat-content,
   .chat-content.collapsed {
-    margin-left: 100px; /* Adjust based on collapsed sidebar width */
-    width: calc(100% - 50px); /* Adjust width based on collapsed sidebar width */
-  }
-  
-
-  /* Responsive Design */
-  @media (max-width: 767px) {
-    .email-chat-container {
-      flex-direction: column;
-    }
-  
-    .chat-content {
-      margin-left: 0;
-      width: 100%;
-    }
-  
-    .chat-content.collapsed {
-      margin-left: 0;
-      width: 100%;
-    }
-  }
-  
-
-  .email-header {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-  }
-  
-  .chat-container {
-    max-height: 340px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 10px;
-    background: #f9f9f9;
-  }
-  
-  .message {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 10px;
-  }
-  
-  .message.sent {
-    justify-content: flex-end;
-  }
-  
-  .message-bubble {
-    max-width: 60%;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: #e3f2fd;
-    color: #333;
-  }
-  
-  .message.received .message-bubble {
-    background-color: #f1f1f1;
-  }
-  
-  .timestamp {
-    display: block;
-    font-size: 0.8rem;
-    color: #777;
-    margin-top: 5px;
-  }
-  
-  .email-form {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
-  }
-  
-  .input-field,
-  .textarea-field,
-  .file-input {
+    margin-left: 0;
     width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
   }
-  
-  .send-button {
-    background-color: #007bff;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  
-  .send-button:disabled {
-    background-color: #999;
-    cursor: not-allowed;
-  }
+}
+
+/* Header */
+.email-header {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+/* Chat Area */
+.chat-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  max-height: 500px;
+  overflow-y: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 30px;
+}
+
+/* Message Styles */
+.message {
+  display: flex;
+  margin-bottom: 15px;
+}
+
+.message.sent {
+  justify-content: flex-end;
+}
+
+.message.received {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 70%;
+  background: #dff3ff;
+  padding: 15px;
+  border-radius: 15px;
+  position: relative;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  word-wrap: break-word;
+}
+
+.message.received .message-bubble {
+  background: #f1f1f1;
+}
+
+/* Subject */
+.message-bubble .subject {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+/* Timestamp */
+.timestamp {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #888;
+  text-align: right;
+}
+
+/* Attachment Link */
+.attachment-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.attachment-link:hover {
+  text-decoration: underline;
+}
+
+/* Form */
+.email-form {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Subject Input */
+.input-subject {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: 0.2s ease;
+}
+
+.input-subject:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Quill Editor */
+.rich-text-editor {
+  height: 200px; /* Increased Height */
+  margin-bottom: 15px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #ccc;
+}
+
+.ql-toolbar {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.ql-container {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* File Input */
+.file-input {
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+/* Send Button */
+.send-button {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.send-button:hover {
+  background: linear-gradient(135deg, #0056b3, #003d80);
+}
+
+.send-button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}

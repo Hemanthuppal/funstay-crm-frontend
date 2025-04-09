@@ -10,7 +10,7 @@ import {
   FaCalendarAlt,
   FaTimes,
   FaCopy,
-  FaDownload,FaSave,FaSpinner
+  FaDownload,FaSave,FaSpinner,FaDollarSign 
 } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
@@ -1026,6 +1026,14 @@ XLSX.writeFile(wb, fileName);
               style={{ color: "#ff9966", cursor: "pointer" }}
               onClick={() =>
                 navigate(`/a-opportunity-comments/${row.original.leadid}`, {
+                  state: { leadid: row.original.leadid },
+                })
+              }
+            />
+            <FaDollarSign
+              style={{ color: "#ff9966", cursor: "pointer" }}
+              onClick={() =>
+                navigate(`/a-payments/${row.original.leadid}`, {
                   state: { leadid: row.original.leadid },
                 })
               }

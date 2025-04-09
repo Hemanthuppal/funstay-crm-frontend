@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../../Shared/ManagerNavbar/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaEdit, FaEye, FaDownload, FaComment, FaTrash,FaSpinner,FaSave, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
+import { FaEdit, FaEye, FaDownload, FaComment, FaTrash, FaDollarSign, FaSpinner, FaSave, FaCalendarAlt, FaTimes, FaCopy } from "react-icons/fa";
 import { Row, Col, Form } from "react-bootstrap";
 import { HiUserGroup } from "react-icons/hi";
 import DataTable from "../../../Layout/Table/TableLayoutOpp";
@@ -35,14 +35,14 @@ const Potentialleads = () => {
   const [employees, setEmployees] = useState([]);
 
   const [showDateRange, setShowDateRange] = useState(
-          localStorage.getItem("showDateRange") === "true"
-        );
-       
-        // Save state to localStorage when values change
-        useEffect(() => {
-          localStorage.setItem("showDateRange", showDateRange);
-        }, [showDateRange]);
-  
+    localStorage.getItem("showDateRange") === "true"
+  );
+
+  // Save state to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem("showDateRange", showDateRange);
+  }, [showDateRange]);
+
 
   const downloadExcel = () => {
     if (!filteredData || filteredData.length === 0) {
@@ -500,56 +500,56 @@ const Potentialleads = () => {
         const [selectedFile, setSelectedFile] = useState(null);
         const [isUploading, setIsUploading] = useState(false);
         const [showQuotationId, setShowQuotationId] = useState(row.original.quotation_id);
-    
+
         const handleFileChange = (event) => {
           const file = event.target.files[0];
-        
+
           if (file && file.size > 2 * 1024 * 1024) { // 2MB limit
             alert("File size must be less than 2MB.");
             return;
           }
-        
+
           setSelectedFile(file);
         };
-        
-    
+
+
         const handleUpload = async () => {
           if (!selectedFile) {
             alert("Please choose a file before saving.");
             return;
           }
-    
+
           setIsUploading(true);
           const formData = new FormData();
           formData.append("file", selectedFile);
           formData.append("email", row.original.email);
           formData.append("leadid", row.original.leadid);
-    
+
           try {
             // 1. Upload the file
             const uploadResponse = await axios.post(`${baseURL}/api/upload-quotation`, formData);
-            
+
             // 2. Update email status and get the quotation_id
             const statusResponse = await axios.post(`${baseURL}/api/update-email-status`, {
               leadid: row.original.leadid,
             });
-    
+
             // 3. Immediately update the UI
             setShowQuotationId(statusResponse.data.quotation_id || row.original.quotation_id);
-    
+
             // 4. Update the main data state
-            setData(prevData => 
-              prevData.map(item => 
-                item.leadid === row.original.leadid 
-                  ? { 
-                      ...item, 
-                      email_sent: true,
-                      quotation_id: statusResponse.data.quotation_id || item.quotation_id
-                    } 
+            setData(prevData =>
+              prevData.map(item =>
+                item.leadid === row.original.leadid
+                  ? {
+                    ...item,
+                    email_sent: true,
+                    quotation_id: statusResponse.data.quotation_id || item.quotation_id
+                  }
                   : item
               )
             );
-    
+
             alert("File uploaded and email sent successfully!");
           } catch (error) {
             console.error("Error uploading file:", error);
@@ -558,20 +558,20 @@ const Potentialleads = () => {
             setIsUploading(false);
           }
         };
-    
+
         const handleNavigate = () => {
-          navigate(`/m_email-history/${row.original.leadid}`, { 
-            state: { email: row.original.email } 
+          navigate(`/m_email-history/${row.original.leadid}`, {
+            state: { email: row.original.email }
           });
         };
-    
+
         return (
-          <div style={{ 
-            display: "flex", 
-            alignItems: "center", 
-            justifyContent: "center", 
-            gap: "5px", 
-            flexWrap: "nowrap" 
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "5px",
+            flexWrap: "nowrap"
           }}>
             {showQuotationId || row.original.email_sent ? (
               <a
@@ -580,10 +580,10 @@ const Potentialleads = () => {
                   e.preventDefault();
                   handleNavigate();
                 }}
-                style={{ 
-                  textDecoration: "underline", 
-                  color: "blue", 
-                  cursor: "pointer" 
+                style={{
+                  textDecoration: "underline",
+                  color: "blue",
+                  cursor: "pointer"
                 }}
               >
                 {showQuotationId || "View"}
@@ -598,42 +598,42 @@ const Potentialleads = () => {
                   id={`fileInput-${row.original.leadid}`}
                   disabled={isUploading}
                 />
-                
+
                 {/* Clickable File Name OR File Input */}
                 {selectedFile ? (
-                  <label 
-                    htmlFor={`fileInput-${row.original.leadid}`} 
-                    style={{ 
-                      fontSize: "12px", 
-                      color: "blue", 
-                      textDecoration: "underline", 
-                      cursor: "pointer", 
-                      maxWidth: "100px", 
-                      overflow: "hidden", 
-                      textOverflow: "ellipsis", 
-                      whiteSpace: "nowrap" 
+                  <label
+                    htmlFor={`fileInput-${row.original.leadid}`}
+                    style={{
+                      fontSize: "12px",
+                      color: "blue",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      maxWidth: "100px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap"
                     }}
                   >
                     {selectedFile.name}
                   </label>
                 ) : (
-                  <label 
-                    htmlFor={`fileInput-${row.original.leadid}`} 
+                  <label
+                    htmlFor={`fileInput-${row.original.leadid}`}
                     style={{ cursor: "pointer", border: "1px solid #ccc", padding: "2px 5px", borderRadius: "4px" }}
                   >
-                    Choose 
+                    Choose
                   </label>
                 )}
-        
+
                 {/* Upload Button with Loader */}
                 <button
                   onClick={handleUpload}
                   disabled={isUploading}
-                  style={{ 
-                    background: "none", 
-                    border: "none", 
-                    cursor: isUploading ? "not-allowed" : "pointer", 
-                    padding: "5px" 
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: isUploading ? "not-allowed" : "pointer",
+                    padding: "5px"
                   }}
                 >
                   {isUploading ? (
@@ -642,16 +642,16 @@ const Potentialleads = () => {
                     <FaSave size={16} color="green" />
                   )}
                 </button>
-        
-                
+
+
               </>
             )}
           </div>
         );
       },
     }
-    
-  ,
+
+    ,
     {
       Header: "Assign",
       accessor: "id",
@@ -714,6 +714,14 @@ const Potentialleads = () => {
           <FaEye style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-details/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
           {/* <FaTrash style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => handleDelete(row.original.leadid)} /> */}
           <FaComment style={{ color: "#ff9966", cursor: "pointer" }} onClick={() => navigate(`/m-opportunity-comments/${row.original.leadid}`, { state: { leadid: row.original.leadid } })} />
+          <FaDollarSign
+            style={{ color: "#ff9966", cursor: "pointer" }}
+            onClick={() =>
+              navigate(`/m-payments/${row.original.leadid}`, {
+                state: { leadid: row.original.leadid },
+              })
+            }
+          />
         </div>
       ),
     },
@@ -757,10 +765,10 @@ const Potentialleads = () => {
           </Row>
           <Row className="mb-3 align-items-center">
             <Col md={6} className="d-flex align-items-center gap-2">
-              <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm}  onChange={(e) => {
+              <input type="text" className="form-control" placeholder="Free Text Search..." value={searchTerm} onChange={(e) => {
                 setSearchTerm(e.target.value);
                 localStorage.setItem("searchTerm", e.target.value);
-              }}  />
+              }} />
               {showDateRange ? (
                 <FaTimes
                   onClick={() => {
@@ -776,7 +784,7 @@ const Potentialleads = () => {
                     localStorage.removeItem("appliedFilterEndDate");
                   }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Hide Date Range" />
               ) : (
-                <FaCalendarAlt  onClick={() => {
+                <FaCalendarAlt onClick={() => {
                   setShowDateRange(true);
                   localStorage.setItem("showDateRange", "true");
                 }} style={{ cursor: "pointer", fontSize: "1.5rem" }} title="Show Date Range" />

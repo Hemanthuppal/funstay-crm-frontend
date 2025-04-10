@@ -6,11 +6,11 @@ import '../Customer/Customer.css';
 import './AllTeams.css';
 import { AuthContext } from '../../../AuthContext/AuthContext';
 import axios from 'axios';
-import { baseURL } from "../../../Apiservices/Api";
+import { baseURL, headofSalesMail } from "../../../Apiservices/Api";
 import { useNavigate } from "react-router-dom";
 
 const AdminCustomer = () => {
-  const { userName } = useContext(AuthContext);
+  const { userName, userEmail } = useContext(AuthContext);
   const [collapsed, setCollapsed] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -105,11 +105,12 @@ const AdminCustomer = () => {
           <div className="ViewCustomer-table-container">
             <h3 className="d-flex justify-content-between align-items-center w-100">
               <span></span>
-              {userName === "Admin" && (
+              {userEmail !== headofSalesMail && (
                 <button className="btn btn-primary" onClick={handleAddEmployee}>
                   + Add Employee
                 </button>
               )}
+
             </h3>
             {message && <div className="alert alert-success">{message}</div>}
             <DataTable columns={columns} data={managers} />

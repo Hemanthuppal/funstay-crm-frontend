@@ -5,6 +5,7 @@
 const baseURL = "http://localhost:5000"; 
 const webhookUrl = "http://localhost:4000";
 const adminMail = "admin"
+const headofSalesMail = "saleshead@funstay.in"
 
 // Export them as named exports
-export { baseURL, webhookUrl,adminMail };
+export { baseURL, webhookUrl,adminMail,headofSalesMail };

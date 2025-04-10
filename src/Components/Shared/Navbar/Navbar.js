@@ -8,7 +8,7 @@ import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from "../../AuthContext/AuthContext";
 import { baseURL } from "../../Apiservices/Api";
-import { adminMail } from "../../Apiservices/Api";
+import { adminMail,headofSalesMail } from "../../Apiservices/Api";
 import { ThemeContext } from "../Themes/ThemeContext";
 
 const Navbar = ({ onToggleSidebar }) => {
@@ -20,7 +20,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const [showMenu, setShowMenu] = useState(false); // State for toggle menu
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, userName, userId, authToken } = useContext(AuthContext);
+  const { logout, userName, userId, authToken ,userEmail} = useContext(AuthContext);
   const { themeColor } = useContext(ThemeContext);
   const [notifications, setNotifications] = useState([]);
   const [emailNotifications, setEmailNotifications] = useState([]);
@@ -186,8 +186,8 @@ const Navbar = ({ onToggleSidebar }) => {
             <img src={'https://primary0101211.s3.ap-south-1.amazonaws.com/v3/assets/images/Logo.png'} alt="Logo" className="admin-company-logo" />
           </div>
           <h2 className="text-center user-admin" style={{ color: 'white' }}>
-            {userName === "Sales Head" ? "Head of Sales" : userName}
-          </h2>
+  {userEmail === headofSalesMail ? "Head of Sales" : userName}
+</h2>
           <div className="admin-header-right">
             <div className="admin-header-icons">
               {/* Bell Notifications */}
